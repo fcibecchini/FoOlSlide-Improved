@@ -292,38 +292,21 @@ class Migration_Install extends CI_Migration
                                         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;"
 			);
 		}
-
-        // After all tables are created, add default admin user
-        if ($this->db->table_exists($this->db->dbprefix('users')) &&
-            $this->db->table_exists($this->db->dbprefix('profiles')))
-        {
-            // Check if admin user already exists
-            $admin_exists = $this->db->where('username', 'admin')
-                ->get($this->db->dbprefix('users'))
-                ->num_rows();
-
-            if (!$admin_exists) {
-                // Insert admin user
-                $this->db->insert($this->db->dbprefix('users'), array(
-                    'username' => 'admin',
-                    'password' => password_hash('admin', PASSWORD_DEFAULT),
-                    'email' => 'admin@example.com',
-                    'activated' => 1,
-                    'created' => date('Y-m-d H:i:s'),
-                    'modified' => date('Y-m-d H:i:s'),
-                    'updated' => date('Y-m-d H:i:s')
-                ));
-
-                $user_id = $this->db->insert_id();
-
-                // Create admin profile
-                $this->db->insert($this->db->dbprefix('profiles'), array(
-                    'user_id' => $user_id,
-                    'group_id' => 1, // Admin group
-                    'display_name' => 'Administrator'
-                ));
-            }
-        }
+        $this->db->insert($this->db->dbprefix('users'), array(
+            'username' => 'admin',
+            'password' => password_hash('admin', PASSWORD_DEFAULT),
+            'email' => 'admin@example.com',
+            'activated' => 1,
+            'created' => date('Y-m-d H:i:s'),
+            'modified' => date('Y-m-d H:i:s'),
+            'updated' => date('Y-m-d H:i:s')
+        ));
+        $user_id = $this->db->insert_id();
+        $this->db->insert($this->db->dbprefix('profiles'), array(
+            'user_id' => $user_id,
+            'group_id' => 1, // Admin group
+            'display_name' => 'Administrator'
+        ));
 
     }
 
