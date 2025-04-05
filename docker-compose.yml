@@ -1,0 +1,25 @@
+services:
+  web:
+    build: .
+    container_name: foolslide_web
+    ports:
+      - "8080:80"
+    environment:
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_GROUP: www-data
+  db:
+    image: mysql:5.6
+    container_name: foolslide_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: foobar
+      MYSQL_DATABASE: foolslide_db
+      MYSQL_USER: foolslide_user
+      MYSQL_PASSWORD: foobar
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "33061:3306"
+
+volumes:
+  db_data:
