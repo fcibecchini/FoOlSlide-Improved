@@ -421,57 +421,75 @@ if (!defined('BASEPATH'))
         var img = jQuery('#page .inner a img').clone();
         jQuery('#page .inner').empty().append(img);
 
-        var startX;
-        var startY;
-        var startDist;
-        var isZooming = false;
+        var touchState = {
+            startX: 0,
+            startY: 0,
+            lastX: 0,
+            lastY: 0,
+            isDragging: false
+        };
+
+        // Get current scale from transform matrix
+        function getCurrentScale(element) {
+            const transform = window.getComputedStyle(element).transform;
+            if (transform === 'none') return 1;
+            const matrix = new WebKitCSSMatrix(transform);
+            return matrix.a;
+        }
 
         jQuery('#page .inner').bind('touchstart', function(event) {
-            // Store initial touch positions
             if (event.originalEvent.touches.length === 1) {
-                startX = event.originalEvent.touches[0].pageX;
-                startY = event.originalEvent.touches[0].pageY;
-                startDist = 0;
-            } else if (event.originalEvent.touches.length === 2) {
-                // Calculate initial distance between two fingers for pinch detection
-                var dx = event.originalEvent.touches[0].pageX - event.originalEvent.touches[1].pageX;
-                var dy = event.originalEvent.touches[0].pageY - event.originalEvent.touches[1].pageY;
-                startDist = Math.sqrt(dx * dx + dy * dy);
-                isZooming = true;
+                const img = jQuery('#page .inner img.open')[0];
+                const scale = getCurrentScale(img);
+
+                // Only enable dragging if image is zoomed
+                if (scale > 1) {
+                    touchState.isDragging = true;
+                    touchState.startX = touchState.lastX = event.originalEvent.touches[0].pageX;
+                    touchState.startY = touchState.lastY = event.originalEvent.touches[0].pageY;
+                    event.preventDefault();
+                }
             }
         });
 
         jQuery('#page .inner').bind('touchmove', function(event) {
-            // Prevent default only if we're not zooming
-            if (!isZooming) {
+            if (touchState.isDragging && event.originalEvent.touches.length === 1) {
+                const touch = event.originalEvent.touches[0];
+                const img = jQuery('#page .inner img.open');
+                const matrix = new WebKitCSSMatrix(img.css('transform'));
+
+                // Calculate distance moved
+                const deltaX = touch.pageX - touchState.lastX;
+                const deltaY = touch.pageY - touchState.lastY;
+
+                // Update transform with new position while keeping scale
+                img.css('transform', `matrix(${matrix.a}, 0, 0, ${matrix.a}, ${matrix.m41 + deltaX}, ${matrix.m42 + deltaY})`);
+
+                // Update last position
+                touchState.lastX = touch.pageX;
+                touchState.lastY = touch.pageY;
                 event.preventDefault();
             }
         });
 
         jQuery('#page .inner').bind('touchend', function(event) {
-            // Only handle page navigation if it wasn't a zoom gesture
-            if (!isZooming) {
-                var endX = event.changedTouches[0].pageX;
-                var endY = event.changedTouches[0].pageY;
+            if (!touchState.isDragging) {
+                // Handle page navigation as before
+                const endX = event.changedTouches[0].pageX;
+                const moveX = Math.abs(endX - touchState.startX);
+                const moveY = Math.abs(event.changedTouches[0].pageY - touchState.startY);
 
-                // Calculate movement distance
-                var moveX = Math.abs(endX - startX);
-                var moveY = Math.abs(endY - startY);
-
-                // Only trigger page change if the movement was mostly horizontal
-                // and longer than 10px (to avoid accidental triggers)
                 if (moveX > moveY && moveX > 10) {
-                    var pageWidth = jQuery(this).width();
-                    if (endX < startX && startX > pageWidth * 0.6) {
+                    const pageWidth = jQuery(this).width();
+                    if (endX < touchState.startX && touchState.startX > pageWidth * 0.6) {
                         nextPage();
-                    } else if (endX > startX && startX < pageWidth * 0.4) {
+                    } else if (endX > touchState.startX && touchState.startX < pageWidth * 0.4) {
                         prevPage();
                     }
                 }
             }
 
-            // Reset zoom flag
-            isZooming = false;
+            touchState.isDragging = false;
         });
 
         // Handle regular clicks for desktop
