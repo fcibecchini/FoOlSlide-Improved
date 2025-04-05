@@ -12,9 +12,18 @@ class MY_Controller extends CI_Controller
 		if (!file_exists(FCPATH . "config.php"))
 		{
 			if ($this->uri->segment(1) != "install")
-				show_error("If you are here, and have no clue why FoOlSlide is not working, start by reading the <a href='http://www.foolz.us/docs/foolslide'>installation manual</a>.");
+            {
+                redirect('install');
+            }
 		} else
 		{
+            // execute migrations
+            $this->load->library('migration');
+            $result = $this->migration->latest();
+            if ($result === FALSE) {
+                echo $this->migration->error_string();
+            }
+
 			$this->load->database();
 			$this->load->library('session');
 			$this->load->library('datamapper');

@@ -252,7 +252,10 @@ class Install extends Install_Controller
 		// load the necessary libraries
 		// migrate to latest database
 		$this->load->library('migration');
-		$this->migration->latest();
+        $result = $this->migration->latest();
+        if ($result === FALSE) {
+            echo $this->migration->error_string();
+        }
 
 		// load everything needed for a normal startup
 		$this->load->library('session');
