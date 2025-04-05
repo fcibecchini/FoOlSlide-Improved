@@ -148,67 +148,96 @@ if (!defined('BASEPATH'))
 	}
 
 
-	function resizePage(id) {
-		var doc_width = jQuery(document).width();
-		var page_width = parseInt(pages[id].width);
-		var page_height = parseInt(pages[id].height);
-		var nice_width = 980;
-		var perfect_width = 980;
+    function resizePage(id) {
+        var viewport_width = Math.min(jQuery(window).width(), jQuery(document).width());
+        var page_width = parseInt(pages[id].width);
+        var page_height = parseInt(pages[id].height);
 
-		if(doc_width > 1200) {
-			nice_width = 1120;
-			perfect_width = 1000;
-		}
-		if(doc_width > 1600) {
-			nice_width = 1400;
-			perfect_width = 1300;
-		}
-		if(doc_width > 1800) {
-			nice_width = 1600;
-			perfect_width = 1500;
-		}
+        // For mobile devices
+        if (viewport_width <= 768) {
+            // Calculate new dimensions maintaining aspect ratio
+            var new_width = viewport_width - 20; // 10px padding on each side
+            var new_height = Math.floor((new_width * page_height) / page_width);
 
-		if (page_width > nice_width && (page_width/page_height) > 1.2) {
-			if(page_height < 1610) {
-				width = page_width;
-				height = page_height;
-			}
-			else {
-				height = 1600;
-				width = page_width;
-				width = (height*width)/(page_height);
-			}
-			jQuery("#page").css({'max-width': 'none', 'overflow':'auto'});
-			jQuery("#page").animate({scrollLeft:9000},400);
-			jQuery("#page .inner img.open").css({'max-width':'99999px'});
-			jQuery('#page .inner img.open').attr({width:width, height:height});
-			if(jQuery("#page").width() < jQuery("#page .inner img.open").width()) {
-				isSpread = true;
-				create_message('is_spread', 3000, 'Tap the arrows twice to change page');
-			}
-			else {
-				jQuery("#page").css({'max-width': width+10, 'overflow':'hidden'});
-				isSpread = false;
-				delete_message('is_spread');
-			}
-		}
-		else{
-			if((page_width < nice_width) && (doc_width > page_width + 10)) {
-				width = page_width;
-				height = page_height;
-			}
-			else {
-				width = (doc_width > perfect_width) ? perfect_width : doc_width - 10;
-				height = page_height;
-				height = (height*width)/page_width;
-			}
-			jQuery('#page .inner img.open').attr({width:width, height:height});
-			jQuery("#page").css({'max-width':(width + 10) + 'px','overflow':'hidden'});
-			jQuery("#page .inner img.open").css({'max-width':'100%'});
-			isSpread = false;
-			delete_message('is_spread');
-		}
-	}
+            // Apply new dimensions
+            jQuery('#page').css({
+                'max-width': '100%',
+                'overflow': 'hidden'
+            });
+            jQuery('#page .inner').css({
+                'width': '100%',
+                'text-align': 'center'
+            });
+            jQuery('#page .inner img.open').css({
+                'max-width': '100%',
+                'width': new_width,
+                'height': new_height,
+                'object-fit': 'contain'
+            });
+
+            isSpread = false;
+            delete_message('is_spread');
+            return;
+        }
+
+        // For desktop, keep existing logic
+        var nice_width = 980;
+        var perfect_width = 980;
+
+        if (viewport_width > 1200) {
+            nice_width = 1120;
+            perfect_width = 1000;
+        }
+        if (viewport_width > 1600) {
+            nice_width = 1400;
+            perfect_width = 1300;
+        }
+        if (viewport_width > 1800) {
+            nice_width = 1600;
+            perfect_width = 1500;
+        }
+
+        if (page_width > nice_width && (page_width/page_height) > 1.2) {
+            if (page_height < 1610) {
+                width = page_width;
+                height = page_height;
+            }
+            else {
+                height = 1600;
+                width = page_width;
+                width = (height*width)/(page_height);
+            }
+            jQuery("#page").css({'max-width': 'none', 'overflow':'auto'});
+            jQuery("#page .inner img.open").css({'max-width':'99999px'});
+            jQuery('#page .inner img.open').attr({width:width, height:height});
+
+            if (jQuery("#page").width() < jQuery("#page .inner img.open").width()) {
+                isSpread = true;
+                create_message('is_spread', 3000, 'Tap the arrows twice to change page');
+            }
+            else {
+                jQuery("#page").css({'max-width': width+10, 'overflow':'hidden'});
+                isSpread = false;
+                delete_message('is_spread');
+            }
+        }
+        else {
+            if ((page_width < nice_width) && (viewport_width > page_width + 10)) {
+                width = page_width;
+                height = page_height;
+            }
+            else {
+                width = (viewport_width > perfect_width) ? perfect_width : viewport_width - 10;
+                height = page_height;
+                height = (height*width)/page_width;
+            }
+            jQuery('#page .inner img.open').attr({width:width, height:height});
+            jQuery("#page").css({'max-width':(width + 10) + 'px','overflow':'hidden'});
+            jQuery("#page .inner img.open").css({'max-width':'100%'});
+            isSpread = false;
+            delete_message('is_spread');
+        }
+    }
 
 	function nextPage()
 	{
