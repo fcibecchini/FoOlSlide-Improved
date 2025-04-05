@@ -333,7 +333,7 @@ class Series extends Admin_Controller
 						}
 						if (!unlink($up_data["full_path"]))
 						{
-							log_message('error', 'series.php/add_new: couldn\'t remove cache file ' . $data["full_path"]);
+							log_message('error', 'series.php/add_new: couldn\'t remove cache file ' . $up_data["full_path"]);
 							return false;
 						}
 					}
@@ -467,7 +467,7 @@ class Series extends Admin_Controller
 			$type = new Typeh();
 			if ($type->add($this->input->post()))
 			{
-				flash_notice('notice', 'Added the tag ' . $tag->name . '.');
+				flash_notice('notice', 'Added the type ' . $type->name . '.');
 				redirect('/admin/series/manage_types/' . str_replace(' ', '_', $type->name));
 			}
 		}
@@ -609,7 +609,7 @@ class Series extends Admin_Controller
 					}
 					if (!unlink($up_data["full_path"]))
 					{
-						log_message('error', 'series.php/add_tag: couldn\'t remove cache file ' . $data["full_path"]);
+						log_message('error', 'series.php/add_tag: couldn\'t remove cache file ' . $up_data["full_path"]);
 						return false;
 					}
 				}
@@ -706,7 +706,7 @@ class Series extends Admin_Controller
 							log_message ( "error", "Controller: series.php/add_tag: image failed being added to folder" );
 						}
 						if (! unlink ( $up_data ["full_path"] )) {
-							log_message ( 'error', 'series.php/add_tag: couldn\'t remove cache file ' . $data ["full_path"] );
+							log_message ( 'error', 'series.php/add_tag: couldn\'t remove cache file ' . $up_data["full_path"] );
 							return false;
 						}
 						// green box to tell data is saved

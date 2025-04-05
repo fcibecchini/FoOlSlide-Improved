@@ -12,7 +12,8 @@ class Migration_Update009 extends CI_Migration {
                                           `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
                                           `name` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
                                           `description` varchar(100) COLLATE utf8_unicode_ci NOT NULL,
-                                          PRIMARY KEY (`id`)
+                                          PRIMARY KEY (`id`),
+                                          UNIQUE KEY `name` (`name`)
                                         ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ;"
 			);
 		}
