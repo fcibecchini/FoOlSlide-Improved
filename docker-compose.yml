@@ -7,6 +7,8 @@ services:
     environment:
       APACHE_RUN_USER: www-data
       APACHE_RUN_GROUP: www-data
+    volumes:
+      - ./content/themes:/var/www/html/content/themes
   db:
     image: mysql:5.6
     container_name: foolslide_db
