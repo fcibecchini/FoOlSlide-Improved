@@ -387,7 +387,44 @@ if (!defined('BASEPATH'))
 		jQuery(window).resize(function() {
 			resizePage(current_page);
 		});
-	});
+
+        // Remove the anchor tag and wrap the image directly in the inner div
+        var img = jQuery('#page .inner a img').clone();
+        jQuery('#page .inner').empty().append(img);
+        jQuery('#page .inner').bind('touchstart click', function(event) {
+            // Stop event propagation and prevent default
+            event.stopPropagation();
+            event.preventDefault();
+
+            // Get coordinates based on event type
+            var x;
+            if (event.type === 'touchstart') {
+                x = event.originalEvent.touches[0].pageX;
+            } else {
+                x = event.pageX;
+            }
+
+            var pageWidth = jQuery(this).width();
+
+            // If interaction is on the left 40% of screen, go to previous page
+            if (x < pageWidth * 0.4) {
+                prevPage();
+                return false;
+            }
+            // If interaction is on the right 40% of screen, go to next page
+            else if (x > pageWidth * 0.6) {
+                nextPage();
+                return false;
+            }
+
+            return false;
+        });
+        // Remove existing click handler from the anchor tag
+        jQuery('#page .inner a').bind('click', function(event) {
+            event.preventDefault();
+            return false;
+        });
+    });
 </script>
 
 <script type="text/javascript">
