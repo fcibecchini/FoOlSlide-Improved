@@ -420,32 +420,71 @@ if (!defined('BASEPATH'))
         // Remove the anchor tag and wrap the image directly in the inner div
         var img = jQuery('#page .inner a img').clone();
         jQuery('#page .inner').empty().append(img);
-        jQuery('#page .inner').bind('touchstart click', function(event) {
-            // Stop event propagation and prevent default
-            event.stopPropagation();
-            event.preventDefault();
 
-            // Get coordinates based on event type
-            var x;
-            if (event.type === 'touchstart') {
-                x = event.originalEvent.touches[0].pageX;
-            } else {
-                x = event.pageX;
+        var startX;
+        var startY;
+        var startDist;
+        var isZooming = false;
+
+        jQuery('#page .inner').bind('touchstart', function(event) {
+            // Store initial touch positions
+            if (event.originalEvent.touches.length === 1) {
+                startX = event.originalEvent.touches[0].pageX;
+                startY = event.originalEvent.touches[0].pageY;
+                startDist = 0;
+            } else if (event.originalEvent.touches.length === 2) {
+                // Calculate initial distance between two fingers for pinch detection
+                var dx = event.originalEvent.touches[0].pageX - event.originalEvent.touches[1].pageX;
+                var dy = event.originalEvent.touches[0].pageY - event.originalEvent.touches[1].pageY;
+                startDist = Math.sqrt(dx * dx + dy * dy);
+                isZooming = true;
+            }
+        });
+
+        jQuery('#page .inner').bind('touchmove', function(event) {
+            // Prevent default only if we're not zooming
+            if (!isZooming) {
+                event.preventDefault();
+            }
+        });
+
+        jQuery('#page .inner').bind('touchend', function(event) {
+            // Only handle page navigation if it wasn't a zoom gesture
+            if (!isZooming) {
+                var endX = event.changedTouches[0].pageX;
+                var endY = event.changedTouches[0].pageY;
+
+                // Calculate movement distance
+                var moveX = Math.abs(endX - startX);
+                var moveY = Math.abs(endY - startY);
+
+                // Only trigger page change if the movement was mostly horizontal
+                // and longer than 10px (to avoid accidental triggers)
+                if (moveX > moveY && moveX > 10) {
+                    var pageWidth = jQuery(this).width();
+                    if (endX < startX && startX > pageWidth * 0.6) {
+                        nextPage();
+                    } else if (endX > startX && startX < pageWidth * 0.4) {
+                        prevPage();
+                    }
+                }
             }
 
-            var pageWidth = jQuery(this).width();
+            // Reset zoom flag
+            isZooming = false;
+        });
 
-            // If interaction is on the left 40% of screen, go to previous page
+        // Handle regular clicks for desktop
+        jQuery('#page .inner').bind('click', function(event) {
+            event.preventDefault();
+            var pageWidth = jQuery(this).width();
+            var x = event.pageX;
+
             if (x < pageWidth * 0.4) {
                 prevPage();
-                return false;
-            }
-            // If interaction is on the right 40% of screen, go to next page
-            else if (x > pageWidth * 0.6) {
+            } else if (x > pageWidth * 0.6) {
                 nextPage();
-                return false;
             }
-
             return false;
         });
         // Remove existing click handler from the anchor tag
