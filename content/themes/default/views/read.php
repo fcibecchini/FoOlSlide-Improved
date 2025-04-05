@@ -295,33 +295,6 @@ if (!defined('BASEPATH'))
 	var button_down_code;
 
 	jQuery(document).ready(function() {
-        // Add touch navigation
-        var touchStartX = 0;
-        var touchEndX = 0;
-        const threshold = 50; // minimum distance for swipe
-
-        jQuery('#page').on('touchstart', function(e) {
-            touchStartX = e.originalEvent.touches[0].clientX;
-        });
-
-        jQuery('#page').on('touchend', function(e) {
-            touchEndX = e.originalEvent.changedTouches[0].clientX;
-            const width = jQuery(window).width();
-            const tapPosition = touchEndX;
-
-            // Check if it's a tap (not a swipe)
-            if (Math.abs(touchEndX - touchStartX) < threshold) {
-                // Tap on left third of screen
-                if (tapPosition < (width / 3)) {
-                    prevPage();
-                }
-                // Tap on right third of screen
-                else if (tapPosition > (width * 2/3)) {
-                    nextPage();
-                }
-            }
-        });
-
 		jQuery(document).keydown(function(e){
 
 			if(!button_down && !jQuery("input").is(":focus"))
