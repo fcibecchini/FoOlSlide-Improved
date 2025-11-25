@@ -193,7 +193,6 @@ class Preferences extends Admin_Controller
 	/*
 	 * About page configuration
 	 *
-	 * @author Woxxy
 	 */
 	function about()
 	{
