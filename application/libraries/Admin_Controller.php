@@ -109,6 +109,7 @@ class Admin_Controller extends MY_Controller
 				"general" => array("level" => "admin", "name" => _("General"), "icon" => "cog"),
 				"reader" => array("level" => "admin", "name" => _("Reader"), "icon" => "book"),
 				"theme" => array("level" => "admin", "name" => _("Theme"), "icon" => "eye"),
+				"about" => array("level" => "admin", "name" => _("About Page"), "icon" => "info-circle"),
 				"slideshow" => array("level" => "admin", "name" => _("Slideshow"), "icon" => "camera-retro"),
 				"registration" => array("level" => "admin", "name" => _("Registration"), "icon" => "credit-card"),
 				"advertising" => array("level" => "admin", "name" => _("Advertising"), "icon" => "puzzle-piece"),
