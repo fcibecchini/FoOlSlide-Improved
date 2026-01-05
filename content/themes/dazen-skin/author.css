@@ -1,0 +1,36 @@
+/* ===== LISTA AUTORI / ATTRIBUTES (no griglia) ===== */
+.list a.attribute-row {
+  display: inline-flex;
+  align-items: center;
+  margin: 4px 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #e9edf4;
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+  transition: background .18s ease, border-color .18s ease, transform .06s ease;
+  white-space: nowrap;
+}
+
+.list a.attribute-row:hover,
+.list a.attribute-row:focus-visible {
+  background: #B24759;
+  border-color: rgba(255,255,255,0.35);
+  text-decoration: none;
+}
+
+.list a.attribute-row:active {
+  transform: translateY(1px);
+}
+
+/* versione più compatta su mobile */
+@media (max-width: 640px) {
+  .list a.attribute-row {
+    padding: 6px 10px;
+    font-size: 14px;
+    margin: 3px 4px;
+  }
+}
