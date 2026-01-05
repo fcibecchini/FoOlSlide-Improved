@@ -1,0 +1,88 @@
+/* ===========================
+   Pagination (restyle)
+   =========================== */
+
+.prevnext{
+  margin: 12px 0;
+  padding: 8px 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px 10px;          /* verticale orizzontale */
+  flex-wrap: wrap;
+  background: transparent; /* lascia il fondo pulito */
+}
+
+/* neutralizza i float legacy dei singoli item */
+.prevnext .prev,
+.prevnext .next{
+  float: none !important;
+  margin: 0 !important;
+}
+
+/* bottoni numerici e frecce */
+.prevnext .gbutton,
+.prevnext .gbuttonactive{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 1px 2px rgba(0,0,0,.15) inset;
+  transition: background .18s ease, border-color .18s ease, transform .06s ease, box-shadow .18s ease;
+}
+
+/* corrente */
+.prevnext .gbuttonactive{
+  background: #B24759;                 /* accent chiaro */
+  border-color: rgba(255,255,255,0.35);
+  cursor: default;
+}
+
+/* hover / focus */
+.prevnext .gbutton:hover,
+.prevnext .gbutton:focus-visible{
+  background: #B24759;
+  border-color: rgba(255,255,255,0.35);
+  text-decoration: none;
+}
+
+/* press effect */
+.prevnext .gbutton:active{
+  transform: translateY(1px);
+}
+
+/* variante frecce un po’ più strette */
+.prevnext .prev .gbutton,
+.prevnext .next .gbutton{
+  min-width: 36px;
+  padding: 0 10px;
+}
+
+/* spaziatura tra gruppi (facoltativo) */
+.prevnext .prev { margin-right: 4px !important; }
+.prevnext .next { margin-left: 4px !important; }
+
+/* Mobile: compattiamo */
+@media (max-width: 640px){
+  .prevnext{
+    gap: 6px 8px;
+    padding: 6px;
+  }
+  .prevnext .gbutton,
+  .prevnext .gbuttonactive{
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+}
