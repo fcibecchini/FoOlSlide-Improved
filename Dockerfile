@@ -3,7 +3,7 @@ FROM php:5.6-apache
 RUN echo "deb http://archive.debian.org/debian/ stretch main" > /etc/apt/sources.list && \
     echo "deb http://archive.debian.org/debian-security stretch/updates main" >> /etc/apt/sources.list
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libmcrypt-dev \

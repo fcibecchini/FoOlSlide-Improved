@@ -19,6 +19,13 @@ class Reader extends Public_Controller
 		$this->latest();
 	}
 
+	public function about()
+	{
+		$this->template->title(_('About'), get_setting('fs_gen_site_title'));
+		$this->template->set('show_sidebar', TRUE);
+		$this->template->build('about');
+	}
+
 	function sitemap()
 	{
 		$sitemap = array(

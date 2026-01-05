@@ -8,7 +8,12 @@ services:
       APACHE_RUN_USER: www-data
       APACHE_RUN_GROUP: www-data
     volumes:
+      - ./index.php:/var/www/html/index.php
       - ./content/themes:/var/www/html/content/themes
+      - ./application:/var/www/html/application
+      - content_comics:/var/www/html/content/comics
+      - content_tags:/var/www/html/content/tags
+      - content_cache:/var/www/html/content/cache
   db:
     image: mysql:5.6
     container_name: foolslide_db
@@ -25,3 +30,6 @@ services:
 
 volumes:
   db_data:
+  content_comics:
+  content_tags:
+  content_cache:
