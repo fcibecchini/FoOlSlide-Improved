@@ -15,3 +15,11 @@ Installation
 3.  Go to http://yourdomain.com/slidefolder/install
 4.  Insert database info and admin account info
 5.  Done
+
+Unit tests
+----------
+- Controller unit tests are in `tests/controllers/` and follow the `*Test.php` suffix.
+- Test bootstrap and lightweight CodeIgniter stubs are in `tests/bootstrap.php`.
+- Run tests with `./scripts/run-tests.sh`.
+- Run tests + Docker Compose E2E smoke checks with `./scripts/run-tests.sh --with-e2e`.
+- The script falls back in this order: host `phpunit`, `vendor/bin/phpunit`, Docker (`docker compose run --rm web ...`).

@@ -177,7 +177,14 @@ function _get_codeset($domain=null) {
 	global $text_domains, $default_domain, $LC_CATEGORIES;
 	if (!isset($domain))
 		$domain = $default_domain;
-	return (isset($text_domains[$domain]->codeset)) ? $text_domains[$domain]->codeset : ini_get('mbstring.internal_encoding');
+	$codeset = (isset($text_domains[$domain]->codeset)) ? $text_domains[$domain]->codeset : ini_get('mbstring.internal_encoding');
+	if ($codeset === false || $codeset === null || $codeset === '') {
+		$codeset = ini_get('default_charset');
+	}
+	if ($codeset === false || $codeset === null || $codeset === '') {
+		$codeset = 'UTF-8';
+	}
+	return $codeset;
 }
 
 /**
@@ -191,6 +198,9 @@ function _encode($text) {
 	$target_encoding = _get_codeset();
 	if (function_exists("mb_detect_encoding")) {
 		$source_encoding = mb_detect_encoding($text);
+		if ($source_encoding === false || $source_encoding === null || $source_encoding === '') {
+			$source_encoding = 'UTF-8';
+		}
 		if ($source_encoding != $target_encoding) {
 			$text = mb_convert_encoding($text, $target_encoding, $source_encoding);
 		}

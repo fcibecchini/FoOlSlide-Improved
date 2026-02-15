@@ -1,0 +1,15 @@
+{
+	"name": "fcibecchini/foolslide-improved",
+	"description": "FoOlSlide Improved",
+	"type": "project",
+	"require": {},
+	"require-dev": {
+		"phpunit/phpunit": "^9.6"
+	},
+	"config": {
+		"platform": {
+			"php": "8.4.0"
+		},
+		"sort-packages": true
+	}
+}

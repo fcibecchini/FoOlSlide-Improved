@@ -58,6 +58,33 @@ if ( ! function_exists('is_php'))
 // ------------------------------------------------------------------------
 
 /**
+ * PHP 8 removed each(); keep legacy behavior for the CI2 codebase.
+ *
+ * @access	public
+ * @param	array
+ * @return	mixed
+ */
+if ( ! function_exists('each'))
+{
+	function each(&$array)
+	{
+		$key = key($array);
+
+		if ($key === null)
+		{
+			return FALSE;
+		}
+
+		$value = current($array);
+		next($array);
+
+		return array(1 => $value, 'value' => $value, 0 => $key, 'key' => $key);
+	}
+}
+
+// ------------------------------------------------------------------------
+
+/**
  * Tests for file writability
  *
  * is_writable() returns TRUE on Windows servers when you really can't write to
@@ -140,10 +167,10 @@ if ( ! function_exists('load_class'))
 			{
 				$name = $prefix.$class;
 
-				if (class_exists($name) === FALSE)
-				{
-					require($path.$directory.'/'.$class.'.php');
-				}
+					if (class_exists($name) === FALSE)
+					{
+						require_once($path.$directory.'/'.$class.'.php');
+					}
 
 				break;
 			}
@@ -154,10 +181,10 @@ if ( ! function_exists('load_class'))
 		{
 			$name = config_item('subclass_prefix').$class;
 
-			if (class_exists($name) === FALSE)
-			{
-				require(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php');
-			}
+				if (class_exists($name) === FALSE)
+				{
+					require_once(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php');
+				}
 		}
 
 		// Did we find the class?
@@ -346,7 +373,7 @@ if ( ! function_exists('show_404'))
 */
 if ( ! function_exists('log_message'))
 {
-	function log_message($level = 'error', $message, $php_error = FALSE)
+	function log_message($level = 'error', $message = '', $php_error = FALSE)
 	{
 		static $_log;
 
