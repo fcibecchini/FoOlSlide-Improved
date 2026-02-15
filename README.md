@@ -2,6 +2,8 @@
 
 This is an unofficial continuation of the FoOlSlide reader, focused on maintainability, modern PHP compatibility, and a better admin + reading experience.
 
+Note that this project improved the frontend as well, providing a mobile-friendly version of the reader. The admin panel theme was maninly inspired by the work of chocolatkey's FoOlSlide2.
+
 ## Main Features
 - Reader and admin panel tailored for manga/doujin archives.
 - Comic organization with series metadata, categories, tags, teams, and releases.
