@@ -14,3 +14,4 @@ content/tags
 content/logs
 application/controllers/admin/chat.php
 application/views/admin/chat
+vendor/
