@@ -78,6 +78,11 @@ class CI_DB_driver {
 	 *
 	 * @param array
 	 */
+	function __construct($params = array())
+	{
+		$this->CI_DB_driver($params);
+	}
+
 	function CI_DB_driver($params)
 	{
 		if (is_array($params))
@@ -764,6 +769,11 @@ class CI_DB_driver {
 
 		$retval = array();
 		$query = $this->query($sql);
+
+		if ($query === FALSE)
+		{
+			return $retval;
+		}
 
 		if ($query->num_rows() > 0)
 		{

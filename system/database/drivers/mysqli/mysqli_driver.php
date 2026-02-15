@@ -64,14 +64,21 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	function db_connect()
 	{
+		if (function_exists('mysqli_report'))
+		{
+			mysqli_report(MYSQLI_REPORT_OFF);
+		}
+
 		if ($this->port != '')
 		{
-			return @mysqli_connect($this->hostname, $this->username, $this->password, $this->database, $this->port);
+			$conn = @mysqli_connect($this->hostname, $this->username, $this->password, $this->database, $this->port);
 		}
 		else
 		{
-			return @mysqli_connect($this->hostname, $this->username, $this->password, $this->database);
+			$conn = @mysqli_connect($this->hostname, $this->username, $this->password, $this->database);
 		}
+
+		return $conn;
 
 	}
 
@@ -175,6 +182,10 @@ class CI_DB_mysqli_driver extends CI_DB {
 	function _execute($sql)
 	{
 		$sql = $this->_prep_query($sql);
+		if (!$this->conn_id)
+		{
+			return FALSE;
+		}
 		$result = @mysqli_query($this->conn_id, $sql);
 		return $result;
 	}
@@ -453,6 +464,10 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	function _error_message()
 	{
+		if (!$this->conn_id)
+		{
+			return 'Unable to connect to the database';
+		}
 		return mysqli_error($this->conn_id);
 	}
 
@@ -466,6 +481,10 @@ class CI_DB_mysqli_driver extends CI_DB {
 	 */
 	function _error_number()
 	{
+		if (!$this->conn_id)
+		{
+			return 0;
+		}
 		return mysqli_errno($this->conn_id);
 	}
 

@@ -372,15 +372,16 @@ if (file_exists(FCPATH . "config.php"))
   | for base controllers and some third-party libraries.
   |
  */
-if (!function_exists('__autoload')) {
+if (!function_exists('foolslide_native_autoload')) {
 
-	function __autoload($class) {
+	function foolslide_native_autoload($class) {
 		if (strpos($class, 'CI_') !== 0) {
 			if (file_exists(APPPATH . 'libraries/' . $class . EXT))
 				@include_once( APPPATH . 'libraries/' . $class . EXT );
 		}
 	}
 
+	spl_autoload_register('foolslide_native_autoload');
 }
 
 

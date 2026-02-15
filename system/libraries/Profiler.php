@@ -63,13 +63,13 @@ class CI_Profiler {
 		}
 
 		// default all sections to display
-		foreach ($this->_available_sections as $section)
-		{
-			if ( ! isset($config[$section]))
+			foreach ($this->_available_sections as $section)
 			{
-				$this->_compile_{$section} = TRUE;
+				if ( ! isset($config[$section]))
+				{
+					$this->{'_compile_'.$section} = TRUE;
+				}
 			}
-		}
 
 		$this->set_sections($config);
 	}
@@ -86,13 +86,13 @@ class CI_Profiler {
 	 */
 	public function set_sections($config)
 	{
-		foreach ($config as $method => $enable)
-		{
-			if (in_array($method, $this->_available_sections))
+			foreach ($config as $method => $enable)
 			{
-				$this->_compile_{$method} = ($enable !== FALSE) ? TRUE : FALSE;
+				if (in_array($method, $this->_available_sections))
+				{
+					$this->{'_compile_'.$method} = ($enable !== FALSE) ? TRUE : FALSE;
+				}
 			}
-		}
 	}
 
 	// --------------------------------------------------------------------
@@ -531,15 +531,15 @@ class CI_Profiler {
 		$output = "<div id='codeigniter_profiler' style='clear:both;background-color:#fff;padding:10px;'>";
 		$fields_displayed = 0;
 
-		foreach ($this->_available_sections as $section)
-		{
-			if ($this->_compile_{$section} !== FALSE)
+			foreach ($this->_available_sections as $section)
 			{
-				$func = "_compile_{$section}";
-				$output .= $this->{$func}();
-				$fields_displayed++;
+				if ($this->{'_compile_'.$section} !== FALSE)
+				{
+					$func = '_compile_'.$section;
+					$output .= $this->{$func}();
+					$fields_displayed++;
+				}
 			}
-		}
 
 		if ($fields_displayed == 0)
 		{

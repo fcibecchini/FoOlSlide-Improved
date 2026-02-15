@@ -728,7 +728,7 @@ class Comic extends DataMapper
 
 		// update license data
 		$license = new License();
-		$license->update($this->id, $data['licensed']);
+		$license->update_for_comic($this->id, $data['licensed']);
 
 		// Good job!
 		return true;

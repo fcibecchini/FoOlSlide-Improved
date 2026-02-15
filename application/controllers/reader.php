@@ -781,7 +781,7 @@ class Reader extends Public_Controller
 
 	public function _remap($method, $params = array())
 	{
-		if (method_exists($this->RC, $method))
+		if (isset($this->RC) && is_object($this->RC) && method_exists($this->RC, $method))
 		{
 			return call_user_func_array(array($this->RC, $method), $params);
 		}
