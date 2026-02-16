@@ -47,7 +47,7 @@ if(!function_exists('get_searchtags_bar'))
 		$tagnames = array("");
 		foreach ($tags as $tag)
 			$tagnames[$tag->id] = $tag->name;
-		
+
 		$table[] = array(
 			_('Tags'),
 			array(
@@ -55,7 +55,8 @@ if(!function_exists('get_searchtags_bar'))
 				'type' => 'dropdowner',
 				'values' => $tagnames,
 				'value' => array(),
-				'help' => _('Select the tags you are interested in')
+				//'help' => _('Select the tags you are interested in')
+
 			)
 		);
 		$table = tabler($table, FALSE, TRUE, FALSE, TRUE);
@@ -63,18 +64,17 @@ if(!function_exists('get_searchtags_bar'))
 				function addField(e){
 					if (jQuery(e).val().length > 0){
 						jQuery(e).clone().val("").insertAfter(e);
-						jQuery(e).after("<br/>");
 						jQuery(e).attr("onKeyUp", "");
 						jQuery(e).attr("onChange", "");
 					}
 				}
 				</script>';
-		
-		$echo .= '<ul class="sidebar"><li><h3>'._('Multiple Tag Search').'</h3>';
+
+		$echo .= '<h3>'._('Multiple Tag Search').'</h3>';
 		$echo .= form_open_multipart("search_tags/", array('class' => 'form-stacked'));
 		$echo .= $table;
 		$echo .= form_close();
-		$echo .= '</li></ul>';
+		$echo .= '';
 		return $echo;
 	}
 }
@@ -184,8 +184,8 @@ if(!function_exists('get_facebook_widget'))
 	function get_facebook_widget($team = NULL)
 	{
 		$facebook = get_setting_facebook($team);
-		
-		//return 	"<iframe src='http://www.facebook.com/plugins/likebox.php?href=".urlencode($facebook)."&amp;width=290&amp;colorscheme=light&amp;show_faces=false&amp;stream=false&amp;header=false' scrolling='no' frameborder='0' style='border:none; overflow:hidden; width:290px; height:63px; background:rgba(255,255,255,.5)' allowTransparency='true'></iframe>";	
+
+		//return 	"<iframe src='http://www.facebook.com/plugins/likebox.php?href=".urlencode($facebook)."&amp;width=290&amp;colorscheme=light&amp;show_faces=false&amp;stream=false&amp;header=false' scrolling='no' frameborder='0' style='border:none; overflow:hidden; width:290px; height:63px; background:rgba(255,255,255,.5)' allowTransparency='true'></iframe>";
 		return '<a href="'.$facebook.'"><div><div><i class="fa fa-3x fa-facebook" aria-hidden="true" style=""></i></div></div><br>Facebook</a>';
 	}
 }
