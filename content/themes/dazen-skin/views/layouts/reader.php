@@ -87,7 +87,6 @@
 						<li><a href="<?php echo site_url('authors') ?>"><span class="mh"> <?php echo _('Authors'); ?></span></a></li>
 						<li><a href="<?php echo site_url('parodies') ?>"><span class="mh"> <?php echo _('Parodies'); ?></span></a></li>
 						<li><a href="<?php echo site_url('most_downloaded') ?>"><span class="mh"> <?php echo _('Most Downloaded'); ?></span></a></li>
-						<li><a href="<?php echo site_url('about') ?>"><span class="mh"> <?php echo _('About'); ?></span></a></li>
 						<?php if (get_setting ('fs_theme_custom_link')) : ?><?php echo '<li>'.get_setting('fs_theme_custom_link').'</li>';?><?php endif; ?>
 
 
@@ -123,8 +122,8 @@
 				if (isset($show_sidebar))
 					//echo get_sidebar();
 
-				if(isset($show_searchtags))
-					echo get_searchtags_bar();
+					if (isset($show_searchtags) && $this->uri->segment(1) !== 'tags')
+						echo get_searchtags_bar();
 
 				if (isset($is_latest) && $is_latest)
 				{
