@@ -123,7 +123,7 @@
 					//echo get_sidebar();
 
 					if (isset($show_searchtags) && $this->uri->segment(1) !== 'tags')
-						echo get_searchtags_bar();
+						echo get_searchtags_style() . '<div class="tag-search">' . get_searchtags_bar() . '</div>';
 
 				if (isset($is_latest) && $is_latest)
 				{
