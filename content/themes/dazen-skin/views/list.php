@@ -23,7 +23,7 @@ if (!defined('BASEPATH'))
 					<div class="meta_r">' . _('by') . ' ' . $comic->latest_chapter->team_url() . ', ' . $comic->latest_chapter->date() . ' ' . $comic->latest_chapter->edit_url() . '</div>
 				</div></div>';
 	}
-	if ($error_message) echo '<div class="element"><div class="title">' . $error_message . '.</div></div>';
+	if (isset($error_message) && $error_message) echo '<div class="element"><div class="title">' . $error_message . '.</div></div>';
 	echo prevnext($link.'/', $comics);
 	?>
 </div>

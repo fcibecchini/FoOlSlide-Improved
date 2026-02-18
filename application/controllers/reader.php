@@ -397,6 +397,12 @@ class Reader extends Public_Controller
 	public function search_tags()
 	{
 		if ($post = $this->input->post()) {
+			// Invalid payloads (e.g. search bar posting to this endpoint) should
+			// gracefully return to tags instead of triggering warnings in PHP 8+.
+			if (!isset($post['tag']) || !is_array($post['tag']) || count($post['tag']) === 0) {
+				redirect('tags');
+			}
+
 			// let's sort the tags and delete empty entries
 			foreach ($post['tag'] as $key => $value)
 				if ($value == 0)
@@ -427,9 +433,9 @@ class Reader extends Public_Controller
 				// Take the last element (the tag with lowest number of comics)
 				$alltags = new Tag();
 				$last = array_pop($sorted_tags);
-				$result = $comics->get_comics($last);
-				foreach ($sorted_tags as $tg) {
-					$t = array_pop($sorted_tags);
+				$result_dm = $comics->get_comics($last);
+				$result = (isset($result_dm->all) && is_array($result_dm->all)) ? $result_dm->all : array();
+				foreach ($sorted_tags as $t) {
 					if (count($result) > 0)
 						$result = $alltags->get_comics($result, $t);
 					else break;
@@ -698,12 +704,13 @@ class Reader extends Public_Controller
 		$chapters = new Chapter();
 		$chapters->where('comic_id', $comic->id)->order_by('volume', 'desc')->order_by('chapter', 'desc')->order_by('subchapter', 'desc')->get_bulk();
 		$type = new Typeh();
-		$type->where('id', $comic->typeh_id)->get();
-		$type->stub = URIpurifier($type->name);
-		$comic->get_tags();
-		foreach($comic->tags as $value)
-			$value->stub = URIpurifier($value->name);
-		$users = new Users();
+			$type->where('id', $comic->typeh_id)->get();
+			$type->stub = URIpurifier($type->name);
+			$comic->get_tags();
+			if (is_array($comic->tags) || is_object($comic->tags))
+				foreach($comic->tags as $value)
+					$value->stub = URIpurifier($value->name);
+			$users = new Users();
 		$user = $users->get_user_by_id($comic->creator, TRUE);
 		
 		//$this->template->set('show_sidebar', TRUE);
@@ -711,11 +718,18 @@ class Reader extends Public_Controller
 		$this->template->set('metacomic', $comic);
 		$this->template->set('chapters', $chapters);
 		$this->template->set('type', $type);
-		$this->template->set('user', $user->username);
+		$this->template->set('user', $user ? $user->username : '');
 		$this->template->title($comic->name, get_setting('fs_gen_site_title'));
 		$this->template->build('comic');
 	}
 
+
+	private function sanitize_search_query($value)
+	{
+		$value = (string) $value;
+		$value = strip_tags($value);
+		return trim($value);
+	}
 
 	public function search()
 	{
@@ -726,25 +740,37 @@ class Reader extends Public_Controller
 			return TRUE;
 		}
 
-		$search = HTMLpurify($this->input->post('search'), 'unallowed');
-		$this->template->title(_('Search'));
+			$search = $this->sanitize_search_query($this->input->post('search'));
+			try
+			{
+				$this->template->title(_('Search'));
 
-		$comics = new Comic();
-		$comics->ilike('name', $search)->get();
-		foreach ($comics->all as $comic)
-		{
-			$comic->latest_chapter = new Chapter();
-			$comic->latest_chapter->where('comic_id', $comic->id)->order_by('created', 'DESC')->limit(1)->get()->get_teams();
+				$comics = new Comic();
+				$comics->ilike('name', $search)->limit(50)->get();
+				$comic_items = (isset($comics->all) && (is_array($comics->all) || is_object($comics->all))) ? $comics->all : array();
+				foreach ($comic_items as $comic)
+				{
+					$comic->latest_chapter = new Chapter();
+					$comic->latest_chapter->where('comic_id', $comic->id)->order_by('created', 'DESC')->limit(1)->get();
+					if ($comic->latest_chapter->result_count() > 0)
+						$comic->latest_chapter->get_teams();
+				}
+				$this->template->set('show_sidebar', TRUE);
+				$this->template->set('search', $search);
+				$this->template->set('comics', $comics);
+				$this->template->build('search');
+			}
+			catch (Throwable $e)
+			{
+				log_message('error', 'search failed: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+				$this->template->title(_('Search'), get_setting('fs_gen_site_title'));
+				$this->template->build('search_pre');
+			}
 		}
-		$this->template->set('show_sidebar', TRUE);
-		$this->template->set('search', $search);
-		$this->template->set('comics', $comics);
-		$this->template->build('search');
-	}
 	
 	public function search_author() 
 	{
-		$search = HTMLpurify($this->input->post('search'), 'unallowed');
+		$search = $this->sanitize_search_query($this->input->post('search'));
 		$this->template->title(_('Search Artist'));
 		
 		$comics = new Comic();
@@ -762,7 +788,7 @@ class Reader extends Public_Controller
 	
 	public function search_parody()
 	{
-		$search = HTMLpurify($this->input->post('search'), 'unallowed');
+		$search = $this->sanitize_search_query($this->input->post('search'));
 		$this->template->title(_('Search Parody'));
 	
 		$comics = new Comic();
