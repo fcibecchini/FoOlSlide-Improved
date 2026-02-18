@@ -93,11 +93,87 @@ check_page() {
 	fi
 }
 
+check_post_page() {
+	local path="$1"
+	local post_data="$2"
+	local min_bytes="$3"
+	local marker="${4:-}"
+
+	local safe_name
+	safe_name="$(echo "post_${path}_${post_data}" | tr '/:?&= ' '_')"
+	local headers_file="$tmp_dir/${safe_name}.headers"
+	local body_file="$tmp_dir/${safe_name}.body"
+
+	curl -sS -L -D "$headers_file" -o "$body_file" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "$post_data" \
+		"$BASE_URL$path"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	local content_type
+	content_type="$(awk 'BEGIN{IGNORECASE=1} /^Content-Type:/ { val=$0 } END { sub(/\r$/, "", val); print val }' "$headers_file")"
+	local body_bytes
+	body_bytes="$(wc -c < "$body_file" | tr -d ' ')"
+
+	echo "[e2e] POST $path -> status=$http_code bytes=$body_bytes"
+
+	if [ "$http_code" != "200" ]; then
+		echo "[e2e] FAIL POST $path: expected HTTP 200, got $http_code" >&2
+		exit 1
+	fi
+
+	if [ "$body_bytes" -lt "$min_bytes" ]; then
+		echo "[e2e] FAIL POST $path: expected at least $min_bytes bytes, got $body_bytes" >&2
+		exit 1
+	fi
+
+	if ! grep -qi '<html' "$body_file"; then
+		echo "[e2e] FAIL POST $path: response is not HTML" >&2
+		exit 1
+	fi
+
+	if [ -n "$marker" ] && ! grep -q "$marker" "$body_file"; then
+		echo "[e2e] FAIL POST $path: marker '$marker' not found" >&2
+		exit 1
+	fi
+
+	if ! echo "$content_type" | grep -qi 'text/html'; then
+		echo "[e2e] FAIL POST $path: unexpected content type ($content_type)" >&2
+		exit 1
+	fi
+}
+
+check_search_tags_multi() {
+	local tag_ids
+	tag_ids="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT id FROM fs_tags ORDER BY id LIMIT 2\"" 2>/dev/null | tr '\n' ' ' | xargs || true)"
+
+	if [ -z "$tag_ids" ]; then
+		echo "[e2e] SKIP POST /search_tags/ multi-tag check: no tags found in local DB."
+		return 0
+	fi
+
+	local first second
+	first="$(echo "$tag_ids" | awk '{print $1}')"
+	second="$(echo "$tag_ids" | awk '{print $2}')"
+
+	if [ -z "$first" ] || [ -z "$second" ]; then
+		echo "[e2e] SKIP POST /search_tags/ multi-tag check: need at least two tags in local DB."
+		return 0
+	fi
+
+	check_post_page "/search_tags/" "tag%5B%5D=${first}&tag%5B%5D=${second}" 800 "<!DOCTYPE html"
+}
+
 # Core public + auth/admin routes that should always render a real HTML page.
 check_page "/" 1000 "<!DOCTYPE html"
 check_page "/latest/" 1000 "<!DOCTYPE html"
 check_page "/account/auth/login/" 1000 "<!DOCTYPE html"
 check_page "/admin/" 1000 "<!DOCTYPE html"
 check_page "/install" 1000 "<!DOCTYPE html"
+check_post_page "/search/" "search=aaa%2Ftest%2Fnaruto" 800 "<!DOCTYPE html"
+check_post_page "/search_tags/" "search=invalid_payload" 800 "<!DOCTYPE html"
+check_search_tags_multi
 
 echo "[e2e] PASS: smoke routes are serving HTML pages correctly."
