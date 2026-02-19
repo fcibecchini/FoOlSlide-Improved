@@ -30,7 +30,18 @@ class PasswordHash {
 	var $portable_hashes;
 	var $random_state;
 
+	function __construct($iteration_count_log2, $portable_hashes)
+	{
+		$this->init($iteration_count_log2, $portable_hashes);
+	}
+
+	// PHP 4-style constructor retained for backwards compatibility.
 	function PasswordHash($iteration_count_log2, $portable_hashes)
+	{
+		$this->init($iteration_count_log2, $portable_hashes);
+	}
+
+	private function init($iteration_count_log2, $portable_hashes)
 	{
 		$this->itoa64 = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
