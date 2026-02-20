@@ -64,16 +64,20 @@ class MY_Controller extends CI_Controller
 				$ignored_ips = @unserialize(get_setting('fs_balancer_ips'));
 			$ignored_ips[] = '127.0.0.1';
 			$remote_addr = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
-			if ($this->session->userdata('nation') !== FALSE || !in_array($remote_addr, $ignored_ips))
+			$current_nation = $this->session->userdata('nation');
+			if ($current_nation !== FALSE || !in_array($remote_addr, $ignored_ips))
 			{
 				// If the user doesn't have a nation set, let's grab it
 				require_once("assets/geolite/GeoIP.php");
 				$gi = geoip_open("assets/geolite/GeoIP.dat", GEOIP_STANDARD);
 				$nation = geoip_country_code_by_addr($gi, $remote_addr);
 				geoip_close($gi);
-				$this->session->set_userdata('nation', $nation);
+				if ($current_nation !== $nation)
+				{
+					$this->session->set_userdata('nation', $nation);
+				}
 			}
-			else if ($this->session->userdata('nation'))
+			else if ($current_nation)
 			{
 				$this->session->set_userdata('nation', '');
 			}

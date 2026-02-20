@@ -703,7 +703,7 @@ class Chapter extends DataMapper
 
 		// Create the directory and return false on failure. It's most likely file permissions anyway.
 		$dir = "content/comics/" . $this->comic->directory() . "/" . $this->directory();
-		if (!mkdir($dir))
+		if (!is_dir($dir) && !mkdir($dir, 0775, TRUE))
 		{
 			set_notice('error', _('Failed to create the chapter directory. Please, check file permissions.'));
 			log_message('error', 'add_chapter_dir: folder could not be created');

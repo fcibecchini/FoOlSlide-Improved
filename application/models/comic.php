@@ -460,6 +460,8 @@ class Comic extends DataMapper
 		// Check if dir is created. GUI errors in inner function.
 		if (!$this->add_comic_dir())
 		{
+			// Keep DB and filesystem consistent: rollback the comic entry if the folder wasn't created.
+			$this->remove_comic_db();
 			log_message('error', 'add_comic: failed creating dir');
 			return false;
 		}
@@ -787,8 +789,14 @@ class Comic extends DataMapper
 	 */
 	public function add_comic_dir()
 	{
+		$dir = "content/comics/" . $this->directory();
+		if (is_dir($dir))
+		{
+			return true;
+		}
+
 		// Just create the folder
-		if (!mkdir("content/comics/" . $this->directory()))
+		if (!mkdir($dir, 0775, TRUE))
 		{
 			set_notice('error', _('The directory could not be created. Please, check file permissions.'));
 			log_message('error', 'add_comic_dir: folder could not be created');
