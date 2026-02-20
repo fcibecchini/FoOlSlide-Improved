@@ -6,6 +6,9 @@ cd "$ROOT_DIR"
 
 BASE_URL="${BASE_URL:-http://localhost:8080}"
 START_TIMEOUT_SECONDS="${START_TIMEOUT_SECONDS:-90}"
+ADMIN_USER="${ADMIN_USER:-admin}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
+MAX_HEADER_BYTES="${MAX_HEADER_BYTES:-7000}"
 
 require_cmd() {
 	local cmd="$1"
@@ -45,6 +48,7 @@ fi
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
+COOKIE_JAR="$tmp_dir/cookies.txt"
 
 check_page() {
 	local path="$1"
@@ -145,6 +149,90 @@ check_post_page() {
 	fi
 }
 
+validate_header_size() {
+	local headers_file="$1"
+	local path="$2"
+	local header_bytes
+	header_bytes="$(wc -c < "$headers_file" | tr -d ' ')"
+	echo "[e2e] $path headers_bytes=$header_bytes"
+	if [ "$header_bytes" -gt "$MAX_HEADER_BYTES" ]; then
+		echo "[e2e] FAIL $path: response headers too large ($header_bytes > $MAX_HEADER_BYTES)." >&2
+		exit 1
+	fi
+}
+
+admin_login() {
+	local headers_file="$tmp_dir/admin_login.headers"
+	local body_file="$tmp_dir/admin_login.body"
+
+	curl -sS -L -D "$headers_file" -o "$body_file" \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "login=${ADMIN_USER}&password=${ADMIN_PASSWORD}&remember=1&submit=Login" \
+		"$BASE_URL/account/auth/login/"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	echo "[e2e] POST /account/auth/login/ -> status=$http_code"
+
+	if [ "$http_code" != "200" ]; then
+		echo "[e2e] FAIL login: expected HTTP 200 after redirects, got $http_code" >&2
+		exit 1
+	fi
+
+	if grep -q "Incorrect password" "$body_file"; then
+		echo "[e2e] FAIL login: invalid credentials for admin flow checks." >&2
+		exit 1
+	fi
+
+	if ! grep -q "/account/auth/logout/" "$body_file"; then
+		echo "[e2e] FAIL login: expected authenticated profile page with logout link." >&2
+		exit 1
+	fi
+
+	validate_header_size "$headers_file" "/account/auth/login/"
+}
+
+check_authed_page() {
+	local path="$1"
+	local min_bytes="$2"
+	local marker="${3:-}"
+
+	local safe_name
+	safe_name="$(echo "authed_${path}" | tr '/:?&=' '_')"
+	local headers_file="$tmp_dir/${safe_name}.headers"
+	local body_file="$tmp_dir/${safe_name}.body"
+
+	curl -sS -L -D "$headers_file" -o "$body_file" \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		"$BASE_URL$path"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	local body_bytes
+	body_bytes="$(wc -c < "$body_file" | tr -d ' ')"
+
+	echo "[e2e] AUTH $path -> status=$http_code bytes=$body_bytes"
+
+	if [ "$http_code" != "200" ]; then
+		echo "[e2e] FAIL AUTH $path: expected HTTP 200, got $http_code" >&2
+		exit 1
+	fi
+
+	if [ "$body_bytes" -lt "$min_bytes" ]; then
+		echo "[e2e] FAIL AUTH $path: expected at least $min_bytes bytes, got $body_bytes" >&2
+		exit 1
+	fi
+
+	if [ -n "$marker" ] && ! grep -q "$marker" "$body_file"; then
+		echo "[e2e] FAIL AUTH $path: marker '$marker' not found" >&2
+		exit 1
+	fi
+
+	validate_header_size "$headers_file" "$path"
+}
+
 check_search_tags_multi() {
 	local tag_ids
 	tag_ids="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT id FROM fs_tags ORDER BY id LIMIT 2\"" 2>/dev/null | tr '\n' ' ' | xargs || true)"
@@ -175,5 +263,14 @@ check_page "/install" 1000 "<!DOCTYPE html"
 check_post_page "/search/" "search=aaa%2Ftest%2Fnaruto" 800 "<!DOCTYPE html"
 check_post_page "/search_tags/" "search=invalid_payload" 800 "<!DOCTYPE html"
 check_search_tags_multi
+admin_login
+check_authed_page "/admin/series/add_new/" 1000 "<!DOCTYPE html"
+
+first_stub="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT stub FROM fs_comics ORDER BY id LIMIT 1\"" 2>/dev/null | tr -d '\r' | head -n 1 || true)"
+if [ -n "$first_stub" ]; then
+	check_authed_page "/admin/series/add_new/${first_stub}" 1000 "<!DOCTYPE html"
+else
+	echo "[e2e] SKIP /admin/series/add_new/<stub>: no existing series found in local DB."
+fi
 
 echo "[e2e] PASS: smoke routes are serving HTML pages correctly."

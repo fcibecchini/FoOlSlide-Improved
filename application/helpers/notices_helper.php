@@ -16,7 +16,6 @@ if (!function_exists('get_notices'))
 		$CI = & get_instance();
 		$merge = array_merge($CI->notices, $CI->flash_notice_data);
 		$CI->flash_notice_data = '';
-		$CI->session->set_flashdata('notices', array());
 		$echo = '';
 		foreach ($merge as $key => $value)
 		{
@@ -39,7 +38,7 @@ if (!function_exists('clear_notices'))
 	{
 		$CI = & get_instance();
 		unset($CI->notices);
-		$CI->session->set_flashdata('notices', array());
+		$CI->flash_notice_data = array();
 	}
 
 

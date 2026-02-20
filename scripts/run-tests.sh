@@ -56,7 +56,7 @@ run_docker_phpunit() {
 	fi
 
 	echo "[tests] Running phpunit in Docker (service: web)"
-	docker compose run --rm -v "$(pwd):/workspace" web sh -lc '
+	docker compose run --rm --entrypoint sh -v "$(pwd):/workspace" web -lc '
 		set -eu
 		cd /workspace
 		if command -v phpunit >/dev/null 2>&1; then
