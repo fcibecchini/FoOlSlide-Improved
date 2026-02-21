@@ -84,7 +84,10 @@ $config['login_attempt_expire'] = 60*60*24;
 | 'autologin_cookie_life' = Auto login cookie life before expired. Default is 2 months (60*60*24*31*2).
 |--------------------------------------------------------------------------
 */
-$config['autologin_cookie_name'] = 'autologin';
+$autologin_host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : 'cli';
+$autologin_host = preg_replace('/:\d+$/', '', $autologin_host);
+$autologin_host_hash = substr(md5($autologin_host), 0, 8);
+$config['autologin_cookie_name'] = 'autologin_' . $autologin_host_hash;
 $config['autologin_cookie_life'] = 60*60*24*31*2;
 
 /*
