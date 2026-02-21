@@ -136,8 +136,11 @@ if (!defined('BASEPATH'))
   padding: 0; margin: 0;
   cursor: pointer;
   outline: none;
+  z-index: 20;
+  pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
 }
+#page .inner img.open{ position: relative; z-index: 1; }
 #page .inner .nav-left  { left: 0; }
 #page .inner .nav-right { right: 0; }
 #page .inner .nav-zone:focus{ outline: none; }
@@ -408,11 +411,19 @@ if (!defined('BASEPATH'))
     var $img = $inner.find('a img.open').clone();
     $inner.empty().append($img);
 
-    $inner.append('<button class="nav-zone nav-left"  aria-label="Previous page"></button>'+
-                  '<button class="nav-zone nav-right" aria-label="Next page"></button>');
+    $inner.append('<button type="button" class="nav-zone nav-left" aria-label="Previous page"></button>'+
+                  '<button type="button" class="nav-zone nav-right" aria-label="Next page"></button>');
 
-    $inner.on('click', '.nav-left',  function(e){ e.preventDefault(); prevPage(); });
-    $inner.on('click', '.nav-right', function(e){ e.preventDefault(); nextPage(); });
+    $inner.find('.nav-left').bind('click', function(e){ e.preventDefault(); prevPage(); });
+    $inner.find('.nav-right').bind('click', function(e){ e.preventDefault(); nextPage(); });
+    // Desktop fallback: click left/right area even if overlay buttons are not hit.
+    $inner.bind('click', function(e){
+      if (jQuery(e.target).closest('.nav-zone').length) return;
+      var x = e.pageX - $inner.offset().left;
+      var w = $inner.width();
+      if (x < w * 0.4) prevPage();
+      else if (x > w * 0.6) nextPage();
+    });
 
     // Touch: drag solo se zoom; altrimenti swipe/tap area
     var touchState = { startXRel:0, startY:0, lastX:0, lastY:0, isDragging:false };
@@ -424,7 +435,7 @@ if (!defined('BASEPATH'))
       return matrix.a;
     }
 
-    $inner.on('touchstart', function(event){
+    $inner.bind('touchstart', function(event){
       if (event.originalEvent.touches.length === 1) {
         var imgEl = $inner.find('img.open')[0];
         var scale = getCurrentScale(imgEl);
@@ -447,7 +458,7 @@ if (!defined('BASEPATH'))
       }
     });
 
-    $inner.on('touchmove', function(event){
+    $inner.bind('touchmove', function(event){
       if (touchState.isDragging && event.originalEvent.touches.length === 1) {
         var touch = event.originalEvent.touches[0];
         var img = $inner.find('img.open');
@@ -464,7 +475,7 @@ if (!defined('BASEPATH'))
       }
     });
 
-    $inner.on('touchend', function(event){
+    $inner.bind('touchend', function(event){
       if (!touchState.isDragging) {
         var rect = this.getBoundingClientRect();
         var endXRel = event.changedTouches[0].clientX - rect.left;
@@ -486,7 +497,6 @@ if (!defined('BASEPATH'))
 </script>
 
 <script>
-<script>
 jQuery(function($){
   var $parents = $('.dropdown_parent');
 
@@ -497,8 +507,8 @@ jQuery(function($){
 
   // Handler click SOLO per mobile/tablet (niente hover affidabile)
   function bindMobileClick(){
-    $parents.off('.dd'); // pulizia eventuali handler precedenti
-    $parents.on('click.dd', '.text, .text_only', function(e){
+    $parents.undelegate('.text, .text_only', 'click.dd'); // pulizia eventuali handler precedenti
+    $parents.delegate('.text, .text_only', 'click.dd', function(e){
       var $p = $(this).closest('.dropdown_parent');
 
       // Se non c'è il dropdown, lascia navigare tranquillamente (link puro)
@@ -513,18 +523,18 @@ jQuery(function($){
     });
 
     // Chiudi cliccando fuori o con ESC
-    $(document).on('click.dd', function(e){
+    $(document).unbind('click.dd').bind('click.dd', function(e){
       if (!$(e.target).closest('.dropdown_parent').length) $parents.removeClass('open');
     });
-    $(document).on('keydown.dd', function(e){
+    $(document).unbind('keydown.dd').bind('keydown.dd', function(e){
       if (e.key === 'Escape') $parents.removeClass('open');
     });
   }
 
   // Modalità desktop: niente click handler, usa solo :hover da CSS
   function unbindClicks(){
-    $parents.off('.dd');
-    $(document).off('.dd');
+    $parents.undelegate('.text, .text_only', 'click.dd');
+    $(document).unbind('click.dd').unbind('keydown.dd');
     $parents.removeClass('open');
   }
 
@@ -538,8 +548,6 @@ jQuery(function($){
     else bindMobileClick();          // torna al click
   });
 });
-</script>
-
 </script>
 
 <script type="text/javascript">
