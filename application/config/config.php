@@ -248,10 +248,7 @@ $config['encryption_key'] = '';
   | 'sess_time_to_update'		= how many seconds between CI refreshing Session Information
   |
  */
-$session_host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : 'cli';
-$session_host = preg_replace('/:\d+$/', '', $session_host);
-$session_host_hash = substr(md5($session_host), 0, 8);
-$config['sess_cookie_name'] = 'ci_session_' . $session_host_hash;
+$config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 7200;
 $config['sess_expire_on_close'] = FALSE;
 $config['sess_encrypt_cookie'] = TRUE;
@@ -271,7 +268,7 @@ $config['sess_time_to_update'] = 300;
   | 'cookie_path'   =  Typically will be a forward slash
   |
  */
-$config['cookie_prefix'] = 'fs_' . $session_host_hash . '_';
+$config['cookie_prefix'] = '';
 $config['cookie_domain'] = '';
 $config['cookie_path'] = '/';
 
@@ -364,6 +361,25 @@ $config['proxy_ips'] = '';
 
 if (file_exists(FCPATH . "config.php"))
 	require(FCPATH . "config.php");
+
+// Isolate cookies by deployment host (e.g. demo vs production) using a stable namespace.
+// Prefer base_url host from root config.php because reverse proxies can alter HTTP_HOST.
+$cookie_host = '';
+if (!empty($config['base_url']))
+{
+	$cookie_url_parts = @parse_url($config['base_url']);
+	if (is_array($cookie_url_parts) && isset($cookie_url_parts['host']))
+	{
+		$cookie_host = strtolower($cookie_url_parts['host']);
+	}
+}
+if ($cookie_host === '')
+{
+	$cookie_host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : 'cli';
+}
+$cookie_host = preg_replace('/:\d+$/', '', $cookie_host);
+$cookie_host_hash = substr(md5($cookie_host), 0, 8);
+$config['sess_cookie_name'] = 'ci_session_' . $cookie_host_hash;
 
 
 /*

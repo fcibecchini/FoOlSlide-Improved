@@ -111,8 +111,8 @@ class Auth extends Account_Controller
 	function logout()
 	{
 		$this->tank_auth->logout();
-
-		$this->_show_message($this->lang->line('auth_message_logged_out'));
+		// Don't write flashdata after destroying session; just send the user to login.
+		redirect('/account/auth/login/');
 	}
 
 	/**
