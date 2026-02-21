@@ -380,6 +380,8 @@ if ($cookie_host === '')
 $cookie_host = preg_replace('/:\d+$/', '', $cookie_host);
 $cookie_host_hash = substr(md5($cookie_host), 0, 8);
 $config['sess_cookie_name'] = 'ci_session_' . $cookie_host_hash;
+// Enforce host-only cookies so production cookies never bleed into demo (and vice versa).
+$config['cookie_domain'] = '';
 
 
 /*
