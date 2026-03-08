@@ -180,21 +180,9 @@ if (!defined('BASEPATH'))
     return window.matchMedia('(max-width: 768px)').matches;
   }
 
-  function resetMobileViewportZoom()
+  function isMobileViewportZoomed()
   {
-    if (!isMobileReader()) return;
-
-    var viewport = document.querySelector('meta[name="viewport"]');
-    if (!viewport) return;
-
-    var baseContent = viewport.dataset.baseContent || viewport.getAttribute('content') || 'width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes';
-    viewport.dataset.baseContent = baseContent;
-    viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
-
-    window.setTimeout(function(){
-      viewport.setAttribute('content', baseContent);
-      resetReaderScroll();
-    }, 120);
+    return !!(window.visualViewport && window.visualViewport.scale && window.visualViewport.scale > 1.01);
   }
 
   function resetPageView()
@@ -205,7 +193,7 @@ if (!defined('BASEPATH'))
       'transform-origin': '',
       '-webkit-transform-origin': ''
     });
-    resetMobileViewportZoom();
+    resetReaderScroll();
   }
 
   function changePage(id, noscroll, nohash)
@@ -226,6 +214,11 @@ if (!defined('BASEPATH'))
     if (id < 0) {
       current_page = 0;
       id = 0;
+    }
+
+    if (initialized && isMobileReader() && isMobileViewportZoomed() && !noscroll && !nohash && id !== current_page) {
+      window.location.href = base_url + 'page/' + (id + 1);
+      return false;
     }
 
     preload(id);
