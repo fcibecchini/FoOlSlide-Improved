@@ -3,10 +3,10 @@ name: Tests
 on:
   pull_request:
     branches:
-      - docker
+      - main
   push:
     branches:
-      - docker
+      - main
 
 jobs:
   unit-and-e2e:
