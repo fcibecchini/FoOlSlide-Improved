@@ -106,6 +106,29 @@ if (!defined('BASEPATH'))
 		jQuery('#page').scrollLeft(0);
 	}
 
+	function isMobileReader()
+	{
+		return window.matchMedia('(max-width: 768px)').matches;
+	}
+
+	function resetMobileViewportZoom()
+	{
+		if (!isMobileReader())
+			return;
+
+		var viewport = document.querySelector('meta[name="viewport"]');
+		if (!viewport)
+			return;
+
+		var baseContent = viewport.getAttribute('content') || 'width=device-width, initial-scale=1';
+		viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1');
+
+		window.setTimeout(function() {
+			viewport.setAttribute('content', baseContent);
+			resetReaderScroll();
+		}, 80);
+	}
+
 	function resetPageView()
 	{
 		jQuery('#page .inner img.open').css({
@@ -114,7 +137,7 @@ if (!defined('BASEPATH'))
 			'transform-origin': '',
 			'-webkit-transform-origin': ''
 		});
-		resetReaderScroll();
+		resetMobileViewportZoom();
 	}
 
 	function changePage(id, noscroll, nohash)
