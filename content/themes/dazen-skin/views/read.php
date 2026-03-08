@@ -167,6 +167,14 @@ if (!defined('BASEPATH'))
   var gt_key_suggestion = '<?php echo addslashes(_("Use W-A-S-D or the arrow keys to navigate")) ?>';
   var gt_key_tap        = '<?php echo addslashes(_("Double-tap to change page")) ?>';
 
+  function resetReaderScroll()
+  {
+    var readerTop = Math.max(jQuery('#page').offset().top - 6, 0);
+    jQuery(window).scrollTop(readerTop);
+    jQuery('html, body').scrollTop(readerTop);
+    jQuery('#page').scrollLeft(0);
+  }
+
   function changePage(id, noscroll, nohash)
   {
     id = parseInt(id);
@@ -191,7 +199,7 @@ if (!defined('BASEPATH'))
     current_page = id;
 
     jQuery("html, body").stop(true,true);
-    if(!noscroll) jQuery.scrollTo('.panel', 430, {'offset':{'top':-6}});
+    if(!noscroll) resetReaderScroll();
 
     if (pages[id].loaded !== true) {
       jQuery('#page .inner img.open').css({'opacity':'0'}).attr('src', pages[id].url);
