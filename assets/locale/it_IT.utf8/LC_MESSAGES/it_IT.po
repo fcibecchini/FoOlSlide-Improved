@@ -3509,3 +3509,24 @@ msgstr "Indirizzo email di contatto visualizzato nella pagina chi siamo."
 #: application/controllers/admin/preferences.php:224
 msgid "Custom message to display on the about page. Leave empty for default message."
 msgstr "Messaggio personalizzato da visualizzare nella pagina chi siamo. Lascia vuoto per il messaggio predefinito."
+
+
+#: application/controllers/reader.php:24
+msgid "About"
+msgstr "Chi Siamo"
+
+#: content/themes/default/views/about.php:11 content/themes/dazen-skin/views/about.php:9
+msgid "Site"
+msgstr "Sito"
+
+#: content/themes/default/views/about.php:16 content/themes/dazen-skin/views/about.php:14
+msgid "Administrator"
+msgstr "Amministratore"
+
+#: content/themes/default/views/about.php:22 content/themes/dazen-skin/views/about.php:20
+msgid "Contact"
+msgstr "Contatto"
+
+#: content/themes/default/views/about.php:31 content/themes/dazen-skin/views/about.php:29
+msgid "About This Site"
+msgstr "Informazioni su Questo Sito"

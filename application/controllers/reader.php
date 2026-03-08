@@ -21,7 +21,7 @@ class Reader extends Public_Controller
 
 	public function about()
 	{
-		$this->template->title(_('About'), get_setting('fs_gen_site_title'));
+		$this->template->title(about_label('About'), get_setting('fs_gen_site_title'));
 		$this->template->set('show_sidebar', TRUE);
 		$this->template->build('about');
 	}

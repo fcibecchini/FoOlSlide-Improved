@@ -3,23 +3,23 @@
 
 <div class="large">
 	<h1 class="title">
-		<?php echo _('About'); ?>
+		<?php echo about_label('About'); ?>
 	</h1>
 	<div class="info">
 		<div id="tablelist">
 			<div class="row">
-				<div class="cell"><b><?php echo _('Site'); ?></b>:</div>
+				<div class="cell"><b><?php echo about_label('Site'); ?></b>:</div>
 				<div class="cell"><?php echo get_setting('fs_gen_site_title'); ?></div>
 			</div>
 			<?php if (get_setting('fs_about_admin_name')) : ?>
 			<div class="row">
-				<div class="cell"><b><?php echo _('Administrator'); ?></b>:</div>
+				<div class="cell"><b><?php echo about_label('Administrator'); ?></b>:</div>
 				<div class="cell"><?php echo htmlspecialchars(get_setting('fs_about_admin_name')); ?></div>
 			</div>
 			<?php endif; ?>
 			<?php if (get_setting('fs_about_admin_email')) : ?>
 			<div class="row">
-				<div class="cell"><b><?php echo _('Contact'); ?></b>:</div>
+				<div class="cell"><b><?php echo about_label('Contact'); ?></b>:</div>
 				<div class="cell"><a href="mailto:<?php echo htmlspecialchars(get_setting('fs_about_admin_email')); ?>"><?php echo htmlspecialchars(get_setting('fs_about_admin_email')); ?></a></div>
 			</div>
 			<?php endif; ?>
@@ -28,7 +28,7 @@
 </div>
 
 <div class="list">
-	<div class="title"><?php echo _('About This Site'); ?></div>
+		<div class="title"><?php echo about_label('About This Site'); ?></div>
 	<div class="group">
 		<div class="elemento">
 			<?php if (get_setting('fs_about_message')) : ?>

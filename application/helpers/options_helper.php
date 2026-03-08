@@ -25,6 +25,51 @@ if (!function_exists('get_setting'))
 
 }
 
+if (!function_exists('has_about_page'))
+{
+
+	function has_about_page()
+	{
+		return (bool) (get_setting('fs_about_admin_name') || get_setting('fs_about_admin_email') || get_setting('fs_about_message'));
+	}
+
+
+}
+
+if (!function_exists('about_label'))
+{
+
+	function about_label($string)
+	{
+		$translated = _($string);
+		if ($translated !== $string)
+		{
+			return $translated;
+		}
+
+		$locale = (string) get_setting('fs_gen_lang');
+		$fallbacks = array(
+			'it_IT' => array(
+				'About' => 'Chi Siamo',
+				'About This Site' => 'Informazioni su Questo Sito',
+				'Site' => 'Sito',
+				'Administrator' => 'Amministratore',
+				'Contact' => 'Contatto',
+			),
+		);
+
+		$locale_key = substr($locale, 0, 5);
+		if (isset($fallbacks[$locale_key][$string]))
+		{
+			return $fallbacks[$locale_key][$string];
+		}
+
+		return $string;
+	}
+
+
+}
+
 /**
  * Loads variables from database for get_setting()
  *
@@ -206,89 +251,124 @@ function balance_url($string = '')
 }
 
 
-function glyphish($num, $on = FALSE)
-{
-	return site_url() . 'assets/glyphish/' . ($on ? 'on' : 'off') . '/' . $num . '.png';
-}
-
-
-function icons($num, $size = '32', $icons = 'sweeticons2')
-{
-	return site_url() . 'assets/icons/' . $icons . '/' . $size . '/' . $num . '.png';
-}
-
-function is_natural($str) {
-	return (bool) preg_match( '/^[0-9]+$/', $str);
-}
-
-function relative_date($time)
+if (!function_exists('glyphish'))
 {
 
-	$today = strtotime(date('M j, Y'));
-
-	$reldays = ($time - $today) / 86400;
-
-	if ($reldays >= 0 && $reldays < 1)
+	function glyphish($num, $on = FALSE)
 	{
-		return _('Today');
-	}
-	else if ($reldays >= 1 && $reldays < 2)
-	{
-		return _('Tomorrow');
-	}
-	else if ($reldays >= -1 && $reldays < 0)
-	{
-		return _('Yesterday');
+		return site_url() . 'assets/glyphish/' . ($on ? 'on' : 'off') . '/' . $num . '.png';
 	}
 
-	return date('Y.m.d', $time ? $time : time());
+
+}
+
+if (!function_exists('icons'))
+{
+
+	function icons($num, $size = '32', $icons = 'sweeticons2')
+	{
+		return site_url() . 'assets/icons/' . $icons . '/' . $size . '/' . $num . '.png';
+	}
+
+
+}
+
+if (!function_exists('is_natural'))
+{
+
+	function is_natural($str) {
+		return (bool) preg_match( '/^[0-9]+$/', $str);
+	}
+
+
+}
+
+if (!function_exists('relative_date'))
+{
+
+	function relative_date($time)
+	{
+
+		$today = strtotime(date('M j, Y'));
+
+		$reldays = ($time - $today) / 86400;
+
+		if ($reldays >= 0 && $reldays < 1)
+		{
+			return _('Today');
+		}
+		else if ($reldays >= 1 && $reldays < 2)
+		{
+			return _('Tomorrow');
+		}
+		else if ($reldays >= -1 && $reldays < 0)
+		{
+			return _('Yesterday');
+		}
+
+		return date('Y.m.d', $time ? $time : time());
+	}
+
+
 }
 
 
 /**
  *
  */
-function HTMLpurify($dirty_html, $set = 'default')
+if (!function_exists('HTMLpurify'))
 {
-	if (is_array($dirty_html))
+
+	function HTMLpurify($dirty_html, $set = 'default')
 	{
-		foreach ($dirty_html as $key => $val)
+		if (is_array($dirty_html))
 		{
-			$dirty_html[$key] = purify($val);
+			foreach ($dirty_html as $key => $val)
+			{
+				$dirty_html[$key] = purify($val);
+			}
+
+			return $dirty_html;
 		}
 
-		return $dirty_html;
+		if (trim($dirty_html) === '')
+		{
+			return $dirty_html;
+		}
+
+		require_once(FCPATH . "assets/htmlpurifier/library/HTMLPurifier.auto.php");
+		require_once(FCPATH . "assets/htmlpurifier/library/HTMLPurifier.func.php");
+
+		$config = HTMLPurifier_Config::createDefault();
+		if (!file_exists('content/cache/HTMLPurifier'))
+			mkdir('content/cache/HTMLPurifier');
+		$config->set('HTML.Doctype', 'XHTML 1.0 Strict');
+		$config->set('Cache.SerializerPath', FCPATH . 'content/cache/HTMLPurifier');
+
+
+
+		switch ($set)
+		{
+			case 'default':
+				break;
+			case 'unallowed':
+				$config->set('HTML.AllowedElements', '');
+				break;
+		}
+		return HTMLPurifier($dirty_html, $config);
 	}
 
-	if (trim($dirty_html) === '')
-	{
-		return $dirty_html;
-	}
 
-	require_once(FCPATH . "assets/htmlpurifier/library/HTMLPurifier.auto.php");
-	require_once(FCPATH . "assets/htmlpurifier/library/HTMLPurifier.func.php");
-
-	$config = HTMLPurifier_Config::createDefault();
-	if (!file_exists('content/cache/HTMLPurifier'))
-		mkdir('content/cache/HTMLPurifier');
-	$config->set('HTML.Doctype', 'XHTML 1.0 Strict');
-	$config->set('Cache.SerializerPath', FCPATH . 'content/cache/HTMLPurifier');
-
-
-
-	switch ($set)
-	{
-		case 'default':
-			break;
-		case 'unallowed':
-			$config->set('HTML.AllowedElements', '');
-			break;
-	}
-	return HTMLPurifier($dirty_html, $config);
 }
 
-function URIpurifier($string)
+if (!function_exists('URIpurifier'))
 {
-	$string = strtolower(preg_replace('/[^a-zA-Z0-9½]/', '_', $string));
-	return str_replace('½', '_', $string);
+
+	function URIpurifier($string)
+	{
+		$string = strtolower(preg_replace('/[^a-zA-Z0-9½]/', '_', $string));
+		return str_replace('½', '_', $string);
+	}
+
+
 }

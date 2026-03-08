@@ -86,8 +86,11 @@
 						<li><a href="<?php echo site_url('tags') ?>"><span class="mh"><?php echo _('Tags'); ?></span></a></li>
 						<li><a href="<?php echo site_url('authors') ?>"><span class="mh"> <?php echo _('Authors'); ?></span></a></li>
 						<li><a href="<?php echo site_url('parodies') ?>"><span class="mh"> <?php echo _('Parodies'); ?></span></a></li>
-						<li><a href="<?php echo site_url('most_downloaded') ?>"><span class="mh"> <?php echo _('Most Downloaded'); ?></span></a></li>
-						<?php if (get_setting ('fs_theme_custom_link')) : ?><?php echo '<li>'.get_setting('fs_theme_custom_link').'</li>';?><?php endif; ?>
+							<li><a href="<?php echo site_url('most_downloaded') ?>"><span class="mh"> <?php echo _('Most Downloaded'); ?></span></a></li>
+							<?php if (has_about_page()) : ?>
+								<li><a href="<?php echo site_url('about') ?>"><span class="mh"> <?php echo about_label('About'); ?></span></a></li>
+							<?php endif; ?>
+							<?php if (get_setting ('fs_theme_custom_link')) : ?><?php echo '<li>'.get_setting('fs_theme_custom_link').'</li>';?><?php endif; ?>
 
 
 						<div class="clearer"></div>

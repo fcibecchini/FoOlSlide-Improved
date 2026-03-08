@@ -2882,3 +2882,24 @@ msgstr ""
 #: content/themes/default/views/team.php:53
 msgid "No members in this team"
 msgstr ""
+
+
+#: application/controllers/reader.php:24
+msgid "About"
+msgstr ""
+
+#: content/themes/default/views/about.php:11 content/themes/dazen-skin/views/about.php:9
+msgid "Site"
+msgstr ""
+
+#: content/themes/default/views/about.php:16 content/themes/dazen-skin/views/about.php:14
+msgid "Administrator"
+msgstr ""
+
+#: content/themes/default/views/about.php:22 content/themes/dazen-skin/views/about.php:20
+msgid "Contact"
+msgstr ""
+
+#: content/themes/default/views/about.php:31 content/themes/dazen-skin/views/about.php:29
+msgid "About This Site"
+msgstr ""
