@@ -175,6 +175,17 @@ if (!defined('BASEPATH'))
     jQuery('#page').scrollLeft(0);
   }
 
+  function resetPageView()
+  {
+    jQuery('#page .inner img.open').css({
+      'transform': '',
+      '-webkit-transform': '',
+      'transform-origin': '',
+      '-webkit-transform-origin': ''
+    });
+    resetReaderScroll();
+  }
+
   function changePage(id, noscroll, nohash)
   {
     id = parseInt(id);
@@ -199,7 +210,7 @@ if (!defined('BASEPATH'))
     current_page = id;
 
     jQuery("html, body").stop(true,true);
-    if(!noscroll) resetReaderScroll();
+    if(!noscroll) resetPageView();
 
     if (pages[id].loaded !== true) {
       jQuery('#page .inner img.open').css({'opacity':'0'}).attr('src', pages[id].url);
@@ -208,6 +219,8 @@ if (!defined('BASEPATH'))
     }
 
     resizePage(id);
+
+    if(!noscroll) resetReaderScroll();
 
     if(!nohash) History.pushState(null, null, base_url+'page/' + (current_page + 1));
     document.title = gt_page+' ' + (current_page+1) + ' :: ' + title;
