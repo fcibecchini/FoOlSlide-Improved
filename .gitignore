@@ -8,10 +8,11 @@ Desktop.ini
 .buildpath
 .project
 .settings
-config.php
 content/cache
 content/comics
 content/tags
 content/logs
 application/controllers/admin/chat.php
 application/views/admin/chat
+vendor/
+.phpunit.result.cache

@@ -191,6 +191,67 @@ class Preferences extends Admin_Controller
 
 
 	/*
+	 * About page configuration
+	 *
+	 */
+	function about()
+	{
+		$this->viewdata["function_title"] = _("About Page");
+
+		$form = array();
+
+		$form[] = array(
+			_('Administrator Name'),
+			array(
+				'type' => 'input',
+				'name' => 'fs_about_admin_name',
+				'maxlength' => '200',
+				'placeholder' => _('Your Name'),
+				'preferences' => 'fs_about',
+				'help' => _('The name of the person responsible for running this site.')
+			)
+		);
+
+		$form[] = array(
+			_('Administrator Email'),
+			array(
+				'type' => 'input',
+				'name' => 'fs_about_admin_email',
+				'maxlength' => '200',
+				'placeholder' => 'admin@example.com',
+				'preferences' => 'fs_about',
+				'help' => _('Contact email address displayed on the about page.')
+			)
+		);
+
+		$form[] = array(
+			_('About Message'),
+			array(
+				'type' => 'textarea',
+				'name' => 'fs_about_message',
+				'preferences' => 'fs_about',
+				'help' => _('Custom message to display on the about page. Leave empty for default message.')
+			)
+		);
+
+		if ($post = $this->input->post())
+		{
+			$this->_submit($post, $form);
+			redirect('admin/preferences/about');
+		}
+
+		// create a form
+		$table = tabler($form, FALSE);
+		$data['form_title'] = _('About Page');
+		$data['table'] = $table;
+
+		// print out
+		$this->viewdata["main_content_view"] = $this->load->view("admin/preferences/general.php", $data, TRUE);
+		$this->load->view("admin/default.php", $this->viewdata);
+	}
+
+
+	/*
 	 * Allows setting basic variables for theme.
 	 * Does not yet allow adding more variables from current theme.
 	 *

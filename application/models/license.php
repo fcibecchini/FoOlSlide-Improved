@@ -77,7 +77,7 @@ class License extends DataMapper
 	}
 
 
-	function update($id, $new)
+	function update_for_comic($id, $new)
 	{
 		$this->where('comic_id', $id)->get();
 		if ($this->result_count() > 0)

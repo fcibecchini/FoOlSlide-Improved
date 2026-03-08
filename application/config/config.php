@@ -362,6 +362,25 @@ $config['proxy_ips'] = '';
 if (file_exists(FCPATH . "config.php"))
 	require(FCPATH . "config.php");
 
+// Isolate cookies by deployment host (e.g. demo vs production) using a stable namespace.
+// Prefer base_url host from root config.php because reverse proxies can alter HTTP_HOST.
+$cookie_host = '';
+if (!empty($config['base_url']))
+{
+	$cookie_url_parts = @parse_url($config['base_url']);
+	if (is_array($cookie_url_parts) && isset($cookie_url_parts['host']))
+	{
+		$cookie_host = strtolower($cookie_url_parts['host']);
+	}
+}
+if ($cookie_host === '')
+{
+	$cookie_host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : 'cli';
+}
+$cookie_host = preg_replace('/:\d+$/', '', $cookie_host);
+$cookie_host_hash = substr(md5($cookie_host), 0, 8);
+$config['sess_cookie_name'] = 'ci_session_' . $cookie_host_hash;
+
 
 /*
   | -------------------------------------------------------------------
@@ -372,15 +391,16 @@ if (file_exists(FCPATH . "config.php"))
   | for base controllers and some third-party libraries.
   |
  */
-if (!function_exists('__autoload')) {
+if (!function_exists('foolslide_native_autoload')) {
 
-	function __autoload($class) {
+	function foolslide_native_autoload($class) {
 		if (strpos($class, 'CI_') !== 0) {
 			if (file_exists(APPPATH . 'libraries/' . $class . EXT))
 				@include_once( APPPATH . 'libraries/' . $class . EXT );
 		}
 	}
 
+	spl_autoload_register('foolslide_native_autoload');
 }
 
 

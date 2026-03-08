@@ -1,0 +1,410 @@
+/* =========================================================
+   READER TOP BAR (fumetto / capitolo / pagine)
+   ========================================================= */
+
+/* Contenitore barra */
+.panel .topbar {
+  background: #1f2733;
+  border: 1px solid #3a4250;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  color: #e9edf4;
+}
+
+/* Layout */
+.panel .topbar > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.panel .topbar_left,
+.panel .topbar_right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Titoli a pill */
+.panel .tbtitle .text,
+.panel .tbtitle .text_only {
+  display: inline-flex;
+  align-items: center;
+  max-width: 420px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.15);
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.panel .tbtitle .text:hover,
+.panel .tbtitle .text_only:hover {
+  background: #B24759;
+  border-color: rgba(255,255,255,0.35);
+}
+.panel .tbtitle .text a,
+.panel .tbtitle .text_only a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Pulsante download */
+.panel .topbar_left .larg {
+  float: none !important;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #912F3F;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.panel .topbar_left .larg img { display: none; }
+.panel .topbar_left .larg a { color:#fff; text-decoration:none; font-weight:700; }
+
+/* Dropdown */
+.dropdown_parent { position: relative; cursor: pointer; }
+.dropdown_parent ul.dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 2000;
+  min-width: 220px;
+  max-height: 320px;
+  overflow: auto;
+  background: #0f1620;
+  border: 1px solid #3a4250;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.35);
+  padding: 6px;
+}
+.dropdown_parent:hover ul.dropdown { display: block; }
+.dropdown_parent ul.dropdown li { list-style: none; margin: 0; }
+.dropdown_parent ul.dropdown a {
+  display: block;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #e9edf4;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.dropdown_parent ul.dropdown a:hover { background: rgba(255,255,255,0.08); }
+
+/* Divider */
+.panel .topbar_right .divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.18);
+  margin: 0 6px;
+}
+
+/* Numeri pagina */
+.panel .topbar_right .numbers {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  direction: ltr; /* sempre sinistra→destra */
+}
+.panel .topbar_right .number {
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+  border-radius: 8px;
+  min-width: 38px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.15);
+}
+.panel .topbar_right .number a {
+  color:#fff;
+  text-decoration:none;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+.panel .topbar_right .number.current_page {
+  border-color: rgba(255,255,255,0.35);
+  background: #B24759;
+}
+.panel .topbar_right .number.dnone { display: none !important; }
+
+/* Responsivo */
+@media (max-width: 1024px){
+  .panel .topbar > div { flex-direction: column; align-items: stretch; gap: 10px; }
+  .panel .topbar_left, .panel .topbar_right { flex-wrap: wrap; }
+  .panel .tbtitle .text, .panel .tbtitle .text_only { max-width: 100%; }
+  .panel .topbar_right .numbers { flex-wrap: wrap; }
+}
+@media (max-width: 640px){
+  .panel .topbar { padding: 8px 10px; }
+  .panel .tbtitle .text, .panel .tbtitle .text_only { height: 34px; padding: 0 10px; font-size: 14px; }
+  .panel .topbar_left .larg { height: 34px; }
+  .panel .topbar_right .number { min-width: 34px; height: 30px; }
+}
+/* Assicurati che il contenitore non tagli i dropdown */
+.panel .topbar,
+.panel .topbar > div { overflow: visible; }
+
+/* Il genitore fa da ancoraggio */
+.dropdown_parent {
+  position: relative;
+}
+
+/* Cliccabile e focusable (per tastiera/touch) */
+.dropdown_parent .text,
+.dropdown_parent .text_only {
+  cursor: pointer;
+}
+
+/* Dropdown: vicino al trigger e sopra tutto */
+.dropdown_parent ul.dropdown{
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);    /* riduci la distanza dal trigger */
+  left: 0;
+  z-index: 3000;            /* sopra la topbar */
+  min-width: 220px;
+}
+
+/* Allineamento a destra quando c'è .dropdown_right */
+.dropdown_parent.dropdown_right ul.dropdown{
+  left: auto;
+  right: 0;
+}
+
+/* Mostra in hover o quando il parent è “open” o focus-within */
+.dropdown_parent:hover ul.dropdown,
+.dropdown_parent.open ul.dropdown,
+.dropdown_parent:focus-within ul.dropdown{
+  display: block;
+}
+
+/* “Ponte” invisibile tra trigger e lista: impedisce di perdere hover */
+.dropdown_parent::after{
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%;
+  height: 8px;              /* area cuscinetto */
+}
+
+/* Evita che qualche regola del tema nasconda la lista */
+.dropdown_parent ul.dropdown { visibility: visible !important; }
+
+/* === DROPDOWN PANEL (più carino) === */
+.dropdown_parent { position: relative; }
+
+/* finestra */
+.dropdown_parent ul.dropdown{
+  display: none;                 /* verrà mostrato via :hover o classe .open */
+  position: absolute;
+  top: calc(100% + 6px);         /* vicino al pulsante */
+  left: 0;
+  z-index: 3000;
+
+  min-width: 220px;
+  max-width: 320px;
+  max-height: 360px;
+  overflow: auto;
+
+  padding: 8px;
+  background: #0f1620;           /* scuro coerente col tema */
+  border: 1px solid #2c3442;
+  border-radius: 12px;
+  box-shadow:
+    0 12px 28px rgba(0,0,0,.45),
+    0 2px 6px rgba(0,0,0,.25);
+
+  /* animazione */
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+/* allineamento a destra quando c'è .dropdown_right */
+.dropdown_parent.dropdown_right ul.dropdown{
+  left: auto; right: 0;
+}
+
+/* mostrare il pannello (hover, focus o classe .open da JS) */
+.dropdown_parent:hover ul.dropdown,
+.dropdown_parent:focus-within ul.dropdown,
+.dropdown_parent.open ul.dropdown{
+  display: block;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* “ponte” anti-gap tra trigger e pannello */
+.dropdown_parent::after{
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  top: 100%;
+  height: 10px;
+}
+
+/* header opzionale (se vuoi un titolo dentro) */
+.dropdown_parent ul.dropdown .dd-head{
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  opacity: .7;
+  margin: 4px 6px 8px;
+}
+
+/* elementi */
+.dropdown_parent ul.dropdown li{ list-style: none; margin: 0; }
+.dropdown_parent ul.dropdown a{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  margin: 2px 0;
+  border-radius: 8px;
+
+  color: #e9edf4;
+  text-decoration: none;
+
+  transition: background .12s ease, color .12s ease;
+}
+
+/* hover / active */
+.dropdown_parent ul.dropdown a:hover{
+  background: rgba(255,255,255,0.08);
+}
+.dropdown_parent ul.dropdown a:active{
+  background: rgba(255,255,255,0.12);
+}
+
+/* pagina corrente (se gli aggiungi la classe .current) */
+.dropdown_parent ul.dropdown a.current{
+  background: #B24759;
+  color: #fff;
+  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* micro freccetta (caret) che punta al trigger */
+.dropdown_parent ul.dropdown::before{
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 18px;                    /* sposta se vuoi centrarla */
+  width: 10px; height: 10px;
+  background: #0f1620;
+  border-left: 1px solid #2c3442;
+  border-top: 1px solid #2c3442;
+  transform: rotate(45deg);
+}
+.dropdown_parent.dropdown_right ul.dropdown::before{
+  left: auto; right: 18px;
+}
+
+/* scrollbar carina */
+.dropdown_parent ul.dropdown::-webkit-scrollbar{ width: 10px; }
+.dropdown_parent ul.dropdown::-webkit-scrollbar-track{ background: rgba(255,255,255,0.06); border-radius: 8px; }
+.dropdown_parent ul.dropdown::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.22); border-radius: 8px; }
+.dropdown_parent ul.dropdown::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.32); }
+
+/* mobile: finestra un filo più larga e vicina */
+@media (max-width: 640px){
+  .dropdown_parent ul.dropdown{
+    min-width: 200px;
+    max-height: 280px;
+    top: calc(100% + 4px);
+  }
+}
+/* di default non mostrare il picker mobile */
+.chapter-picker-mobile { display: none; }
+
+/* su mobile: mostra il picker mobile e (se vuoi) nascondi quello desktop con .mmh */
+@media (max-width: 640px){
+  .chapter-picker-mobile { display: inline-flex; }
+  .panel .topbar_left .tbtitle.dropdown_parent.mmh { display: none !important; }
+}
+/* --- Dropdown: base fix --- */
+.dropdown_parent { position: relative; }
+.dropdown_parent .text,
+.dropdown_parent .text_only {
+  display: inline-flex;        /* area continua, niente “buchi” */
+  align-items: center;
+}
+
+/* Il menu SI ATTACCA al trigger: nessun offset verticale */
+.dropdown_parent ul.dropdown{
+  top: 100% !important;        /* attaccato subito sotto */
+  left: 0 !important;
+  margin-top: 0 !important;
+  transform: none !important;  /* rimuovi eventuali translate */
+  z-index: 3000;               /* sopra tutto */
+}
+
+/* Desktop: apri on-hover, senza click */
+@media (hover: hover) and (pointer: fine) {
+  .dropdown_parent:hover ul.dropdown { display: block !important; }
+}
+/* =========================================================
+   READER BOTTOM BAR (numero pagina)
+   ========================================================= */
+#bottombar {
+  background: #1f2733;
+  border: 1px solid #3a4250;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+  margin: 16px auto;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #e9edf4;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1;
+  max-width: 320px;       /* così resta compatto */
+}
+
+#bottombar .pagenumber {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  padding: 6px 16px;
+  min-width: 80px;
+  text-align: center;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.15);
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Versione mobile più piccola */
+@media (max-width: 640px){
+  #bottombar {
+    margin: 12px auto;
+    padding: 8px 10px;
+    max-width: 240px;
+  }
+  #bottombar .pagenumber {
+    font-size: 14px;
+    padding: 5px 12px;
+    min-width: 70px;
+  }
+}

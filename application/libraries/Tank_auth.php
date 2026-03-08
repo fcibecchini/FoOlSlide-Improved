@@ -35,6 +35,14 @@ class Tank_auth
 		$this->ci->load->database();
 		$this->ci->load->model('tank_auth/users');
 
+		// Keep autologin cookie namespace aligned with CI session namespace.
+		// This prevents collisions between multiple deployments on related hosts.
+		$sess_cookie_name = $this->ci->config->item('sess_cookie_name');
+		if (preg_match('/_([a-f0-9]{8})$/', $sess_cookie_name, $m))
+		{
+			$this->ci->config->config['tank_auth']['autologin_cookie_name'] = 'autologin_' . $m[1];
+		}
+
 		// Try to autologin
 		$this->autologin();
 	}
@@ -139,10 +147,7 @@ class Tank_auth
 	function logout()
 	{
 		$this->delete_autologin();
-
-		// See http://codeigniter.com/forums/viewreply/662369/ as the reason for the next line
-		$this->ci->session->set_userdata(array('user_id' => '', 'username' => '', 'status' => ''));
-
+		// Avoid extra session cookie rewrites: destroy is enough to clear auth state.
 		$this->ci->session->sess_destroy();
 	}
 

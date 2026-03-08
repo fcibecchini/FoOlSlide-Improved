@@ -292,7 +292,23 @@ class Migration_Install extends CI_Migration
                                         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;"
 			);
 		}
-	}
+        $this->db->insert($this->db->dbprefix('users'), array(
+            'username' => 'admin',
+            'password' => password_hash('admin', PASSWORD_DEFAULT),
+            'email' => 'admin@example.com',
+            'activated' => 1,
+            'created' => date('Y-m-d H:i:s'),
+            'modified' => date('Y-m-d H:i:s'),
+            'updated' => date('Y-m-d H:i:s')
+        ));
+        $user_id = $this->db->insert_id();
+        $this->db->insert($this->db->dbprefix('profiles'), array(
+            'user_id' => $user_id,
+            'group_id' => 1, // Admin group
+            'display_name' => 'Administrator'
+        ));
+
+    }
 
 
 }

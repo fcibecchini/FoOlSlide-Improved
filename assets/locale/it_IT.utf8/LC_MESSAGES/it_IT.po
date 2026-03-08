@@ -3473,3 +3473,39 @@ msgstr "Nessun membro in questo gruppo"
 
 #~ msgid "Go back to site"
 #~ msgstr "Torna al sito"
+
+#: content/themes/default/views/about.php:36
+msgid "is a manga and comic reading platform dedicated to providing quality content to our community. Our mission is to make manga and comics easily accessible to everyone by maintaining an organized and user-friendly platform."
+msgstr "è una piattaforma di lettura di manga e fumetti dedicata a fornire contenuti di qualità alla nostra comunità. La nostra missione è rendere manga e fumetti facilmente accessibili a tutti mantenendo una piattaforma organizzata e user-friendly."
+
+#: content/themes/default/views/about.php:41
+msgid "If you have any questions or feedback, please contact us using the information provided above."
+msgstr "Se hai domande o feedback, contattaci utilizzando le informazioni fornite sopra."
+
+#: application/controllers/admin/preferences.php:202
+msgid "About Page"
+msgstr "Pagina Chi Siamo"
+
+#: application/controllers/admin/preferences.php:205
+msgid "Administrator Name"
+msgstr "Nome Amministratore"
+
+#: application/controllers/admin/preferences.php:212
+msgid "Administrator Email"
+msgstr "Email Amministratore"
+
+#: application/controllers/admin/preferences.php:219
+msgid "About Message"
+msgstr "Messaggio Chi Siamo"
+
+#: application/controllers/admin/preferences.php:212
+msgid "The name of the person responsible for running this site."
+msgstr "Il nome della persona responsabile della gestione di questo sito."
+
+#: application/controllers/admin/preferences.php:218
+msgid "Contact email address displayed on the about page."
+msgstr "Indirizzo email di contatto visualizzato nella pagina chi siamo."
+
+#: application/controllers/admin/preferences.php:224
+msgid "Custom message to display on the about page. Leave empty for default message."
+msgstr "Messaggio personalizzato da visualizzare nella pagina chi siamo. Lascia vuoto per il messaggio predefinito."

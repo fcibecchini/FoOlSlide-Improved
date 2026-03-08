@@ -466,6 +466,8 @@ class Chapter extends DataMapper
 	 */
 	public function update_chapter_db($data = array())
 	{
+		$old_hidden = null;
+		
 		// Check if we're updating or creating a new chapter by looking at $data["id"].
 		// False is returned if the chapter ID was not found.
 		if (isset($data["id"]) && $data['id'] != "")
@@ -480,6 +482,9 @@ class Chapter extends DataMapper
 			// Save the stub in case it gets changed (different chapter number/name etc.)
 			// Stub is always automatized.
 			$old_stub = $this->stub;
+			
+			// Store the current hidden state before we apply new data
+			$old_hidden = (int)$this->hidden;
 		}
 		else
 		{ // if we're here, it means that we're creating a new chapter
@@ -531,6 +536,14 @@ class Chapter extends DataMapper
 		// This is necessary to make the checkbox work.
 		if (!isset($data['hidden']) || $data['hidden'] != 1)
 			$this->hidden = 0;
+		else
+			$this->hidden = 1;
+
+		// Update creation date when chapter visibility changes from hidden to visible
+		if ($old_hidden !== null && $old_hidden == 1 && $this->hidden == 0)
+		{
+			$this->created = date('Y-m-d H:i:s');
+		}
 
 		// Prepare a new stub.
 		$this->stub = $this->chapter . '_' . $this->subchapter . '_' . $this->name;
@@ -690,7 +703,7 @@ class Chapter extends DataMapper
 
 		// Create the directory and return false on failure. It's most likely file permissions anyway.
 		$dir = "content/comics/" . $this->comic->directory() . "/" . $this->directory();
-		if (!mkdir($dir))
+		if (!is_dir($dir) && !mkdir($dir, 0775, TRUE))
 		{
 			set_notice('error', _('Failed to create the chapter directory. Please, check file permissions.'));
 			log_message('error', 'add_chapter_dir: folder could not be created');

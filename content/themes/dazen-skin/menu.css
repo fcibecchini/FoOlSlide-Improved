@@ -1,0 +1,177 @@
+/* ===========================
+   MENU HEADER OVERRIDES (final)
+   =========================== */
+
+/* ---- Header barra e struttura base ---- */
+#header {
+  min-height: 56px;
+  display: flex;
+  align-items: center;          /* centra verticalmente i figli */
+  justify-content: space-between;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* neutralizza i float legacy che rompono il flex */
+#header #title,
+#header #navig {
+  float: none !important;
+}
+#header > .clearer { display: none !important; }
+
+/* qualsiasi figlio diretto si allinea al centro verticalmente */
+#header > * { align-self: center; }
+
+/* ---- Titolo (icona + testo) ---- */
+#header #title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;               /* non si schiaccia */
+}
+#header #title a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+  color: #fff;
+  text-decoration: none;
+  height: 36px;                 /* altezza coerente con le pill del menu */
+  padding: 0 10px;
+  border-radius: 999px;         /* armonizza con le pill */
+  /* opzionale: leggero sfondo */
+  /* background: rgba(255,255,255,.06); */
+}
+#header #title i.fa-home {
+  font-size: 22px;
+  line-height: 1;
+}
+
+/* ---- Navigazione: UL di voci + form ricerca ---- */
+#header #navig {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* UL: desktop/tablet default: in riga, può andare a capo se serve */
+#header #navig ul {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: nowrap;           /* niente a capo su desktop */
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;            /* se le voci sono tante, scroll orizzontale */
+  scrollbar-width: none;
+}
+#header #navig ul::-webkit-scrollbar { display: none; }
+#header #navig ul li { float: none; margin: 0; }
+
+/* voci a pill */
+#header #navig ul li a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 1px 2px rgba(0,0,0,.15) inset;
+  transition: background .18s ease, border-color .18s ease, transform .06s ease;
+  text-decoration: none;
+}
+#header #navig ul li a:hover,
+#header #navig ul li a:focus-visible {
+  background: #B24759;
+  border-color: rgba(255,255,255,0.35);
+  text-decoration: none;
+}
+#header #navig ul li a:active { transform: translateY(1px); }
+
+/* ---- Ricerca ---- */
+#header #navig form {
+  flex: 0 0 auto;
+  margin-left: auto;           /* spinge il form a destra su desktop */
+  display: block;
+}
+#header #searchbox {
+  height: 36px;
+  width: 270px;                /* larghezza comoda desktop */
+  max-width: 100%;
+  padding: 0 12px !important;
+  font-size: 14px !important;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  outline: none;
+}
+#header #searchbox::placeholder { color: rgba(255,255,255,0.75); }
+#header #searchbox:hover,
+#header #searchbox:focus {
+  border-color: rgba(255,255,255,0.45);
+  background: rgba(255,255,255,0.18);
+}
+
+/* alcuni temi nascondono #searchbox < 1024px: riattivalo in modo sicuro */
+@media (max-width: 1024px){
+  #header #searchbox{ display: inline-block !important; float: none !important; vertical-align: middle; }
+}
+
+/* ---- MOBILE (≤640px): UL scrollabile orizzontale + search sotto ---- */
+@media (max-width: 640px){
+
+  /* molti temi nascondono le label .mh: mostrale */
+  .mh { display: inline !important; }
+
+  /* Titolo: in mobile puoi aumentare l’icona */
+  #header #title i.fa-home { font-size: 28px; }
+
+  /* wrapper del navig: niente overflow, padding laterale */
+  #header #navig {
+    overflow: visible;
+    padding: 6px 12px;
+    gap: 0;                   /* la UL gestisce lo spacing */
+    flex-direction: column;   /* UL sopra, form sotto */
+    align-items: stretch;
+  }
+
+  /* UL: riga scorrevole orizzontale “app-like” */
+  #header #navig ul{
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 0 6px;
+    margin: 0;
+  }
+  #header #navig ul::-webkit-scrollbar{ display: none; }
+
+  #header #navig ul li a{
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;       /* pill su una riga */
+  }
+
+  /* Ricerca SEMPRE visibile sotto, full width contenuta */
+  #header #navig form{
+    width: 100%;
+    margin-top: 8px;
+  }
+  #header #searchbox{
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+  }
+}

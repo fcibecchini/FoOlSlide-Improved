@@ -98,6 +98,25 @@ if (!defined('BASEPATH'))
 	var gt_key_suggestion = '<?php echo addslashes(_("Use W-A-S-D or the arrow keys to navigate")) ?>';
 	var gt_key_tap = '<?php echo addslashes(_("Double-tap to change page")) ?>';
 
+	function resetReaderScroll()
+	{
+		var readerTop = Math.max(jQuery('#page').offset().top - 6, 0);
+		jQuery(window).scrollTop(readerTop);
+		jQuery('html, body').scrollTop(readerTop);
+		jQuery('#page').scrollLeft(0);
+	}
+
+	function resetPageView()
+	{
+		jQuery('#page .inner img.open').css({
+			'transform': '',
+			'-webkit-transform': '',
+			'transform-origin': '',
+			'-webkit-transform-origin': ''
+		});
+		resetReaderScroll();
+	}
+
 	function changePage(id, noscroll, nohash)
 	{
 		id = parseInt(id);
@@ -123,7 +142,7 @@ if (!defined('BASEPATH'))
 		current_page = id;
 		next = parseInt(id+1);
 		jQuery("html, body").stop(true,true);
-		if(!noscroll) jQuery.scrollTo('.panel', 430, {'offset':{'top':-6}});
+		if(!noscroll) resetPageView();
 
 		if(pages[id].loaded !== true) {
 			jQuery('#page .inner img.open').css({'opacity':'0'});
@@ -135,6 +154,8 @@ if (!defined('BASEPATH'))
 		}
 
 		resizePage(id);
+
+		if(!noscroll) resetReaderScroll();
 
 		if(!nohash) History.pushState(null, null, base_url+'page/' + (current_page + 1));
 		document.title = gt_page+' ' + (current_page+1) + ' :: ' + title;
@@ -148,67 +169,96 @@ if (!defined('BASEPATH'))
 	}
 
 
-	function resizePage(id) {
-		var doc_width = jQuery(document).width();
-		var page_width = parseInt(pages[id].width);
-		var page_height = parseInt(pages[id].height);
-		var nice_width = 980;
-		var perfect_width = 980;
+    function resizePage(id) {
+        var viewport_width = Math.min(jQuery(window).width(), jQuery(document).width());
+        var page_width = parseInt(pages[id].width);
+        var page_height = parseInt(pages[id].height);
 
-		if(doc_width > 1200) {
-			nice_width = 1120;
-			perfect_width = 1000;
-		}
-		if(doc_width > 1600) {
-			nice_width = 1400;
-			perfect_width = 1300;
-		}
-		if(doc_width > 1800) {
-			nice_width = 1600;
-			perfect_width = 1500;
-		}
+        // For mobile devices
+        if (viewport_width <= 768) {
+            // Calculate new dimensions maintaining aspect ratio
+            var new_width = viewport_width - 20; // 10px padding on each side
+            var new_height = Math.floor((new_width * page_height) / page_width);
 
-		if (page_width > nice_width && (page_width/page_height) > 1.2) {
-			if(page_height < 1610) {
-				width = page_width;
-				height = page_height;
-			}
-			else {
-				height = 1600;
-				width = page_width;
-				width = (height*width)/(page_height);
-			}
-			jQuery("#page").css({'max-width': 'none', 'overflow':'auto'});
-			jQuery("#page").animate({scrollLeft:9000},400);
-			jQuery("#page .inner img.open").css({'max-width':'99999px'});
-			jQuery('#page .inner img.open').attr({width:width, height:height});
-			if(jQuery("#page").width() < jQuery("#page .inner img.open").width()) {
-				isSpread = true;
-				create_message('is_spread', 3000, 'Tap the arrows twice to change page');
-			}
-			else {
-				jQuery("#page").css({'max-width': width+10, 'overflow':'hidden'});
-				isSpread = false;
-				delete_message('is_spread');
-			}
-		}
-		else{
-			if((page_width < nice_width) && (doc_width > page_width + 10)) {
-				width = page_width;
-				height = page_height;
-			}
-			else {
-				width = (doc_width > perfect_width) ? perfect_width : doc_width - 10;
-				height = page_height;
-				height = (height*width)/page_width;
-			}
-			jQuery('#page .inner img.open').attr({width:width, height:height});
-			jQuery("#page").css({'max-width':(width + 10) + 'px','overflow':'hidden'});
-			jQuery("#page .inner img.open").css({'max-width':'100%'});
-			isSpread = false;
-			delete_message('is_spread');
-		}
-	}
+            // Apply new dimensions
+            jQuery('#page').css({
+                'max-width': '100%',
+                'overflow': 'hidden'
+            });
+            jQuery('#page .inner').css({
+                'width': '100%',
+                'text-align': 'center'
+            });
+            jQuery('#page .inner img.open').css({
+                'max-width': '100%',
+                'width': new_width,
+                'height': new_height,
+                'object-fit': 'contain'
+            });
+
+            isSpread = false;
+            delete_message('is_spread');
+            return;
+        }
+
+        // For desktop, keep existing logic
+        var nice_width = 980;
+        var perfect_width = 980;
+
+        if (viewport_width > 1200) {
+            nice_width = 1120;
+            perfect_width = 1000;
+        }
+        if (viewport_width > 1600) {
+            nice_width = 1400;
+            perfect_width = 1300;
+        }
+        if (viewport_width > 1800) {
+            nice_width = 1600;
+            perfect_width = 1500;
+        }
+
+        if (page_width > nice_width && (page_width/page_height) > 1.2) {
+            if (page_height < 1610) {
+                width = page_width;
+                height = page_height;
+            }
+            else {
+                height = 1600;
+                width = page_width;
+                width = (height*width)/(page_height);
+            }
+            jQuery("#page").css({'max-width': 'none', 'overflow':'auto'});
+            jQuery("#page .inner img.open").css({'max-width':'99999px'});
+            jQuery('#page .inner img.open').attr({width:width, height:height});
+
+            if (jQuery("#page").width() < jQuery("#page .inner img.open").width()) {
+                isSpread = true;
+                create_message('is_spread', 3000, 'Tap the arrows twice to change page');
+            }
+            else {
+                jQuery("#page").css({'max-width': width+10, 'overflow':'hidden'});
+                isSpread = false;
+                delete_message('is_spread');
+            }
+        }
+        else {
+            if ((page_width < nice_width) && (viewport_width > page_width + 10)) {
+                width = page_width;
+                height = page_height;
+            }
+            else {
+                width = (viewport_width > perfect_width) ? perfect_width : viewport_width - 10;
+                height = page_height;
+                height = (height*width)/page_width;
+            }
+            jQuery('#page .inner img.open').attr({width:width, height:height});
+            jQuery("#page").css({'max-width':(width + 10) + 'px','overflow':'hidden'});
+            jQuery("#page .inner img.open").css({'max-width':'100%'});
+            isSpread = false;
+            delete_message('is_spread');
+        }
+    }
 
 	function nextPage()
 	{
@@ -387,7 +437,101 @@ if (!defined('BASEPATH'))
 		jQuery(window).resize(function() {
 			resizePage(current_page);
 		});
-	});
+
+        // Remove the anchor tag and wrap the image directly in the inner div
+        var img = jQuery('#page .inner a img').clone();
+        jQuery('#page .inner').empty().append(img);
+
+        var touchState = {
+            startX: 0,
+            startY: 0,
+            lastX: 0,
+            lastY: 0,
+            isDragging: false
+        };
+
+        // Get current scale from transform matrix
+        function getCurrentScale(element) {
+            const transform = window.getComputedStyle(element).transform;
+            if (transform === 'none') return 1;
+            const matrix = new WebKitCSSMatrix(transform);
+            return matrix.a;
+        }
+
+        jQuery('#page .inner').bind('touchstart', function(event) {
+            if (event.originalEvent.touches.length === 1) {
+                const img = jQuery('#page .inner img.open')[0];
+                const scale = getCurrentScale(img);
+
+                // Only enable dragging if image is zoomed
+                if (scale > 1) {
+                    touchState.isDragging = true;
+                    touchState.startX = touchState.lastX = event.originalEvent.touches[0].pageX;
+                    touchState.startY = touchState.lastY = event.originalEvent.touches[0].pageY;
+                    event.preventDefault();
+                }
+            }
+        });
+
+        jQuery('#page .inner').bind('touchmove', function(event) {
+            if (touchState.isDragging && event.originalEvent.touches.length === 1) {
+                const touch = event.originalEvent.touches[0];
+                const img = jQuery('#page .inner img.open');
+                const matrix = new WebKitCSSMatrix(img.css('transform'));
+
+                // Calculate distance moved
+                const deltaX = touch.pageX - touchState.lastX;
+                const deltaY = touch.pageY - touchState.lastY;
+
+                // Update transform with new position while keeping scale
+                img.css('transform', `matrix(${matrix.a}, 0, 0, ${matrix.a}, ${matrix.m41 + deltaX}, ${matrix.m42 + deltaY})`);
+
+                // Update last position
+                touchState.lastX = touch.pageX;
+                touchState.lastY = touch.pageY;
+                event.preventDefault();
+            }
+        });
+
+        jQuery('#page .inner').bind('touchend', function(event) {
+            if (!touchState.isDragging) {
+                // Handle page navigation as before
+                const endX = event.changedTouches[0].pageX;
+                const moveX = Math.abs(endX - touchState.startX);
+                const moveY = Math.abs(event.changedTouches[0].pageY - touchState.startY);
+
+                if (moveX > moveY && moveX > 10) {
+                    const pageWidth = jQuery(this).width();
+                    if (endX < touchState.startX && touchState.startX > pageWidth * 0.6) {
+                        nextPage();
+                    } else if (endX > touchState.startX && touchState.startX < pageWidth * 0.4) {
+                        prevPage();
+                    }
+                }
+            }
+
+            touchState.isDragging = false;
+        });
+
+        // Handle regular clicks for desktop
+        jQuery('#page .inner').bind('click', function(event) {
+            event.preventDefault();
+            var pageWidth = jQuery(this).width();
+            var x = event.pageX;
+
+            if (x < pageWidth * 0.4) {
+                prevPage();
+            } else if (x > pageWidth * 0.6) {
+                nextPage();
+            }
+            return false;
+        });
+        // Remove existing click handler from the anchor tag
+        jQuery('#page .inner a').bind('click', function(event) {
+            event.preventDefault();
+            return false;
+        });
+    });
 </script>
 
 <script type="text/javascript">

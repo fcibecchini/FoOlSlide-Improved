@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 220" width="256" height="220" role="img" aria-label="Artisti: naviga agli artisti">
+  <style>
+    .stroke { stroke: currentColor; fill: none; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+    .fill { fill: currentColor; }
+  </style>
+
+  <!-- Document / page (squared) -->
+  <rect x="24" y="16" width="208" height="116" rx="8" class="stroke"/>
+  <!-- Text lines -->
+  <line x1="40" y1="48" x2="112" y2="48" class="stroke"/>
+  <line x1="40" y1="76" x2="120" y2="76" class="stroke"/>
+  <line x1="40" y1="104" x2="96" y2="104" class="stroke"/>
+
+  <!-- Profile/artist panel on the right: stylized pen nib to suggest artist -->
+  <rect x="144" y="40" width="72" height="56" rx="6" class="stroke"/>
+  <!-- Pen nib icon -->
+  <path d="M180 48 L198 76 L180 104 L162 76 Z" class="stroke"/>
+  <circle cx="180" cy="76" r="6" class="stroke"/>
+
+  <!-- Down arrow -->
+  <path d="M128 132 L128 150 M112 144 L128 160 L144 144" class="stroke"/>
+
+  <!-- Button -->
+  <rect x="24" y="160" width="208" height="48" rx="12" class="stroke"/>
+
+  <!-- Label -->
+  <text x="44" y="190" class="fill" font-family="system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="22" font-weight="700">ARTISTI</text>
+
+  <!-- Magnifying glass -->
+  <circle cx="200" cy="184" r="12" class="stroke"/>
+  <line x1="208" y1="192" x2="218" y2="202" class="stroke"/>
+</svg>
