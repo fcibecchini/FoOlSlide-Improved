@@ -81,7 +81,9 @@
 						<li><a href="<?php echo site_url('most_downloaded') ?>"><i class="fa fa-download"></i><span class="mh"> <?php echo _('Most Downloaded'); ?></span></a></li>						
 						<li><a href="<?php echo site_url('authors') ?>"><i class="fa fa-users"></i><span class="mh"> <?php echo _('Authors'); ?></span></a></li>						
 						<li><a href="<?php echo site_url('parodies') ?>"><i class="fa fa-film"></i><span class="mh"> <?php echo _('Parodies'); ?></span></a></li>						
-						<li><a href="<?php echo site_url('about') ?>"><i class="fa fa-info-circle"></i><span class="mh"> <?php echo _('About'); ?></span></a></li>						
+						<?php if (has_about_page()) : ?>
+							<li><a href="<?php echo site_url('about') ?>"><i class="fa fa-info-circle"></i><span class="mh"> <?php echo about_label('About'); ?></span></a></li>
+						<?php endif; ?>						
 						<?php if (get_setting ('fs_theme_custom_link')) : ?><?php echo '<li>'.get_setting('fs_theme_custom_link').'</li>';?><?php endif; ?>
 						<li style="">
 						<?php

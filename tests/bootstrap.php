@@ -20,6 +20,11 @@ if (!function_exists('get_setting'))
 {
 	function get_setting($key)
 	{
+		if (isset($GLOBALS['__test_settings']) && array_key_exists($key, $GLOBALS['__test_settings']))
+		{
+			return $GLOBALS['__test_settings'][$key];
+		}
+
 		return null;
 	}
 }
