@@ -25,6 +25,7 @@
 - Run tests with `./scripts/run-tests.sh` (preferred).
 - `./scripts/run-tests.sh` automatically tries host `phpunit`, `vendor/bin/phpunit`, then Docker (`web` service) with a bind mount.
 - Validate major behavior changes manually by running the app and checking reader/admin flows.
+- Run end-to-end smoke tests for browser-visible changes to confirm the main flows still work.
 
 ## Agent Verification Rule
 - After any code change, run `./scripts/run-tests.sh` before finalizing the response unless the user explicitly asks to skip tests.
@@ -36,11 +37,14 @@
 - PRs should include a clear summary, steps to verify, and screenshots for UI/theme changes.
 - Link relevant issues or describe the motivation when there is no issue.
 
+## Development Workflow
+- Commit new features and fixes on feature branches only; do not commit directly to `docker`.
+- Use the `gh` CLI to open pull requests targeting the `docker` branch.
+- Always run the full test suite with `./scripts/run-tests.sh` to verify work before finalizing.
+- Run e2e smoke tests in addition to the automated test suite when the change affects browser flows or integration behavior.
+- Do not attempt remote deployments unless the user explicitly requests them.
+- If browser testing is performed locally or remotely, do not mention the specific URLs tested in summaries or PR text.
+
 ## Configuration & Security Tips
 - Database defaults live in `config.php`; update credentials for non-dev deployments.
 - Ensure `content/` subfolders are writable by the web server (`content/cache`, `content/comics`, `content/tags`, `content/logs`).
-ALWAYS use ONLY Environments for ANY and ALL file, code, or shell operations—NO EXCEPTIONS—even for simple or generic requests.
-
-DO NOT install or use the git cli with the environment_run_cmd tool. All environment tools will handle git operations for you. Changing ".git" yourself will compromise the integrity of your environment.
-
-You MUST inform the user how to view your work using `container-use log <env_id>` AND `container-use checkout <env_id>`. Failure to do this will make your work inaccessible to others.
