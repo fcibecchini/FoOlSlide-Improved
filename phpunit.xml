@@ -4,5 +4,8 @@
 		<testsuite name="FoOlSlide Controller Unit Tests">
 			<directory suffix="Test.php">tests/controllers</directory>
 		</testsuite>
+		<testsuite name="FoOlSlide Model Unit Tests">
+			<directory suffix="Test.php">tests/models</directory>
+		</testsuite>
 	</testsuites>
 </phpunit>

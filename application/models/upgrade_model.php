@@ -5,44 +5,147 @@ if (!defined('BASEPATH'))
 
 class Upgrade_model extends CI_Model {
 
+	var $github_repo;
+	var $release_api;
+
 	function __construct() {
-		// Call the Model constructor
 		parent::__construct();
-		$this->pod = 'http://foolrulez.com/pod';
+		$this->github_repo = 'fcibecchini/FoOlSlide-Improved';
+		$this->release_api = 'https://api.github.com/repos/' . $this->github_repo . '/releases';
 	}
 
 	/**
-	 * Connects to FoOlPod to retrieve which is the latest version from the API
+	 * Connects to GitHub Releases to retrieve the latest published version.
 	 *
 	 * @param type $force forces returning the download even if FoOlSlide is up to date
 	 * @return type FALSE or the download URL
 	 */
 	function check_latest($force = FALSE) {
-		if (function_exists('curl_init')) {
-			$this->load->library('curl');
-			$result = $this->curl->simple_post($this->pod . '/api/software/foolslide', array('url' => site_url(), 'version' => get_setting('fs_priv_version')));
-		}
-		else
-			$result = file_get_contents($this->pod . '/api/software/foolslide');
-		if (!$result) {
-			//set_notice('error', _('FoOlPod server could not be contacted: impossible to check for new versions.'));
+		$releases = $this->fetch_github_releases();
+		if ($releases === FALSE || empty($releases)) {
 			return FALSE;
 		}
-		$data = json_decode($result);
+
+		$available_versions = array();
+		foreach ($releases as $release) {
+			$mapped_release = $this->map_github_release($release);
+			if ($mapped_release === FALSE) {
+				continue;
+			}
+
+			$available_versions[] = $mapped_release;
+		}
+
+		if (empty($available_versions)) {
+			return FALSE;
+		}
 
 		$new_versions = array();
-		foreach ($data->versions as $new) {
-			if (!$this->is_bigger_version(FOOLSLIDE_VERSION, $new))
-				break;
-			$new_versions[] = $new;
+		foreach ($available_versions as $release) {
+			if (!$this->is_bigger_version(FOOLSLIDE_VERSION, $release)) {
+				continue;
+			}
+			$new_versions[] = $release;
 		}
-		if (!empty($new_versions))
-			return $new_versions;
 
-		if($force)
-			return array($data->versions[0]);
+		if (!empty($new_versions)) {
+			return $new_versions;
+		}
+
+		if ($force) {
+			return array($available_versions[0]);
+		}
 
 		return FALSE;
+	}
+
+	function fetch_github_releases() {
+		$result = $this->request_url($this->release_api . '?per_page=10', TRUE);
+		if (!$result) {
+			return FALSE;
+		}
+
+		$data = json_decode($result);
+		if (!is_array($data)) {
+			log_message('error', 'upgrade_model fetch_github_releases(): invalid GitHub releases payload');
+			return FALSE;
+		}
+
+		return $data;
+	}
+
+	function map_github_release($release) {
+		if (!is_object($release)) {
+			return FALSE;
+		}
+
+		if (!empty($release->draft) || !empty($release->prerelease)) {
+			return FALSE;
+		}
+
+		$parsed_version = $this->parse_version_string(isset($release->tag_name) ? $release->tag_name : '');
+		if ($parsed_version === FALSE) {
+			return FALSE;
+		}
+
+		$parsed_version->download = isset($release->zipball_url) ? $release->zipball_url : FALSE;
+		$parsed_version->direct_download = $parsed_version->download;
+		$parsed_version->changelog = isset($release->body) ? $release->body : '';
+		$parsed_version->release_url = isset($release->html_url) ? $release->html_url : '';
+		$parsed_version->release_name = isset($release->name) ? $release->name : '';
+
+		return $parsed_version;
+	}
+
+	function parse_version_string($string) {
+		if (!is_string($string) || $string === '') {
+			return FALSE;
+		}
+
+		if (!preg_match('/(\d+)\.(\d+)\.(\d+)/', $string, $matches)) {
+			return FALSE;
+		}
+
+		$current = new stdClass();
+		$current->version = $matches[1];
+		$current->subversion = $matches[2];
+		$current->subsubversion = $matches[3];
+		return $current;
+	}
+
+	function request_url($url, $is_api = FALSE) {
+		if (function_exists('curl_init')) {
+			$this->load->library('curl');
+			$this->curl->create($url);
+			$this->curl->http_header('User-Agent', 'FoOlSlide-Improved Upgrader');
+			if ($is_api) {
+				$this->curl->http_header('Accept', 'application/vnd.github+json');
+			}
+			return $this->curl->execute();
+		}
+
+		$headers = array(
+			'User-Agent: FoOlSlide-Improved Upgrader'
+		);
+		if ($is_api) {
+			$headers[] = 'Accept: application/vnd.github+json';
+		}
+
+		$context = stream_context_create(array(
+			'http' => array(
+				'method' => 'GET',
+				'header' => implode("\r\n", $headers) . "\r\n",
+				'timeout' => 30,
+				'ignore_errors' => TRUE
+			)
+		));
+
+		$result = @file_get_contents($url, FALSE, $context);
+		if ($result === FALSE) {
+			return FALSE;
+		}
+
+		return $result;
 	}
 
 	/**
@@ -74,13 +177,7 @@ class Upgrade_model extends CI_Model {
 	 * @return object
 	 */
 	function version_to_object($string) {
-		$version = explode('.', $string);
-
-        $current = new stdClass();
-		$current->version = $version[0];
-		$current->subversion = $version[1];
-		$current->subsubversion = $version[2];
-		return $current;
+		return $this->parse_version_string($string);
 	}
 
 	/**
@@ -89,29 +186,58 @@ class Upgrade_model extends CI_Model {
 	 * @param string $url
 	 * @return bool
 	 */
-	function get_file($url, $direct_url) {
+	function get_file($url, $direct_url = FALSE) {
 		$this->clean();
-		if (function_exists('curl_init')) {
-			$this->load->library('curl');
-			$zip = $this->curl->simple_post($url, array('url' => site_url(), 'version' => FOOLSLIDE_VERSION));
-			if (!$zip) {
-				$zip = $this->curl->simple_get($direct_url);
-			}
-		}
-		else {
-			$zip = file_get_contents($direct_url);
-		}
+		$download_url = $direct_url ? $direct_url : $url;
+		$zip = $this->request_url($download_url, FALSE);
 		if (!$zip) {
-			log_message('error', 'upgrade_model get_file(): impossible to get the update from FoOlPod');
-			flash_notice('error', _('Can\'t get the update file from FoOlPod. It might be a momentary problem, or a problem with your server security configuration. Browse <a href="http://foolrulez.com/pod/human">http://foolrulez.com/pod/human</a> to check if it\'s a known issue.'));
+			log_message('error', 'upgrade_model get_file(): impossible to download the update from GitHub Releases');
+			flash_notice('error', _('Can\'t get the update file from GitHub Releases. It might be a momentary problem, or a problem with your server security configuration.'));
 			return FALSE;
 		}
 
 		if (!is_dir('content/cache/upgrade'))
-			mkdir('content/cache/upgrade');
+			mkdir('content/cache/upgrade', 0777, TRUE);
 		write_file('content/cache/upgrade/upgrade.zip', $zip);
 		$this->load->library('unzip');
 		$this->unzip->extract('content/cache/upgrade/upgrade.zip');
+		$this->flatten_downloaded_release();
+		return TRUE;
+	}
+
+	function flatten_downloaded_release() {
+		$base_path = 'content/cache/upgrade';
+		if (!is_dir($base_path)) {
+			return FALSE;
+		}
+
+		$entries = scandir($base_path);
+		$candidates = array();
+		foreach ($entries as $entry) {
+			if ($entry === '.' || $entry === '..' || $entry === 'upgrade.zip') {
+				continue;
+			}
+			$candidates[] = $entry;
+		}
+
+		if (count($candidates) !== 1) {
+			return TRUE;
+		}
+
+		$source_dir = $base_path . '/' . $candidates[0];
+		if (!is_dir($source_dir)) {
+			return TRUE;
+		}
+
+		$source_entries = scandir($source_dir);
+		foreach ($source_entries as $entry) {
+			if ($entry === '.' || $entry === '..') {
+				continue;
+			}
+			rename($source_dir . '/' . $entry, $base_path . '/' . $entry);
+		}
+
+		rmdir($source_dir);
 		return TRUE;
 	}
 
@@ -153,7 +279,7 @@ class Upgrade_model extends CI_Model {
 				set_notice('warn', sprintf(_('The %s directory would be better if writable, in order to deliver automatic updates. Use this command in your shell if possible: %s'), FCPATH, '<br/><b><code>chown -R ' . $whoami . ' ' . FCPATH . '</code></b>'));
 			else
 				set_notice('warn', sprintf(_('The %s directory would be better if writable, in order to deliver automatic updates.<br/>It was impossible to determine the user running PHP. Use this command in your shell if possible: %s where www-data is an example (usually it\'s www-data or Apache)'), FCPATH, '<br/><b><code>chown -R www-data ' . FCPATH . '</code></b><br/>'));
-			set_notice('warn', sprintf(_('If you can\'t do the above, you can follow the manual upgrade instructons at %sthis link%s.'), '<a href="http://www.foolz.us/docs/foolslide">', '</a>'));
+			set_notice('warn', sprintf(_('If you can\'t do the above, you can follow the manual installation instructions from %sGitHub Releases%s.'), '<a href="https://github.com/' . $this->github_repo . '/releases">', '</a>'));
 			$prob = TRUE;
 		}
 
@@ -188,7 +314,7 @@ class Upgrade_model extends CI_Model {
 	/**
 	 * Does further checking, updates the upgrade2 "stage 2" file to accomodate
 	 * changes to the upgrade script, updates the version number with the one
-	 * from FoOlPod, and cleans up.
+	 * from GitHub Releases, and cleans up.
 	 *
 	 * @author Woxxy
 	 * @return bool
@@ -203,19 +329,21 @@ class Upgrade_model extends CI_Model {
 		if ($new_versions === FALSE)
 			return FALSE;
 
-		// Pick the newest version
 		$latest = $new_versions[0];
 
-		$this->upgrade_model->get_file($latest->download, $latest->direct_download);
+		if (!$this->upgrade_model->get_file($latest->download, $latest->direct_download)) {
+			return FALSE;
+		}
 
-		$this->upgrade_model->update_upgrade();
+		if (!$this->upgrade_model->update_upgrade()) {
+			return FALSE;
+		}
 
 		$this->load->model('upgrade2_model');
 		if (!$this->upgrade2_model->do_upgrade()) {
 			return FALSE;
 		}
 
-		// compatibility for FoOlSlide < 0.8.9 - By Woxxy at 20/10/2011
 		$this->db->update('preferences', array('value' => $latest->version . '.' . $latest->subversion . '.' . $latest->subsubversion), array('name' => 'fs_priv_version'));
 		$this->upgrade_model->clean();
 
