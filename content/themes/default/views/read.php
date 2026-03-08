@@ -120,13 +120,14 @@ if (!defined('BASEPATH'))
 		if (!viewport)
 			return;
 
-		var baseContent = viewport.getAttribute('content') || 'width=device-width, initial-scale=1';
-		viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1');
+		var baseContent = viewport.dataset.baseContent || viewport.getAttribute('content') || 'width=device-width, initial-scale=1, maximum-scale=10, user-scalable=yes';
+		viewport.dataset.baseContent = baseContent;
+		viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
 
 		window.setTimeout(function() {
 			viewport.setAttribute('content', baseContent);
 			resetReaderScroll();
-		}, 80);
+		}, 120);
 	}
 
 	function resetPageView()
