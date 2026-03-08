@@ -194,6 +194,13 @@ define('DMZ_VERSION', '1.8.1');
 class DataMapper implements IteratorAggregate {
 
 	/**
+	 * Reference to the active CodeIgniter config library.
+	 * Kept separate from static DataMapper::$config to avoid PHP 8.4 notices.
+	 * @var CI_Config
+	 */
+	protected $_dmz_ci_config;
+
+	/**
 	 * Stores the shared configuration
 	 * @var array
 	 */
@@ -495,10 +502,10 @@ class DataMapper implements IteratorAggregate {
 			if ($is_dmz)
 			{
 				// Load config settings
-				$this->config->load('datamapper', TRUE, TRUE);
+				$this->_dmz_ci_config->load('datamapper', TRUE, TRUE);
 
 				// Get and store config settings
-				DataMapper::$config = $this->config->item('datamapper');
+				DataMapper::$config = $this->_dmz_ci_config->item('datamapper');
 
 				// now double check that all required config values were set
 				foreach(DataMapper::$_dmz_config_defaults as $config_key => $config_value)
@@ -519,7 +526,7 @@ class DataMapper implements IteratorAggregate {
 			if(!empty($this->lang_file_format))
 			{
 				$lang_file = str_replace(array('${model}', '${table}'), array($this->model, $this->table), $this->lang_file_format);
-				$deft_lang = $this->config->item('language');
+				$deft_lang = $this->_dmz_ci_config->item('language');
 				$idiom = ($deft_lang == '') ? 'english' : $deft_lang;
 				if(file_exists(APPPATH.'language/'.$idiom.'/'.$lang_file.'_lang'.EXT))
 				{
@@ -6559,7 +6566,7 @@ class DataMapper implements IteratorAggregate {
 			}
 			$this->load = $CI->dm_load;
 
-			$this->config = $CI->config;
+			$this->_dmz_ci_config = $CI->config;
 		}
 	}
 
