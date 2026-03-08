@@ -38,8 +38,8 @@
 - Link relevant issues or describe the motivation when there is no issue.
 
 ## Development Workflow
-- Commit new features and fixes on feature branches only; do not commit directly to `docker`.
-- Use the `gh` CLI to open pull requests targeting the `docker` branch.
+- Commit new features and fixes on feature branches only; do not commit directly to `main`.
+- Use the `gh` CLI to open pull requests targeting the `main` branch.
 - Always run the full test suite with `./scripts/run-tests.sh` to verify work before finalizing.
 - Run e2e smoke tests in addition to the automated test suite when the change affects browser flows or integration behavior.
 - Do not attempt remote deployments unless the user explicitly requests them.
