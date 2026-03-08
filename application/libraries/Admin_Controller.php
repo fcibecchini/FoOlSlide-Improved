@@ -139,7 +139,6 @@ class Admin_Controller extends MY_Controller
 			"default" => "http://blog.foolz.us",
 			"icon" => "comments",
 			"content" => array(
-				"http://archive.foolz.us/dev/" => array("level" => "member", "name" => _("Developer Community"), "icon" => "comments-o"),
 				"http://github.com/fcibecchini/FoOlSlide/" => array("level" => "member", "name" => _("Developer Github"), "icon" => "github"),
 			)
 		);
