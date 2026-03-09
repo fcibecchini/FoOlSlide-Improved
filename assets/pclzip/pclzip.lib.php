@@ -212,6 +212,11 @@
   //   Note that no real action is taken, if the archive does not exist it is not
   //   created. Use create() for that.
   // --------------------------------------------------------------------------------
+  function __construct($p_zipname)
+  {
+    $this->PclZip($p_zipname);
+  }
+
   function PclZip($p_zipname)
   {
 
@@ -1833,18 +1838,26 @@
     }
     
     // ----- Get 'memory_limit' configuration value
-    $v_memory_limit = ini_get('memory_limit');
-    $v_memory_limit = trim($v_memory_limit);
+    $v_memory_limit = trim((string) ini_get('memory_limit'));
+    if ($v_memory_limit === '' || $v_memory_limit === '-1') {
+      return $v_result;
+    }
+
     $last = strtolower(substr($v_memory_limit, -1));
- 
+    $v_memory_limit_value = is_numeric($v_memory_limit) ? (float) $v_memory_limit : (float) substr($v_memory_limit, 0, -1);
+
     if($last == 'g')
         //$v_memory_limit = $v_memory_limit*1024*1024*1024;
-        $v_memory_limit = $v_memory_limit*1073741824;
+        $v_memory_limit_value = $v_memory_limit_value*1073741824;
     if($last == 'm')
         //$v_memory_limit = $v_memory_limit*1024*1024;
-        $v_memory_limit = $v_memory_limit*1048576;
+        $v_memory_limit_value = $v_memory_limit_value*1048576;
     if($last == 'k')
-        $v_memory_limit = $v_memory_limit*1024;
+        $v_memory_limit_value = $v_memory_limit_value*1024;
+
+    if (!is_numeric($v_memory_limit)) {
+      $v_memory_limit = $v_memory_limit_value;
+    }
             
     $p_options[PCLZIP_OPT_TEMP_FILE_THRESHOLD] = floor($v_memory_limit*PCLZIP_TEMPORARY_FILE_RATIO);
     
