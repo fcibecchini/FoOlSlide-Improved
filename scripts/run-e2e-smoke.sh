@@ -268,23 +268,51 @@ check_search_tags_multi() {
 	check_post_page "/search_tags/" "tag%5B%5D=${first}&tag%5B%5D=${second}" 800 "<!DOCTYPE html"
 }
 
+detect_install_state() {
+	local headers_file="$tmp_dir/install_state.headers"
+	local body_file="$tmp_dir/install_state.body"
+
+	curl -sS -L -D "$headers_file" -o "$body_file" "$BASE_URL/"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	if [ "$http_code" != "200" ]; then
+		echo "[e2e] FAIL install-state probe: expected HTTP 200, got $http_code" >&2
+		exit 1
+	fi
+
+	if grep -q 'Installing FoOlSlide' "$body_file"; then
+		return 0
+	fi
+
+	return 1
+}
+
 # Core public + auth/admin routes that should always render a real HTML page.
 check_page "/" 1000 "<!DOCTYPE html"
-check_page "/latest/" 1000 "<!DOCTYPE html"
-check_page "/account/auth/login/" 1000 'name="login"'
-check_page "/admin/" 1000 "<!DOCTYPE html"
-check_page "/install" 1000 "<!DOCTYPE html"
-check_post_page "/search/" "search=aaa%2Ftest%2Fnaruto" 800 "<!DOCTYPE html"
-check_post_page "/search_tags/" "search=invalid_payload" 800 "<!DOCTYPE html"
-check_search_tags_multi
-if admin_login; then
-	check_authed_page "/admin/series/add_new/" 1000 "<!DOCTYPE html"
+if detect_install_state; then
+	echo "[e2e] Detected installer state; validating install pages."
+	check_page "/latest/" 1000 "Installing FoOlSlide"
+	check_page "/account/auth/login/" 1000 "Installing FoOlSlide"
+	check_page "/admin/" 1000 "Installing FoOlSlide"
+	check_page "/install" 1000 "Installing FoOlSlide"
+else
+	check_page "/latest/" 1000 "<!DOCTYPE html"
+	check_page "/account/auth/login/" 1000 'name="login"'
+	check_page "/admin/" 1000 "<!DOCTYPE html"
+	check_page "/install" 1000 "<!DOCTYPE html"
+	check_post_page "/search/" "search=aaa%2Ftest%2Fnaruto" 800 "<!DOCTYPE html"
+	check_post_page "/search_tags/" "search=invalid_payload" 800 "<!DOCTYPE html"
+	check_search_tags_multi
+	if admin_login; then
+		check_authed_page "/admin/series/add_new/" 1000 "<!DOCTYPE html"
 
-	first_stub="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT stub FROM fs_comics ORDER BY id LIMIT 1\"" 2>/dev/null | tr -d '\r' | head -n 1 || true)"
-	if [ -n "$first_stub" ]; then
-		check_authed_page "/admin/series/add_new/${first_stub}" 1000 "<!DOCTYPE html"
-	else
-		echo "[e2e] SKIP /admin/series/add_new/<stub>: no existing series found in local DB."
+		first_stub="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT stub FROM fs_comics ORDER BY id LIMIT 1\"" 2>/dev/null | tr -d '\r' | head -n 1 || true)"
+		if [ -n "$first_stub" ]; then
+			check_authed_page "/admin/series/add_new/${first_stub}" 1000 "<!DOCTYPE html"
+		else
+			echo "[e2e] SKIP /admin/series/add_new/<stub>: no existing series found in local DB."
+		fi
 	fi
 fi
 
