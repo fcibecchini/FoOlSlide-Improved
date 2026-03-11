@@ -29,6 +29,7 @@
 
 ## Agent Verification Rule
 - After any code change, run `./scripts/run-tests.sh` before finalizing the response unless the user explicitly asks to skip tests.
+- For code changes, also run `./scripts/run-e2e-smoke.sh`; treat `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke.sh` together as the required verification baseline.
 - If tests cannot run, report the exact blocker and the attempted command in the final response.
 
 ## Commit & Pull Request Guidelines
@@ -41,7 +42,7 @@
 - If the requested work is a fix or new feature and the current branch is a clean `main`, first create a feature branch before modifying files; do not wait for the user to ask.
 - Commit new features and fixes on feature branches only; do not commit directly to `main`.
 - Use the `gh` CLI to open pull requests targeting the `main` branch.
-- Always run the full test suite with `./scripts/run-tests.sh` to verify work before finalizing.
+- Always run all repository verification scripts in `scripts/` that are part of the normal workflow, especially `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke.sh`, before finalizing.
 - Run e2e smoke tests in addition to the automated test suite when the change affects browser flows or integration behavior.
 - Do not attempt remote deployments unless the user explicitly requests them.
 - If browser testing is performed locally or remotely, do not mention the specific URLs tested in summaries or PR text.

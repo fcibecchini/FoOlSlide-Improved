@@ -418,10 +418,6 @@ class DataMapper implements IteratorAggregate {
 	 * @var mixed
 	 */
 	public $extensions = NULL;
-	public $db;
-	public $lang;
-	public $load;
-	public $form_validation;
 	/**
 	 * If a query returns more than the number of rows specified here,
 	 * then it will be automatically freed after a get.
@@ -495,13 +491,13 @@ class DataMapper implements IteratorAggregate {
 			$this->model = $common_key;
 		}
 
-		// Load stored config settings by reference
+		// Load stored config settings
 		foreach (DataMapper::$config as $config_key => &$config_value)
 		{
 			// Only if they're not already set
 			if (empty($this->{$config_key}))
 			{
-				$this->{$config_key} =& $config_value;
+				$this->{$config_key} = $config_value;
 			}
 		}
 
@@ -719,10 +715,10 @@ class DataMapper implements IteratorAggregate {
 			unset($validation);
 		}
 
-		// Load stored common model settings by reference
+		// Load stored common model settings
 		foreach(DataMapper::$common[$common_key] as $key => &$value)
 		{
-			$this->{$key} =& $value;
+			$this->{$key} = $value;
 		}
 
 		// Clear object properties to set at default values
@@ -1099,13 +1095,14 @@ class DataMapper implements IteratorAggregate {
 		if($name == 'db')
 		{
 			$CI =& get_instance();
+			$db = NULL;
 			if($this->db_params === FALSE)
 			{
 				if ( ! isset($CI->db) || ! is_object($CI->db) || ! isset($CI->db->dbdriver) )
 				{
 					show_error('DataMapper Error: CodeIgniter database library not loaded.');
 				}
-				$this->db =& $CI->db;
+				$db =& $CI->db;
 			}
 			else
 			{
@@ -1115,36 +1112,46 @@ class DataMapper implements IteratorAggregate {
 					{
 						show_error('DataMapper Error: CodeIgniter database library not loaded.');
 					}
-					// ensure the shared DB is disconnected, even if the app exits uncleanly
-					if(!isset($CI->db->_has_shutdown_hook))
-					{
-						register_shutdown_function(array($CI->db, 'close'));
-						$CI->db->_has_shutdown_hook = TRUE;
+						// ensure the shared DB is disconnected, even if the app exits uncleanly
+						if(!isset($CI->db->_has_shutdown_hook))
+						{
+							register_shutdown_function(array($CI->db, 'close'));
+							$CI->db->_has_shutdown_hook = TRUE;
+						}
+						// clone, so we don't create additional connections to the DB
+						$db = clone($CI->db);
+						if (empty($db->dbprefix))
+						{
+							$dbprefix = $this->_dmz_resolve_dbprefix();
+							if (is_string($dbprefix) && $dbprefix !== '')
+							{
+								$CI->db->dbprefix = $dbprefix;
+								$db->dbprefix = $dbprefix;
+							}
+						}
+						$db->_reset_select();
 					}
-					// clone, so we don't create additional connections to the DB
-					$this->db = clone($CI->db);
-					$this->db->_reset_select();
+					else
+					{
+						// connecting to a different database, so we *must* create additional copies.
+						// It is up to the developer to close the connection!
+						$db = $CI->load->database($this->db_params, TRUE, TRUE);
+					}
+					// these items are shared (for debugging)
+					if(is_object($CI->db) && isset($CI->db->dbdriver))
+					{
+						$db->queries =& $CI->db->queries;
+						$db->query_times =& $CI->db->query_times;
+					}
 				}
-				else
-				{
-					// connecting to a different database, so we *must* create additional copies.
-					// It is up to the developer to close the connection!
-					$this->db = $CI->load->database($this->db_params, TRUE, TRUE);
-				}
-				// these items are shared (for debugging)
-				if(is_object($CI->db) && isset($CI->db->dbdriver))
-				{
-					$this->db->queries =& $CI->db->queries;
-					$this->db->query_times =& $CI->db->query_times;
-				}
-			}
 			// ensure the created DB is disconnected, even if the app exits uncleanly
-			if(!isset($this->db->_has_shutdown_hook))
+			if(!isset($db->_has_shutdown_hook))
 			{
-				register_shutdown_function(array($this->db, 'close'));
-				$this->db->_has_shutdown_hook = TRUE;
+				register_shutdown_function(array($db, 'close'));
+				$db->_has_shutdown_hook = TRUE;
 			}
-			return $this->db;
+			$this->db = $db;
+			return $db;
 		}
 
 		// Special case to get form_validation when first accessed
@@ -1404,6 +1411,7 @@ class DataMapper implements IteratorAggregate {
 	 *
 	 * @return	Iterator An iterator for the all array
 	 */
+	#[\ReturnTypeWillChange]
 	public function getIterator() {
 		if(isset($this->_dm_dataset_iterator)) {
 			return $this->_dm_dataset_iterator;
@@ -2936,6 +2944,16 @@ class DataMapper implements IteratorAggregate {
 	 */
 	public function add_table_name($field)
 	{
+		if ($field === NULL || $field === '')
+		{
+			return $field;
+		}
+
+		if ( ! is_string($field))
+		{
+			return $field;
+		}
+
 		// only add table if the field doesn't contain a dot (.) or open parentheses
 		if (preg_match('/[\.\(]/', $field) == 0)
 		{
@@ -6637,6 +6655,34 @@ class DataMapper implements IteratorAggregate {
 		}
 	}
 
+	/**
+	 * Resolve the configured DB table prefix even when CI's runtime config
+	 * has not propagated it onto the active DB handle yet.
+	 *
+	 * @return string
+	 */
+	protected function _dmz_resolve_dbprefix()
+	{
+		$CI =& get_instance();
+		$dbprefix = $CI->config->item('db_table_prefix');
+		if (is_string($dbprefix) && $dbprefix !== '')
+		{
+			return $dbprefix;
+		}
+
+		if (file_exists(FCPATH . 'config.php'))
+		{
+			$db = array();
+			require(FCPATH . 'config.php');
+			if (isset($db['default']['dbprefix']) && is_string($db['default']['dbprefix']) && $db['default']['dbprefix'] !== '')
+			{
+				return $db['default']['dbprefix'];
+			}
+		}
+
+		return '';
+	}
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -6760,11 +6806,13 @@ class DM_DatasetIterator implements Iterator, Countable
 	 * Gets the item at the current index $pos
 	 * @return DataMapper
 	 */
+	#[\ReturnTypeWillChange]
 	function current()
 	{
 		return $this->get($this->pos);
 	}
 
+	#[\ReturnTypeWillChange]
 	function key()
 	{
 		return $this->pos;
@@ -6783,16 +6831,19 @@ class DM_DatasetIterator implements Iterator, Countable
 		return $this->object;
 	}
 
+	#[\ReturnTypeWillChange]
 	function next()
 	{
 		$this->pos++;
 	}
 
+	#[\ReturnTypeWillChange]
 	function rewind()
 	{
 		$this->pos = 0;
 	}
 
+	#[\ReturnTypeWillChange]
 	function valid()
 	{
 		return ($this->pos < $this->count);
@@ -6802,6 +6853,7 @@ class DM_DatasetIterator implements Iterator, Countable
 	 * Returns the number of results
 	 * @return int
 	 */
+	#[\ReturnTypeWillChange]
 	function count()
 	{
 		return $this->count;

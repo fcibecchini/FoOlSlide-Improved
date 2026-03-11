@@ -271,7 +271,7 @@ check_search_tags_multi() {
 # Core public + auth/admin routes that should always render a real HTML page.
 check_page "/" 1000 "<!DOCTYPE html"
 check_page "/latest/" 1000 "<!DOCTYPE html"
-check_page "/account/auth/login/" 1000 "<!DOCTYPE html"
+check_page "/account/auth/login/" 1000 'name="login"'
 check_page "/admin/" 1000 "<!DOCTYPE html"
 check_page "/install" 1000 "<!DOCTYPE html"
 check_post_page "/search/" "search=aaa%2Ftest%2Fnaruto" 800 "<!DOCTYPE html"

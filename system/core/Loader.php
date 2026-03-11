@@ -26,6 +26,7 @@
  * @category	Loader
  * @link		http://codeigniter.com/user_guide/libraries/loader.html
  */
+#[AllowDynamicProperties]
 class CI_Loader {
 
 	// All these are set automatically. Don't mess with them.
@@ -42,7 +43,36 @@ class CI_Loader {
 	protected $_ci_helpers			= array();
 	protected $_ci_varmap			= array('unit_test' => 'unit', 
 											'user_agent' => 'agent');
-	protected $_ci_dynamic_properties	= array();
+	public $benchmark;
+	public $hooks;
+	public $config;
+	public $log;
+	public $utf8;
+	public $uri;
+	public $exceptions;
+	public $router;
+	public $output;
+	public $security;
+	public $input;
+	public $lang;
+	public $load;
+	public $db;
+	public $dbforge;
+	public $migration;
+	public $encrypt;
+	public $session;
+	public $datamapper;
+	public $users;
+	public $tank_auth;
+	public $template;
+	public $pagination;
+	public $agent;
+	public $dm_lang;
+	public $dm_load;
+	public $fs_options;
+	public $notices;
+	public $flash_notice_data;
+	public $RC;
 
 	/**
 	 * Constructor
@@ -60,31 +90,6 @@ class CI_Loader {
 		log_message('debug', "Loader Class Initialized");
 	}
 
-	public function __set($key, $value)
-	{
-		$this->_ci_dynamic_properties[$key] = $value;
-	}
-
-	public function __get($key)
-	{
-		if (array_key_exists($key, $this->_ci_dynamic_properties))
-		{
-			return $this->_ci_dynamic_properties[$key];
-		}
-
-		return NULL;
-	}
-
-	public function __isset($key)
-	{
-		return array_key_exists($key, $this->_ci_dynamic_properties);
-	}
-
-	public function __unset($key)
-	{
-		unset($this->_ci_dynamic_properties[$key]);
-	}
-
 	// --------------------------------------------------------------------
 	
 	/**
@@ -97,7 +102,7 @@ class CI_Loader {
 	 */
 	public function set_base_classes()
 	{
-		$this->_base_classes =& is_loaded();
+		$this->_base_classes = is_loaded();
 		
 		return $this;
 	}
@@ -684,6 +689,7 @@ class CI_Loader {
 		{
 			$$_ci_val = ( ! isset($_ci_data[$_ci_val])) ? FALSE : $_ci_data[$_ci_val];
 		}
+		$_ci_view_vars = $this->_ci_object_to_array($_ci_vars);
 		
 		$file_exists = FALSE;
 
@@ -724,10 +730,6 @@ class CI_Loader {
 
 		$_ci_CI =& get_instance();
 		$_ci_vars = get_object_vars($_ci_CI);
-		if (method_exists($_ci_CI, '_ci_get_dynamic_properties'))
-		{
-			$_ci_vars = array_merge($_ci_vars, $_ci_CI->_ci_get_dynamic_properties());
-		}
 		foreach ($_ci_vars as $_ci_key => $_ci_var)
 		{
 			if ( ! isset($this->$_ci_key))
@@ -746,7 +748,11 @@ class CI_Loader {
 		 */
 		if (is_array($_ci_vars))
 		{
-			$this->_ci_cached_vars = array_merge($this->_ci_cached_vars, $_ci_vars);
+			$this->_ci_cached_vars = array_merge($_ci_vars, $this->_ci_cached_vars);
+		}
+		if (is_array($_ci_view_vars))
+		{
+			$this->_ci_cached_vars = array_merge($this->_ci_cached_vars, $_ci_view_vars);
 		}
 		extract($this->_ci_cached_vars);
 

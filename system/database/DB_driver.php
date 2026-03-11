@@ -52,6 +52,7 @@ class CI_DB_driver {
 	var $save_queries	= TRUE;
 	var $queries		= array();
 	var $query_times	= array();
+	var $_has_shutdown_hook = FALSE;
 	var $data_cache		= array();
 	var $trans_enabled	= TRUE;
 	var $trans_strict	= TRUE;
