@@ -195,7 +195,7 @@ class Series extends Admin_Controller
 		//$comic->get_tags();
 		$tagsearch = new Tag();
 		$tagvalues = $tagsearch->get_tags($comic->jointag_id);
-		if ($tagvalues === false)
+		if (!is_array($tagvalues) && !is_object($tagvalues))
 		{
 			$tagvalues = array();
 		}

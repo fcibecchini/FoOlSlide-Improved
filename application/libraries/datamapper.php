@@ -1150,7 +1150,7 @@ class DataMapper implements IteratorAggregate {
 				register_shutdown_function(array($db, 'close'));
 				$db->_has_shutdown_hook = TRUE;
 			}
-			$this->db = $db;
+			$this->__set('db', $db);
 			return $db;
 		}
 
@@ -1166,9 +1166,9 @@ class DataMapper implements IteratorAggregate {
 					$this->lang->load('form_validation');
 					$this->load->unset_form_validation_class();
 				}
-				$this->form_validation = $CI->form_validation;
+				$this->__set('form_validation', $CI->form_validation);
 			}
-			return $this->form_validation;
+			return $this->__get('form_validation');
 		}
 
 		$has_many = isset($this->has_many[$name]);
@@ -6468,14 +6468,28 @@ class DataMapper implements IteratorAggregate {
 		// Populate this object with values from first record
 		foreach ($row as $key => $value)
 		{
-			$item->{$key} = $value;
+			if (property_exists($item, $key))
+			{
+				$item->{$key} = $value;
+			}
+			else
+			{
+				$item->__set($key, $value);
+			}
 		}
 
 		foreach ($this->fields as $field)
 		{
 			if (! isset($row->{$field}))
 			{
-				$item->{$field} = NULL;
+				if (property_exists($item, $field))
+				{
+					$item->{$field} = NULL;
+				}
+				else
+				{
+					$item->__set($field, NULL);
+				}
 			}
 		}
 
@@ -6644,12 +6658,12 @@ class DataMapper implements IteratorAggregate {
 				$CI->dm_lang = new DM_Lang();
 			}
 
-			$this->lang = $CI->dm_lang;
+			$this->__set('lang', $CI->dm_lang);
 			if ( ! isset($CI->dm_load))
 			{
 				$CI->dm_load = new DM_Load();
 			}
-			$this->load = $CI->dm_load;
+			$this->__set('load', $CI->dm_load);
 
 			$this->_dmz_ci_config = $CI->config;
 		}

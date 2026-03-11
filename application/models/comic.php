@@ -396,12 +396,16 @@ class Comic extends DataMapper
 			return true;
 		$tags = new Tag();
 		$this->tags = $tags->get_tags($this->jointag_id);
+		if (!is_array($this->tags))
+			$this->tags = array();
 		foreach ($this->all as $item)
 		{
 			if (isset($item->tags))
 				continue;
 			$tags = new Tag();
 			$item->tags = $tags->get_tags($item->jointag_id);
+			if (!is_array($item->tags))
+				$item->tags = array();
 		}
 		
 		// All good, return true.

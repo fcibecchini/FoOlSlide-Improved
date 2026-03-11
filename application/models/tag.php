@@ -146,6 +146,11 @@ class Tag extends DataMapper
 	
 	public function get_tags($jointag_id)
 	{
+		if (empty($jointag_id) || !is_numeric($jointag_id) || (int) $jointag_id < 1)
+		{
+			return array();
+		}
+
 		// if it's a jointag, let's deal it as a jointag
 		if ($jointag_id > 0)
 		{
@@ -156,8 +161,7 @@ class Tag extends DataMapper
 			// not an existing jointag?
 			if ($jointags->result_count() < 1)
 			{
-				log_message('error', 'get_tags: jointag -> jointag not found '.$jointag_id);
-				return false;
+				return array();
 			}
 	
 			// result array
@@ -172,12 +176,13 @@ class Tag extends DataMapper
 	
 			if (empty($tagarray))
 			{
-				log_message('error', 'get_tags: jointag -> no tag found');
-				return false;
+				return array();
 			}
-	
+
 			return $tagarray;
 		}
+
+		return array();
 	}
 
 	// this works by inputting an array of names (not stubs)
