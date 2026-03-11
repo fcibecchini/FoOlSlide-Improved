@@ -11,6 +11,7 @@ ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
 MAX_HEADER_BYTES="${MAX_HEADER_BYTES:-7000}"
 AUTH_REQUIRED="${AUTH_REQUIRED:-0}"
 SEEDED_SERIES_STUB="${SEEDED_SERIES_STUB:-again-my-childhood-friend}"
+SEEDED_PRIMARY_TAG_NAME="${SEEDED_PRIMARY_TAG_NAME:-School Life}"
 
 require_cmd() {
 	local cmd="$1"
@@ -305,6 +306,7 @@ if detect_install_state; then
 else
 	seed_docker_dev_state
 	check_page "/latest/" 1000 "<!DOCTYPE html"
+	check_page "/tags/" 1000 "${SEEDED_PRIMARY_TAG_NAME}"
 	check_page "/account/auth/login/" 1000 'name="login"'
 	check_page "/admin/" 1000 "<!DOCTYPE html"
 	check_page "/install" 1000 "<!DOCTYPE html"
