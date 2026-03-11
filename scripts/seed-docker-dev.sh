@@ -133,6 +133,7 @@ SET typeh_id = @typeh_id,
 WHERE id = @comic_id;
 
 SET @chapter_id := (SELECT id FROM fs_chapters WHERE comic_id = @comic_id AND chapter = 1 AND subchapter = 0 LIMIT 1);
+SET @chapter_two_id := (SELECT id FROM fs_chapters WHERE comic_id = @comic_id AND chapter = 2 AND subchapter = 0 LIMIT 1);
 
 INSERT INTO fs_chapters
 	(comic_id, team_id, joint_id, chapter, subchapter, volume, language, name, stub, uniqid, hidden, description, thumbnail, created, lastseen, updated, creator, editor, downloads)
@@ -140,6 +141,13 @@ SELECT
 	@comic_id, @team_id, 0, 1, 0, 1, 'it', 'Seed Chapter', 'seed-chapter', 'seedchapter001', 0, 'Seed chapter', '', NOW(), NOW(), NOW(), @admin_user_id, @admin_user_id, 0
 FROM DUAL
 WHERE @chapter_id IS NULL;
+
+INSERT INTO fs_chapters
+	(comic_id, team_id, joint_id, chapter, subchapter, volume, language, name, stub, uniqid, hidden, description, thumbnail, created, lastseen, updated, creator, editor, downloads)
+SELECT
+	@comic_id, @team_id, 0, 2, 0, 1, 'it', 'Seed Chapter Two', 'seed-chapter-two', 'seedchapter002', 0, 'Seed chapter two', '', NOW(), NOW(), NOW(), @admin_user_id, @admin_user_id, 0
+FROM DUAL
+WHERE @chapter_two_id IS NULL;
 SQL"
 
 echo "[seed] Ensured Docker dev seed data: ${ADMIN_USER}/${ADMIN_PASSWORD}, ${SERIES_STUB}"

@@ -67,6 +67,7 @@ class Team extends DataMapper
 	{
 		if (!is_null($id) && $team = $this->get_cached($id)) {
 			parent::__construct();
+			$this->all[0] = new stdClass();
 			foreach($team->to_array() as $key => $t) {
 				$this->$key = $t;
 

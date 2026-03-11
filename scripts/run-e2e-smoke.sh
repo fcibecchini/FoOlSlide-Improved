@@ -315,7 +315,7 @@ else
 	check_search_tags_multi
 	if admin_login; then
 		check_authed_page "/admin/series/add_new/" 1000 "<!DOCTYPE html"
-		check_authed_page "/admin/series/series/${SEEDED_SERIES_STUB}/" 1000 "<!DOCTYPE html"
+		check_authed_page "/admin/series/series/${SEEDED_SERIES_STUB}/" 1000 "Seed Chapter Two"
 
 		first_stub="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT stub FROM fs_comics ORDER BY id LIMIT 1\"" 2>/dev/null | tr -d '\r' | head -n 1 || true)"
 		if [ -n "$first_stub" ]; then
