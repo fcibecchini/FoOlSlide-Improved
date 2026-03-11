@@ -2,6 +2,8 @@
 
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+require_once(APPPATH . 'libraries/phpass-0.1/PasswordHash.php');
+
 class Migration_Install extends CI_Migration
 {
 	function up()
@@ -292,21 +294,35 @@ class Migration_Install extends CI_Migration
                                         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;"
 			);
 		}
-        $this->db->insert($this->db->dbprefix('users'), array(
-            'username' => 'admin',
-            'password' => password_hash('admin', PASSWORD_DEFAULT),
-            'email' => 'admin@example.com',
-            'activated' => 1,
-            'created' => date('Y-m-d H:i:s'),
-            'modified' => date('Y-m-d H:i:s'),
-            'updated' => date('Y-m-d H:i:s')
-        ));
-        $user_id = $this->db->insert_id();
-        $this->db->insert($this->db->dbprefix('profiles'), array(
-            'user_id' => $user_id,
-            'group_id' => 1, // Admin group
-            'display_name' => 'Administrator'
-        ));
+		$admin_user = $this->db->where('username', 'admin')->get($this->db->dbprefix('users'))->row();
+		if ( ! $admin_user)
+		{
+			$hasher = new PasswordHash(8, FALSE);
+			$this->db->insert($this->db->dbprefix('users'), array(
+				'username' => 'admin',
+				'password' => $hasher->HashPassword('admin'),
+				'email' => 'admin@example.com',
+				'activated' => 1,
+				'created' => date('Y-m-d H:i:s'),
+				'modified' => date('Y-m-d H:i:s'),
+				'updated' => date('Y-m-d H:i:s')
+			));
+			$admin_user_id = $this->db->insert_id();
+		}
+		else
+		{
+			$admin_user_id = $admin_user->id;
+		}
+
+		$admin_profile = $this->db->where('user_id', $admin_user_id)->get($this->db->dbprefix('profiles'))->row();
+		if ( ! $admin_profile)
+		{
+			$this->db->insert($this->db->dbprefix('profiles'), array(
+				'user_id' => $admin_user_id,
+				'group_id' => 1,
+				'display_name' => 'Administrator'
+			));
+		}
 
     }
 

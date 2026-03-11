@@ -10,6 +10,7 @@ ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
 MAX_HEADER_BYTES="${MAX_HEADER_BYTES:-7000}"
 AUTH_REQUIRED="${AUTH_REQUIRED:-0}"
+SEEDED_SERIES_STUB="${SEEDED_SERIES_STUB:-again-my-childhood-friend}"
 
 require_cmd() {
 	local cmd="$1"
@@ -288,6 +289,11 @@ detect_install_state() {
 	return 1
 }
 
+seed_docker_dev_state() {
+	echo "[e2e] Seeding Docker dev state"
+	"$ROOT_DIR/scripts/seed-docker-dev.sh"
+}
+
 # Core public + auth/admin routes that should always render a real HTML page.
 check_page "/" 1000 "<!DOCTYPE html"
 if detect_install_state; then
@@ -297,6 +303,7 @@ if detect_install_state; then
 	check_page "/admin/" 1000 "Installing FoOlSlide"
 	check_page "/install" 1000 "Installing FoOlSlide"
 else
+	seed_docker_dev_state
 	check_page "/latest/" 1000 "<!DOCTYPE html"
 	check_page "/account/auth/login/" 1000 'name="login"'
 	check_page "/admin/" 1000 "<!DOCTYPE html"
@@ -306,6 +313,7 @@ else
 	check_search_tags_multi
 	if admin_login; then
 		check_authed_page "/admin/series/add_new/" 1000 "<!DOCTYPE html"
+		check_authed_page "/admin/series/series/${SEEDED_SERIES_STUB}/" 1000 "<!DOCTYPE html"
 
 		first_stub="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT stub FROM fs_comics ORDER BY id LIMIT 1\"" 2>/dev/null | tr -d '\r' | head -n 1 || true)"
 		if [ -n "$first_stub" ]; then
