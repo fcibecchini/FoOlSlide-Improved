@@ -168,7 +168,7 @@ class CI_Migration {
 					return FALSE;
 				}
 
-				if ( ! is_callable(array($class, $method)))
+				if ( ! method_exists($class, $method))
 				{
 					$this->_error_string = sprintf($this->lang->line('migration_missing_'.$method.'_method'), $class);
 					return FALSE;

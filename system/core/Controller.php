@@ -27,9 +27,24 @@
  * @author		ExpressionEngine Dev Team
  * @link		http://codeigniter.com/user_guide/general/controllers.html
  */
+#[AllowDynamicProperties]
 class CI_Controller {
 
 	private static $instance;
+	public $benchmark;
+	public $hooks;
+	public $config;
+	public $log;
+	public $utf8;
+	public $uri;
+	public $exceptions;
+	public $router;
+	public $output;
+	public $security;
+	public $input;
+	public $lang;
+	public $load;
+	public $db;
 
 	/**
 	 * Constructor
@@ -57,6 +72,7 @@ class CI_Controller {
 	{
 		return self::$instance;
 	}
+
 }
 // END Controller class
 

@@ -535,6 +535,7 @@ if (!class_exists('Typeh'))
 	class Typeh
 	{
 		public $name = 'Manga';
+		public $stub = '';
 
 		public function where($key, $value)
 		{

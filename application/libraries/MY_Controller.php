@@ -5,6 +5,11 @@ if (!defined('BASEPATH'))
 
 class MY_Controller extends CI_Controller
 {
+	public $notices = array();
+	public $flash_notice_data = array();
+	public $viewdata = array();
+	public $fs_options = array();
+
 	function __construct()
 	{
 		parent::__construct();

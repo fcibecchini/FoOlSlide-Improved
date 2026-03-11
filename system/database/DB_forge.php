@@ -28,6 +28,7 @@ class CI_DB_forge {
 	var $keys			= array();
 	var $primary_keys	= array();
 	var $db_char_set	=	'';
+	var $db;
 
 	/**
 	 * Constructor

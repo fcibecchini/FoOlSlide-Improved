@@ -46,11 +46,13 @@ class CI_DB_driver {
 	var $result_id		= FALSE;
 	var $db_debug		= FALSE;
 	var $benchmark		= 0;
+	var $stricton		= FALSE;
 	var $query_count	= 0;
 	var $bind_marker	= '?';
 	var $save_queries	= TRUE;
 	var $queries		= array();
 	var $query_times	= array();
+	var $_has_shutdown_hook = FALSE;
 	var $data_cache		= array();
 	var $trans_enabled	= TRUE;
 	var $trans_strict	= TRUE;

@@ -1,4 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+<?php
+$is_latest = !empty($is_latest);
+$is_download = !empty($is_download);
+$is_team = !empty($is_team);
+?>
 
 <div class="list">
 	<div class="title">
@@ -19,6 +24,8 @@
 		echo '<div class="elements">';
 
 foreach ($chapters as $chapter) {
+	if (!isset($chapter->comic) || !is_object($chapter->comic))
+		continue;
 
     // --- Thumb sicura: prende la prima disponibile ---
     $thumb_url = null;
@@ -38,14 +45,14 @@ foreach ($chapters as $chapter) {
 
     echo '<article class="element">';
 
-		$link_raw = $chapter->comic->url();
+		$link_raw = method_exists($chapter->comic, 'url') ? $chapter->comic->url() : '';
 $comic_href = '#';
 if (preg_match('/href=["\']([^"\']+)["\']/', $link_raw, $m)) {
 $comic_href = $m[1];
 }
 
 echo '<a class="thumb" href="'.$comic_href.'">
-		<img class="cover" src="'.$chapter->comic->get_thumb().'" alt="cover" loading="lazy">
+		<img class="cover" src="'.htmlspecialchars($thumb_url ? $thumb_url : '', ENT_QUOTES, 'UTF-8').'" alt="cover" loading="lazy">
 	</a>';
 
 

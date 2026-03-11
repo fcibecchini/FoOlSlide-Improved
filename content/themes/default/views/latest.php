@@ -1,4 +1,9 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
+<?php
+$is_latest = !empty($is_latest);
+$is_download = !empty($is_download);
+$is_team = !empty($is_team);
+?>
 
 <div class="list">
 	<div class="title">
@@ -18,17 +23,21 @@
 		// Let's loop over every chapter. The array is just $chapters because we used get_iterated(), else it would be $chapters->all
 		foreach($chapters as $key => $chapter)
 		{
+			if (!isset($chapter->comic) || !is_object($chapter->comic))
+				continue;
+
 			if ($current_comic != $chapter->comic_id)
 			{
 				if ($opendiv) echo '</div>';
 				
 				echo '<div class="group">';
-				echo '<img class="preview" src="'.$chapter->comic->get_thumb().'" />';
+				echo '<img class="preview" src="'.htmlspecialchars($chapter->comic->get_thumb(), ENT_QUOTES, 'UTF-8').'" />';
 				echo '<div class="title">' . $chapter->comic->url() . ' <span class="meta">' . $chapter->comic->edit_url() . '</span></div>';
 				echo '<div class="elemento"><div class="title"><div id="tablelatest">';
-				if ($tags = $chapter->comic->tags) {
+				$tags = isset($chapter->comic->tags) && is_array($chapter->comic->tags) ? $chapter->comic->tags : array();
+				if ($tags) {
 						echo '<div class="row"><span class="mh"><div class="cell"><b>'._('Tag').'</b>:</div></span><div class="cell"> ';
-						for ($i=0; $i<3; $i++)				
+						for ($i=0; $i<3 && isset($tags[$i]); $i++)				
 							echo '<a href="'.site_url('tag/'.$tags[$i]->stub).'" ><span class="label label-default">'.$tags[$i]->name.'</span></a>  ';
 						if (sizeof($tags)>3) echo ' ... ';
 						echo '</div></div>';

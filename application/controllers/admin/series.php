@@ -159,7 +159,7 @@ class Series extends Admin_Controller
 		}
 
 		$chapters = new Chapter();
-		$chapters->where('comic_id', $comic->id)->include_related('team')->order_by('volume', 'DESC')
+		$chapters->where('comic_id', $comic->id)->order_by('volume', 'DESC')
 				->order_by('chapter', 'DESC')->order_by('subchapter', 'DESC')->get();
 		foreach ($chapters->all as $key => $item)
 		{
@@ -170,6 +170,12 @@ class Series extends Admin_Controller
 				$item->jointers = $jointers;
 				unset($jointers);
 				unset($teams);
+			}
+			else
+			{
+				$team = new Team($item->team_id);
+				$item->team_name = $team->result_count() ? $team->name : _('Unknown');
+				$item->team_stub = $team->result_count() ? $team->stub : '';
 			}
 		}
 
@@ -189,6 +195,10 @@ class Series extends Admin_Controller
 		//$comic->get_tags();
 		$tagsearch = new Tag();
 		$tagvalues = $tagsearch->get_tags($comic->jointag_id);
+		if (!is_array($tagvalues) && !is_object($tagvalues))
+		{
+			$tagvalues = array();
+		}
 		
 		$tagarray = array();
 		

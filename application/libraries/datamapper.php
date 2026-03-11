@@ -201,6 +201,12 @@ class DataMapper implements IteratorAggregate {
 	protected $_dmz_ci_config;
 
 	/**
+	 * Storage for undeclared model fields and related objects.
+	 * @var array
+	 */
+	protected $_dmz_dynamic_properties = array();
+
+	/**
 	 * Stores the shared configuration
 	 * @var array
 	 */
@@ -485,13 +491,13 @@ class DataMapper implements IteratorAggregate {
 			$this->model = $common_key;
 		}
 
-		// Load stored config settings by reference
+		// Load stored config settings
 		foreach (DataMapper::$config as $config_key => &$config_value)
 		{
 			// Only if they're not already set
 			if (empty($this->{$config_key}))
 			{
-				$this->{$config_key} =& $config_value;
+				$this->{$config_key} = $config_value;
 			}
 		}
 
@@ -709,10 +715,10 @@ class DataMapper implements IteratorAggregate {
 			unset($validation);
 		}
 
-		// Load stored common model settings by reference
+		// Load stored common model settings
 		foreach(DataMapper::$common[$common_key] as $key => &$value)
 		{
-			$this->{$key} =& $value;
+			$this->{$key} = $value;
 		}
 
 		// Clear object properties to set at default values
@@ -1079,18 +1085,24 @@ class DataMapper implements IteratorAggregate {
 	 */
 	public function __get($name)
 	{
+		if (array_key_exists($name, $this->_dmz_dynamic_properties))
+		{
+			return $this->_dmz_dynamic_properties[$name];
+		}
+
 		// We dynamically get DB when needed, and create a copy.
 		// This allows multiple queries to be generated at the same time.
 		if($name == 'db')
 		{
 			$CI =& get_instance();
+			$db = NULL;
 			if($this->db_params === FALSE)
 			{
 				if ( ! isset($CI->db) || ! is_object($CI->db) || ! isset($CI->db->dbdriver) )
 				{
 					show_error('DataMapper Error: CodeIgniter database library not loaded.');
 				}
-				$this->db =& $CI->db;
+				$db =& $CI->db;
 			}
 			else
 			{
@@ -1100,36 +1112,46 @@ class DataMapper implements IteratorAggregate {
 					{
 						show_error('DataMapper Error: CodeIgniter database library not loaded.');
 					}
-					// ensure the shared DB is disconnected, even if the app exits uncleanly
-					if(!isset($CI->db->_has_shutdown_hook))
-					{
-						register_shutdown_function(array($CI->db, 'close'));
-						$CI->db->_has_shutdown_hook = TRUE;
+						// ensure the shared DB is disconnected, even if the app exits uncleanly
+						if(!isset($CI->db->_has_shutdown_hook))
+						{
+							register_shutdown_function(array($CI->db, 'close'));
+							$CI->db->_has_shutdown_hook = TRUE;
+						}
+						// clone, so we don't create additional connections to the DB
+						$db = clone($CI->db);
+						if (empty($db->dbprefix))
+						{
+							$dbprefix = $this->_dmz_resolve_dbprefix();
+							if (is_string($dbprefix) && $dbprefix !== '')
+							{
+								$CI->db->dbprefix = $dbprefix;
+								$db->dbprefix = $dbprefix;
+							}
+						}
+						$db->_reset_select();
 					}
-					// clone, so we don't create additional connections to the DB
-					$this->db = clone($CI->db);
-					$this->db->_reset_select();
+					else
+					{
+						// connecting to a different database, so we *must* create additional copies.
+						// It is up to the developer to close the connection!
+						$db = $CI->load->database($this->db_params, TRUE, TRUE);
+					}
+					// these items are shared (for debugging)
+					if(is_object($CI->db) && isset($CI->db->dbdriver))
+					{
+						$db->queries =& $CI->db->queries;
+						$db->query_times =& $CI->db->query_times;
+					}
 				}
-				else
-				{
-					// connecting to a different database, so we *must* create additional copies.
-					// It is up to the developer to close the connection!
-					$this->db = $CI->load->database($this->db_params, TRUE, TRUE);
-				}
-				// these items are shared (for debugging)
-				if(is_object($CI->db) && isset($CI->db->dbdriver))
-				{
-					$this->db->queries =& $CI->db->queries;
-					$this->db->query_times =& $CI->db->query_times;
-				}
-			}
 			// ensure the created DB is disconnected, even if the app exits uncleanly
-			if(!isset($this->db->_has_shutdown_hook))
+			if(!isset($db->_has_shutdown_hook))
 			{
-				register_shutdown_function(array($this->db, 'close'));
-				$this->db->_has_shutdown_hook = TRUE;
+				register_shutdown_function(array($db, 'close'));
+				$db->_has_shutdown_hook = TRUE;
 			}
-			return $this->db;
+			$this->__set('db', $db);
+			return $db;
 		}
 
 		// Special case to get form_validation when first accessed
@@ -1144,9 +1166,9 @@ class DataMapper implements IteratorAggregate {
 					$this->lang->load('form_validation');
 					$this->load->unset_form_validation_class();
 				}
-				$this->form_validation = $CI->form_validation;
+				$this->__set('form_validation', $CI->form_validation);
 			}
-			return $this->form_validation;
+			return $this->__get('form_validation');
 		}
 
 		$has_many = isset($this->has_many[$name]);
@@ -1184,6 +1206,50 @@ class DataMapper implements IteratorAggregate {
 		}
 
 		return NULL;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Magic Set
+	 *
+	 * Stores undeclared model fields and related objects without creating
+	 * dynamic properties under PHP 8.2+.
+	 *
+	 * @ignore
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function __set($name, $value)
+	{
+		$this->_dmz_dynamic_properties[$name] = $value;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Magic isset
+	 *
+	 * @ignore
+	 * @param string $name
+	 * @return bool
+	 */
+	public function __isset($name)
+	{
+		return array_key_exists($name, $this->_dmz_dynamic_properties);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Magic unset
+	 *
+	 * @ignore
+	 * @param string $name
+	 */
+	public function __unset($name)
+	{
+		unset($this->_dmz_dynamic_properties[$name]);
 	}
 
 	// --------------------------------------------------------------------
@@ -1312,6 +1378,14 @@ class DataMapper implements IteratorAggregate {
 				$this->{$key} = clone($value);
 			}
 		}
+
+		foreach ($this->_dmz_dynamic_properties as $key => $value)
+		{
+			if (is_object($value))
+			{
+				$this->_dmz_dynamic_properties[$key] = clone($value);
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------
@@ -1337,6 +1411,7 @@ class DataMapper implements IteratorAggregate {
 	 *
 	 * @return	Iterator An iterator for the all array
 	 */
+	#[\ReturnTypeWillChange]
 	public function getIterator() {
 		if(isset($this->_dm_dataset_iterator)) {
 			return $this->_dm_dataset_iterator;
@@ -2869,6 +2944,16 @@ class DataMapper implements IteratorAggregate {
 	 */
 	public function add_table_name($field)
 	{
+		if ($field === NULL || $field === '')
+		{
+			return $field;
+		}
+
+		if ( ! is_string($field))
+		{
+			return $field;
+		}
+
 		// only add table if the field doesn't contain a dot (.) or open parentheses
 		if (preg_match('/[\.\(]/', $field) == 0)
 		{
@@ -6383,14 +6468,28 @@ class DataMapper implements IteratorAggregate {
 		// Populate this object with values from first record
 		foreach ($row as $key => $value)
 		{
-			$item->{$key} = $value;
+			if (property_exists($item, $key))
+			{
+				$item->{$key} = $value;
+			}
+			else
+			{
+				$item->__set($key, $value);
+			}
 		}
 
 		foreach ($this->fields as $field)
 		{
 			if (! isset($row->{$field}))
 			{
-				$item->{$field} = NULL;
+				if (property_exists($item, $field))
+				{
+					$item->{$field} = NULL;
+				}
+				else
+				{
+					$item->__set($field, NULL);
+				}
 			}
 		}
 
@@ -6559,15 +6658,43 @@ class DataMapper implements IteratorAggregate {
 				$CI->dm_lang = new DM_Lang();
 			}
 
-			$this->lang = $CI->dm_lang;
+			$this->__set('lang', $CI->dm_lang);
 			if ( ! isset($CI->dm_load))
 			{
 				$CI->dm_load = new DM_Load();
 			}
-			$this->load = $CI->dm_load;
+			$this->__set('load', $CI->dm_load);
 
 			$this->_dmz_ci_config = $CI->config;
 		}
+	}
+
+	/**
+	 * Resolve the configured DB table prefix even when CI's runtime config
+	 * has not propagated it onto the active DB handle yet.
+	 *
+	 * @return string
+	 */
+	protected function _dmz_resolve_dbprefix()
+	{
+		$CI =& get_instance();
+		$dbprefix = $CI->config->item('db_table_prefix');
+		if (is_string($dbprefix) && $dbprefix !== '')
+		{
+			return $dbprefix;
+		}
+
+		if (file_exists(FCPATH . 'config.php'))
+		{
+			$db = array();
+			require(FCPATH . 'config.php');
+			if (isset($db['default']['dbprefix']) && is_string($db['default']['dbprefix']) && $db['default']['dbprefix'] !== '')
+			{
+				return $db['default']['dbprefix'];
+			}
+		}
+
+		return '';
 	}
 
 	// --------------------------------------------------------------------
@@ -6693,11 +6820,13 @@ class DM_DatasetIterator implements Iterator, Countable
 	 * Gets the item at the current index $pos
 	 * @return DataMapper
 	 */
+	#[\ReturnTypeWillChange]
 	function current()
 	{
 		return $this->get($this->pos);
 	}
 
+	#[\ReturnTypeWillChange]
 	function key()
 	{
 		return $this->pos;
@@ -6716,16 +6845,19 @@ class DM_DatasetIterator implements Iterator, Countable
 		return $this->object;
 	}
 
+	#[\ReturnTypeWillChange]
 	function next()
 	{
 		$this->pos++;
 	}
 
+	#[\ReturnTypeWillChange]
 	function rewind()
 	{
 		$this->pos = 0;
 	}
 
+	#[\ReturnTypeWillChange]
 	function valid()
 	{
 		return ($this->pos < $this->count);
@@ -6735,6 +6867,7 @@ class DM_DatasetIterator implements Iterator, Countable
 	 * Returns the number of results
 	 * @return int
 	 */
+	#[\ReturnTypeWillChange]
 	function count()
 	{
 		return $this->count;

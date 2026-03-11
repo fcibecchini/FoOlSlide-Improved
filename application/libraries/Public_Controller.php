@@ -5,6 +5,8 @@ if (!defined('BASEPATH'))
 
 class Public_Controller extends MY_Controller
 {
+	public $RC;
+
 	public function __construct()
 	{
 		parent::__construct();

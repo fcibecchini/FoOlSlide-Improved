@@ -482,6 +482,10 @@ class Reader extends Public_Controller
 		$chapters->order_by('created', 'DESC')->get_paged($page, 15);
 		foreach($chapters as $key => $chapter) {
 			$chapter->comic->get_tags();
+			if ( ! is_array($chapter->comic->tags) && ! is_object($chapter->comic->tags))
+			{
+				continue;
+			}
 			foreach ($chapter->comic->tags as $tag) {
 				$tag->stub = URIpurifier($tag->name);
 			}

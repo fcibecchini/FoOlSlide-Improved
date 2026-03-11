@@ -659,6 +659,11 @@ if (!function_exists('prevnext'))
 	{
 
 		$echo = "";
+
+		if ( ! is_object($item) || ! isset($item->paged) || ! is_object($item->paged))
+		{
+			return $echo;
+		}
 	
 		if ($item->paged->total_pages > 1)
 		{
