@@ -24,6 +24,7 @@ class Tank_auth
 
 	private $error = array();
 	private $cached = array();
+	public $ci;
 
 	function __construct()
 	{

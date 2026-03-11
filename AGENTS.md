@@ -38,6 +38,7 @@
 - Link relevant issues or describe the motivation when there is no issue.
 
 ## Development Workflow
+- If the requested work is a fix or new feature and the current branch is a clean `main`, first create a feature branch before modifying files; do not wait for the user to ask.
 - Commit new features and fixes on feature branches only; do not commit directly to `main`.
 - Use the `gh` CLI to open pull requests targeting the `main` branch.
 - Always run the full test suite with `./scripts/run-tests.sh` to verify work before finalizing.

@@ -42,6 +42,7 @@ class CI_Loader {
 	protected $_ci_helpers			= array();
 	protected $_ci_varmap			= array('unit_test' => 'unit', 
 											'user_agent' => 'agent');
+	protected $_ci_dynamic_properties	= array();
 
 	/**
 	 * Constructor
@@ -57,6 +58,31 @@ class CI_Loader {
 		$this->_ci_view_paths = array(APPPATH.'views/'	=> TRUE);
 		
 		log_message('debug', "Loader Class Initialized");
+	}
+
+	public function __set($key, $value)
+	{
+		$this->_ci_dynamic_properties[$key] = $value;
+	}
+
+	public function __get($key)
+	{
+		if (array_key_exists($key, $this->_ci_dynamic_properties))
+		{
+			return $this->_ci_dynamic_properties[$key];
+		}
+
+		return NULL;
+	}
+
+	public function __isset($key)
+	{
+		return array_key_exists($key, $this->_ci_dynamic_properties);
+	}
+
+	public function __unset($key)
+	{
+		unset($this->_ci_dynamic_properties[$key]);
 	}
 
 	// --------------------------------------------------------------------
@@ -697,7 +723,12 @@ class CI_Loader {
 		// to become accessible from within the Controller and Model functions.
 
 		$_ci_CI =& get_instance();
-		foreach (get_object_vars($_ci_CI) as $_ci_key => $_ci_var)
+		$_ci_vars = get_object_vars($_ci_CI);
+		if (method_exists($_ci_CI, '_ci_get_dynamic_properties'))
+		{
+			$_ci_vars = array_merge($_ci_vars, $_ci_CI->_ci_get_dynamic_properties());
+		}
+		foreach ($_ci_vars as $_ci_key => $_ci_var)
 		{
 			if ( ! isset($this->$_ci_key))
 			{

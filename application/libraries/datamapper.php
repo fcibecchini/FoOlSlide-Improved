@@ -201,6 +201,12 @@ class DataMapper implements IteratorAggregate {
 	protected $_dmz_ci_config;
 
 	/**
+	 * Storage for undeclared model fields and related objects.
+	 * @var array
+	 */
+	protected $_dmz_dynamic_properties = array();
+
+	/**
 	 * Stores the shared configuration
 	 * @var array
 	 */
@@ -412,6 +418,10 @@ class DataMapper implements IteratorAggregate {
 	 * @var mixed
 	 */
 	public $extensions = NULL;
+	public $db;
+	public $lang;
+	public $load;
+	public $form_validation;
 	/**
 	 * If a query returns more than the number of rows specified here,
 	 * then it will be automatically freed after a get.
@@ -1079,6 +1089,11 @@ class DataMapper implements IteratorAggregate {
 	 */
 	public function __get($name)
 	{
+		if (array_key_exists($name, $this->_dmz_dynamic_properties))
+		{
+			return $this->_dmz_dynamic_properties[$name];
+		}
+
 		// We dynamically get DB when needed, and create a copy.
 		// This allows multiple queries to be generated at the same time.
 		if($name == 'db')
@@ -1184,6 +1199,50 @@ class DataMapper implements IteratorAggregate {
 		}
 
 		return NULL;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Magic Set
+	 *
+	 * Stores undeclared model fields and related objects without creating
+	 * dynamic properties under PHP 8.2+.
+	 *
+	 * @ignore
+	 * @param string $name
+	 * @param mixed $value
+	 */
+	public function __set($name, $value)
+	{
+		$this->_dmz_dynamic_properties[$name] = $value;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Magic isset
+	 *
+	 * @ignore
+	 * @param string $name
+	 * @return bool
+	 */
+	public function __isset($name)
+	{
+		return array_key_exists($name, $this->_dmz_dynamic_properties);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Magic unset
+	 *
+	 * @ignore
+	 * @param string $name
+	 */
+	public function __unset($name)
+	{
+		unset($this->_dmz_dynamic_properties[$name]);
 	}
 
 	// --------------------------------------------------------------------
@@ -1310,6 +1369,14 @@ class DataMapper implements IteratorAggregate {
 			if (is_object($value) && $key != 'db')
 			{
 				$this->{$key} = clone($value);
+			}
+		}
+
+		foreach ($this->_dmz_dynamic_properties as $key => $value)
+		{
+			if (is_object($value))
+			{
+				$this->_dmz_dynamic_properties[$key] = clone($value);
 			}
 		}
 	}

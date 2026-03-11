@@ -30,6 +30,7 @@
 class CI_Controller {
 
 	private static $instance;
+	protected $_ci_dynamic_properties = array();
 
 	/**
 	 * Constructor
@@ -56,6 +57,36 @@ class CI_Controller {
 	public static function &get_instance()
 	{
 		return self::$instance;
+	}
+
+	public function __set($key, $value)
+	{
+		$this->_ci_dynamic_properties[$key] = $value;
+	}
+
+	public function __get($key)
+	{
+		if (array_key_exists($key, $this->_ci_dynamic_properties))
+		{
+			return $this->_ci_dynamic_properties[$key];
+		}
+
+		return NULL;
+	}
+
+	public function __isset($key)
+	{
+		return array_key_exists($key, $this->_ci_dynamic_properties);
+	}
+
+	public function __unset($key)
+	{
+		unset($this->_ci_dynamic_properties[$key]);
+	}
+
+	public function _ci_get_dynamic_properties()
+	{
+		return $this->_ci_dynamic_properties;
 	}
 }
 // END Controller class

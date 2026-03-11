@@ -46,6 +46,7 @@ class CI_DB_driver {
 	var $result_id		= FALSE;
 	var $db_debug		= FALSE;
 	var $benchmark		= 0;
+	var $stricton		= FALSE;
 	var $query_count	= 0;
 	var $bind_marker	= '?';
 	var $save_queries	= TRUE;

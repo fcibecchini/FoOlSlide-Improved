@@ -35,6 +35,7 @@ class CI_Router {
 	var $method			= 'index';
 	var $directory		= '';
 	var $default_controller;
+	var $uri;
 
 	/**
 	 * Constructor

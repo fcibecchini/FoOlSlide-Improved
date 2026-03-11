@@ -15,6 +15,8 @@ if (!defined('BASEPATH'))
 
 class Reader_Controller {
 
+	public $CI;
+
 	function __construct() {
 		$this->CI = & get_instance();
 	}
