@@ -9,10 +9,14 @@ ADMIN_USER="${ADMIN_USER:-admin}"
 ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
 SERIES_STUB="${SERIES_STUB:-again-my-childhood-friend}"
 SERIES_NAME="${SERIES_NAME:-Again My Childhood Friend}"
+SEED_COMIC_UNIQID="${SEED_COMIC_UNIQID:-seedcomic001}"
+SEED_CHAPTER_TWO_UNIQID="${SEED_CHAPTER_TWO_UNIQID:-seedchapter002}"
 PRIMARY_TYPE_NAME="${PRIMARY_TYPE_NAME:-Manga}"
 SECONDARY_TYPE_NAME="${SECONDARY_TYPE_NAME:-Doujinshi}"
 PRIMARY_TAG_NAME="${PRIMARY_TAG_NAME:-School Life}"
 SECONDARY_TAG_NAME="${SECONDARY_TAG_NAME:-Romance}"
+SEED_PAGE1_SOURCE="${SEED_PAGE1_SOURCE:-$ROOT_DIR/scripts/page1.png}"
+SEED_PAGE2_SOURCE="${SEED_PAGE2_SOURCE:-$ROOT_DIR/scripts/page2.jpg}"
 
 require_cmd() {
 	local cmd="$1"
@@ -24,6 +28,11 @@ require_cmd() {
 
 require_cmd docker
 require_cmd curl
+
+if [ ! -f "$SEED_PAGE1_SOURCE" ] || [ ! -f "$SEED_PAGE2_SOURCE" ]; then
+	echo "[seed] Missing seeded chapter sample pages in scripts/." >&2
+	exit 1
+fi
 
 for ((i = 1; i <= 90; i++)); do
 	if curl -fsS "$BASE_URL/" >/dev/null 2>&1; then
@@ -148,6 +157,50 @@ SELECT
 	@comic_id, @team_id, 0, 2, 0, 1, 'it', 'Seed Chapter Two', 'seed-chapter-two', 'seedchapter002', 0, 'Seed chapter two', '', NOW(), NOW(), NOW(), @admin_user_id, @admin_user_id, 0
 FROM DUAL
 WHERE @chapter_two_id IS NULL;
+
+SET @chapter_two_id := IFNULL(@chapter_two_id, LAST_INSERT_ID());
+
+INSERT INTO fs_preferences (name, value, \`group\`)
+SELECT 'fs_dl_enabled', '1', 0
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_preferences WHERE name = 'fs_dl_enabled');
+
+UPDATE fs_preferences
+SET value = '1'
+WHERE name = 'fs_dl_enabled';
+
+INSERT INTO fs_preferences (name, value, \`group\`)
+SELECT 'fs_dl_volume_enabled', '1', 0
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_preferences WHERE name = 'fs_dl_volume_enabled');
+
+UPDATE fs_preferences
+SET value = '1'
+WHERE name = 'fs_dl_volume_enabled';
+
+DELETE FROM fs_pages WHERE chapter_id = @chapter_two_id;
+
+INSERT INTO fs_pages
+	(chapter_id, filename, hidden, created, lastseen, updated, creator, editor, height, width, mime, size)
+VALUES
+	(@chapter_two_id, '001.png', 0, NOW(), CURRENT_TIMESTAMP, NOW(), @admin_user_id, @admin_user_id, 1740, 1247, 'image/png', 1879978),
+	(@chapter_two_id, '002.jpg', 0, NOW(), CURRENT_TIMESTAMP, NOW(), @admin_user_id, @admin_user_id, 1073, 736, 'image/jpeg', 132961);
 SQL"
+
+docker compose cp "$SEED_PAGE1_SOURCE" web:/tmp/foolslide-seed-page1.png >/dev/null
+docker compose cp "$SEED_PAGE2_SOURCE" web:/tmp/foolslide-seed-page2.jpg >/dev/null
+
+docker compose exec -T web sh -lc "
+set -e
+comic_dir='/var/www/html/content/comics/${SERIES_STUB}_${SEED_COMIC_UNIQID}'
+chapter_dir=\"\$comic_dir/seed-chapter-two_${SEED_CHAPTER_TWO_UNIQID}\"
+mkdir -p \"\$chapter_dir\"
+cp /tmp/foolslide-seed-page1.png \"\$chapter_dir/001.png\"
+cp /tmp/foolslide-seed-page2.jpg \"\$chapter_dir/002.jpg\"
+chown -R www-data:www-data \"\$comic_dir\"
+chmod 0775 \"\$comic_dir\" \"\$chapter_dir\"
+chmod 0664 \"\$chapter_dir/001.png\" \"\$chapter_dir/002.jpg\"
+rm -f /tmp/foolslide-seed-page1.png /tmp/foolslide-seed-page2.jpg
+"
 
 echo "[seed] Ensured Docker dev seed data: ${ADMIN_USER}/${ADMIN_PASSWORD}, ${SERIES_STUB}"
