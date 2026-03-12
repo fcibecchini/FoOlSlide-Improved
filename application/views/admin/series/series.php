@@ -33,6 +33,33 @@ $this->buttoner[] = array(
 ?>
 
 <?php
+if (isset($chapters_by_volume) && count($chapters_by_volume) > 0)
+{
+	foreach ($chapters_by_volume as $volume => $volume_chapters)
+	{
+		$share_rows = 1;
+		$share_code = $volume_chapters[0]->share_volume();
+		$share_title = ((int) $volume > 0) ? sprintf(_('Share Volume %s'), $volume) : _('Share');
+		?>
+<div class="table">
+	<h3><?php echo $share_title; ?></h3>
+	<?php
+		echo form_open('', array('class' => 'form-stacked'));
+		echo '<div class="input"><textarea cols="120" rows="2" class="form-control" style="width: 100%; min-width: 48rem;" onFocus="this.select()">';
+		echo $share_code;
+		echo '</textarea></div>';
+		echo form_close();
+	?>
+</div>
+
+<br/>
+		<?php
+	}
+}
+
+?>
+
+<?php
 	$this->buttoner = array(
 		array(
 			'href' => site_url('/admin/series/add_new/'.$comic->stub),

@@ -2368,6 +2368,10 @@ msgstr "Informazioni Capitolo"
 msgid "Share"
 msgstr "Condivisione forum"
 
+#: application/views/admin/series/series.php:46
+msgid "Share Volume %s"
+msgstr "Condividi Volume %s"
+
 #: application/views/admin/series/chapter.php:40
 msgid "Pages"
 msgstr "Pagine"

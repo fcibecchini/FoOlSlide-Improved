@@ -1214,6 +1214,11 @@ class Chapter extends DataMapper
 		return '[CENTER][URL='.$this->href().'][IMG]'.site_url().'content/reader.png[/IMG][/URL][URL='.$this->download_href().'][IMG]'.site_url().'content/download.png[/IMG][/URL][/CENTER]';
 	}
 
+	public function share_volume()
+	{
+		return '[URL='.$this->download_volume_href().'][/URL]';
+	}
+
 	public function unique_href()
 	{
 		// If we already used this function, no need to recalc it.
