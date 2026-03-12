@@ -2107,6 +2107,10 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
+#: application/views/admin/series/series.php:46
+msgid "Share Volume %s"
+msgstr ""
+
 #: application/views/admin/series/chapter.php:40
 msgid "Pages"
 msgstr ""
