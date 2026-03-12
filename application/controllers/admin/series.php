@@ -180,6 +180,16 @@ class Series extends Admin_Controller
 		}
 
 		$data["chapters"] = $chapters;
+		$data["chapters_by_volume"] = array();
+		foreach ($chapters->all as $item)
+		{
+			$volume = (string) $item->volume;
+			if (!isset($data["chapters_by_volume"][$volume]))
+			{
+				$data["chapters_by_volume"][$volume] = array();
+			}
+			$data["chapters_by_volume"][$volume][] = $item;
+		}
 
 		if ($comic->get_thumb())
 			$comic->thumbnail = $comic->get_thumb();
