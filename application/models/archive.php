@@ -134,13 +134,20 @@ class Archive extends DataMapper
 			$this->remove_old();
 
 			$archive = new PclZip('content/comics/' . $filepath . '/' . $filename . '.zip');
-			$archive->create($files, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_NO_COMPRESSION);
+			$result = $archive->create($files, PCLZIP_OPT_REMOVE_ALL_PATH, PCLZIP_OPT_NO_COMPRESSION);
+			$archive_path = 'content/comics/' . $filepath . '/' . $filename . '.zip';
+
+			if ($result == 0 || !file_exists($archive_path))
+			{
+				log_message('error', 'compress: failed creating ZIP archive at ' . $archive_path . ' (' . $archive->errorInfo(TRUE) . ')');
+				show_error(_('Failed to generate the download archive. Please check the chapter directory permissions.'), 500);
+			}
 
 			$this->comic_id = $comic->id;
 			$this->volume_id = $volume_id;
 			$this->chapter_id = $chapter_id;
 			$this->filename = $filename . '.zip';
-			$this->size = filesize('content/comics/' . $filepath . '/' . $filename . '.zip');
+			$this->size = filesize($archive_path);
 			$this->lastdownload = date('Y-m-d H:i:s', time());
 			$this->save();
 		}

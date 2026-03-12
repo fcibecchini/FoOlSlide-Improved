@@ -12,6 +12,8 @@ MAX_HEADER_BYTES="${MAX_HEADER_BYTES:-7000}"
 AUTH_REQUIRED="${AUTH_REQUIRED:-0}"
 SEEDED_SERIES_STUB="${SEEDED_SERIES_STUB:-again-my-childhood-friend}"
 SEEDED_PRIMARY_TAG_NAME="${SEEDED_PRIMARY_TAG_NAME:-School Life}"
+SEEDED_DOWNLOAD_PATH="${SEEDED_DOWNLOAD_PATH:-/download/again-my-childhood-friend/seedchapter002/it/1/2/}"
+SEEDED_READ_PATH="${SEEDED_READ_PATH:-/read/again-my-childhood-friend/it/1/2/page/1}"
 
 require_cmd() {
 	local cmd="$1"
@@ -150,6 +152,44 @@ check_post_page() {
 		echo "[e2e] FAIL POST $path: unexpected content type ($content_type)" >&2
 		exit 1
 	fi
+}
+
+check_download_archive() {
+	local path="$1"
+	local min_bytes="$2"
+
+	local safe_name
+	safe_name="$(echo "download_${path}" | tr '/:?&=' '_')"
+	local headers_file="$tmp_dir/${safe_name}.headers"
+	local body_file="$tmp_dir/${safe_name}.zip"
+
+	curl -sS -L -D "$headers_file" -o "$body_file" "$BASE_URL$path"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	local body_bytes
+	body_bytes="$(wc -c < "$body_file" | tr -d ' ')"
+	local signature
+	signature="$(dd if="$body_file" bs=1 count=2 2>/dev/null)"
+
+	echo "[e2e] DOWNLOAD $path -> status=$http_code bytes=$body_bytes"
+
+	if [ "$http_code" != "200" ]; then
+		echo "[e2e] FAIL DOWNLOAD $path: expected HTTP 200, got $http_code" >&2
+		exit 1
+	fi
+
+	if [ "$body_bytes" -lt "$min_bytes" ]; then
+		echo "[e2e] FAIL DOWNLOAD $path: expected at least $min_bytes bytes, got $body_bytes" >&2
+		exit 1
+	fi
+
+	if [ "$signature" != "PK" ]; then
+		echo "[e2e] FAIL DOWNLOAD $path: response is not a ZIP archive" >&2
+		exit 1
+	fi
+
+	validate_header_size "$headers_file" "$path"
 }
 
 validate_header_size() {
@@ -313,6 +353,9 @@ else
 	check_post_page "/search/" "search=aaa%2Ftest%2Fnaruto" 800 "<!DOCTYPE html"
 	check_post_page "/search_tags/" "search=invalid_payload" 800 "<!DOCTYPE html"
 	check_search_tags_multi
+	check_page "$SEEDED_READ_PATH" 1000 "<!DOCTYPE html"
+	check_download_archive "$SEEDED_DOWNLOAD_PATH" 1000
+	check_page "$SEEDED_READ_PATH" 1000 "<!DOCTYPE html"
 	if admin_login; then
 		check_authed_page "/admin/series/add_new/" 1000 "<!DOCTYPE html"
 		check_authed_page "/admin/series/series/${SEEDED_SERIES_STUB}/" 1000 "Seed Chapter Two"
