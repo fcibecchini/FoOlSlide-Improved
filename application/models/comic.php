@@ -523,10 +523,11 @@ class Comic extends DataMapper
 	 */
 	public function update_comic_db($data = array())
 	{
+		$is_new = !(isset($data["id"]) && $data['id'] != '');
 
 		// Check if we're updating or creating a new series by looking at $data["id"].
 		// False is returned if the chapter ID was not found.
-		if (isset($data["id"]) && $data['id'] != '')
+		if (!$is_new)
 		{
 			$this->where("id", $data["id"])->get();
 			if ($this->result_count() == 0)
@@ -552,7 +553,7 @@ class Comic extends DataMapper
 
 		// always set the editor name
 		$this->editor = $this->logged_id();
-		$input_stub = $data["stub"];
+		$input_stub = isset($data["stub"]) ? trim($data["stub"]) : '';
 		$has_custom_slug = isset($data["has_custom_slug"]) && $data["has_custom_slug"] == 1;
 
 		// Unset sensible variables
@@ -573,15 +574,18 @@ class Comic extends DataMapper
 		// Loop over the array and assign values to the variables.
 		foreach ($data as $key => $value)
 		{
-			if (($key !== 'tags') || ($key !== 'parody')) 
+			if (($key !== 'tags') && ($key !== 'parody')) 
 				$this->$key = $value;
 		}
 
-		// Double check that we have all the necessary automated variables
-		if (!isset($this->uniqid))
+		// Double check that we have all the necessary automated variables.
+		if (!isset($this->uniqid) || $this->uniqid === '')
 			$this->uniqid = uniqid();
-		if (!isset($this->stub))
+		if ($is_new || trim((string) $this->stub) === '')
+		{
+			$this->to_stub = $this->name;
 			$this->stub = $this->stub();
+		}
 
 		// Create a new stub if the name has changed
 		if (isset($old_name) && isset($old_stub) && ($old_name != $this->name))
@@ -593,7 +597,7 @@ class Comic extends DataMapper
 		}
 		
 		// stub changed by user
-		if ($has_custom_slug & $input_stub != "" && ($this->stub != $input_stub || (isset($old_stub) && $old_stub != $input_stub)))
+		if ($has_custom_slug && $input_stub !== "" && ($this->stub != $input_stub || (isset($old_stub) && $old_stub != $input_stub)))
 		{
 			$this->stub = $input_stub;
 			$this->stub = $this->stub();
