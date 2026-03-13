@@ -31,6 +31,11 @@ if ! docker compose version >/dev/null 2>&1; then
 	exit 127
 fi
 
+db_query() {
+	local sql="$1"
+	docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"$sql\"" 2>/dev/null | tr -d '\r'
+}
+
 echo "[e2e] Starting Docker Compose stack"
 docker compose up -d --build
 
@@ -289,6 +294,122 @@ check_authed_page() {
 	validate_header_size "$headers_file" "$path"
 }
 
+check_authed_post_redirect() {
+	local path="$1"
+	local post_data="$2"
+	local expected_location_fragment="$3"
+
+	local safe_name
+	safe_name="$(echo "authed_post_${path}_${expected_location_fragment}" | tr '/:?&= ' '_')"
+	local headers_file="$tmp_dir/${safe_name}.headers"
+	local body_file="$tmp_dir/${safe_name}.body"
+
+	curl -sS -D "$headers_file" -o "$body_file" \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "$post_data" \
+		"$BASE_URL$path"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	local location
+	location="$(awk 'BEGIN{IGNORECASE=1} /^Location:/ { val=$2 } END { sub(/\r$/, "", val); print val }' "$headers_file")"
+
+	echo "[e2e] AUTH POST $path -> status=$http_code location=$location"
+
+	if [ "$http_code" != "302" ]; then
+		echo "[e2e] FAIL AUTH POST $path: expected HTTP 302, got $http_code" >&2
+		exit 1
+	fi
+
+	if [[ "$location" != *"$expected_location_fragment"* ]]; then
+		echo "[e2e] FAIL AUTH POST $path: expected redirect containing '$expected_location_fragment', got '$location'" >&2
+		exit 1
+	fi
+
+	validate_header_size "$headers_file" "$path"
+}
+
+create_series_via_admin() {
+	local series_name="$1"
+	local tag_value="$2"
+	local data="name=${series_name// /+}&stub=&typeh_id=1&parody=&urlforum=&description=&customchapter=&format=1&author=&artist=&author_stub=&parody_stub=&id=&tags%5B%5D=${tag_value}&tags%5B%5D=0&licensed%5B%5D=&submit=Save"
+
+	curl -sS -o /dev/null \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "$data" \
+		"$BASE_URL/admin/series/add_new/"
+
+	local stub
+	stub="$(db_query "SELECT stub FROM fs_comics WHERE name = '${series_name}' ORDER BY id DESC LIMIT 1;")"
+	if [ -z "$stub" ]; then
+		echo "[e2e] FAIL create series '${series_name}': no comic row found." >&2
+		exit 1
+	fi
+
+	if [ "$stub" = "0" ] || [ "$stub" = "" ]; then
+		echo "[e2e] FAIL create series '${series_name}': stub was not generated." >&2
+		exit 1
+	fi
+
+	check_authed_page "/admin/series/series/${stub}/" 1000 "${series_name}" >&2
+	check_authed_page "/admin/series/add_new/${stub}" 1000 "<!DOCTYPE html" >&2
+
+	echo "$stub"
+}
+
+create_chapter_via_admin() {
+	local series_stub="$1"
+	local chapter_number="$2"
+	local chapter_name="$3"
+	local comic_id
+	comic_id="$(db_query "SELECT id FROM fs_comics WHERE stub = '${series_stub}' ORDER BY id DESC LIMIT 1;")"
+	if [ -z "$comic_id" ]; then
+		echo "[e2e] FAIL create chapter for '${series_stub}': no comic row found." >&2
+		exit 1
+	fi
+
+	local data="comic_id=${comic_id}&name=${chapter_name// /+}&team%5B%5D=Anonymous&team%5B%5D=&volume=1&chapter=${chapter_number}&subchapter=0&language=it&hidden=0&description=&submit=Save"
+
+	curl -sS -o /dev/null \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "$data" \
+		"$BASE_URL/admin/series/add_new/${series_stub}"
+
+	local chapter_id
+	chapter_id="$(db_query "SELECT ch.id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE c.stub = '${series_stub}' AND ch.chapter = ${chapter_number} ORDER BY ch.id DESC LIMIT 1;")"
+	if [ -z "$chapter_id" ]; then
+		echo "[e2e] FAIL create chapter for '${series_stub}': no chapter row found." >&2
+		exit 1
+	fi
+
+	check_authed_page "/admin/series/series/${series_stub}/${chapter_id}/" 1000 "${chapter_name}" >&2
+
+	echo "$chapter_id"
+}
+
+upload_page_via_admin() {
+	local chapter_id="$1"
+	local response_file="$tmp_dir/upload_${chapter_id}.json"
+
+	curl -sS -o "$response_file" \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-F "chapter_id=${chapter_id}" \
+		-F "Filedata[]=@${ROOT_DIR}/scripts/page1.png;type=image/png" \
+		"$BASE_URL/admin/series/upload"
+
+	if ! grep -q '"name"' "$response_file"; then
+		echo "[e2e] FAIL upload for chapter ${chapter_id}: upload endpoint did not return file metadata." >&2
+		cat "$response_file" >&2
+		exit 1
+	fi
+}
+
 check_search_tags_multi() {
 	local tag_ids
 	tag_ids="$(docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"SELECT id FROM fs_tags ORDER BY id LIMIT 2\"" 2>/dev/null | tr '\n' ' ' | xargs || true)"
@@ -366,6 +487,18 @@ else
 		else
 			echo "[e2e] SKIP /admin/series/add_new/<stub>: no existing series found in local DB."
 		fi
+
+		smoke_suffix="$(date +%s)"
+		no_tag_stub="$(create_series_via_admin "Smoke Series No Tag ${smoke_suffix}" 0)"
+		tagged_stub="$(create_series_via_admin "Smoke Series Tagged ${smoke_suffix}" 1)"
+		seeded_upload_chapter_id="$(db_query "SELECT ch.id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE c.stub = '${SEEDED_SERIES_STUB}' AND ch.uniqid = 'seedchapter002' LIMIT 1;")"
+		if [ -z "$seeded_upload_chapter_id" ]; then
+			echo "[e2e] FAIL upload smoke: no seeded chapter found." >&2
+			exit 1
+		fi
+		upload_page_via_admin "$seeded_upload_chapter_id"
+
+		check_authed_page "/admin/series/series/${tagged_stub}/" 1000 "Smoke Series Tagged ${smoke_suffix}"
 	fi
 fi
 

@@ -764,9 +764,15 @@ class Series extends Admin_Controller
 		}
 	}
 
-	function upload()
+	function upload($upload_type = "")
 	{
 		$info = array();
+
+		if (!isset($_FILES['Filedata']) || !isset($_FILES['Filedata']['tmp_name']))
+		{
+			$this->output->set_output(json_encode($info));
+			return true;
+		}
 
 		// compatibility for flash uploader and browser not supporting multiple upload
 		if (is_array($_FILES['Filedata']) && !is_array($_FILES['Filedata']['tmp_name']))
@@ -785,6 +791,11 @@ class Series extends Admin_Controller
 				$pages = $this->files_model->page($_FILES['Filedata']['tmp_name'][$file], $_FILES['Filedata']['name'][$file], $this->input->post('chapter_id'));
 			else
 				$pages = $this->files_model->compressed_chapter($_FILES['Filedata']['tmp_name'][$file], $_FILES['Filedata']['name'][$file], $this->input->post('chapter_id'));
+
+			if (!$pages || !is_array($pages))
+			{
+				continue;
+			}
 
 			foreach ($pages as $page)
 			{

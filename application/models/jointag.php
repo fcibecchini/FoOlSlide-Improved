@@ -59,63 +59,76 @@ class Jointag extends DataMapper {
 
 	public function add_jointag_via_name($tags) {
 		$result = array();
-		
-		//tags is an array of ordered numbers that must be changed with an array of tag names  
+
 		$alltags = new Tag();
-		$alltags->order_by('name','ASC')->get();
-		
-		$newtags = array();
-		foreach ($alltags->all as $new) 
+		$alltags->order_by('name', 'ASC')->get();
+
+		$ordered_tag_ids = array();
+		foreach ($alltags->all as $tag)
 		{
-			$newtags[] = $new->name;
+			$ordered_tag_ids[] = (int) $tag->id;
 		}
-		
-		foreach ($tags as $key => $value)
+
+		foreach ($tags as $value)
 		{
-			$tags[$key] = $newtags[$value-1];
-		} 
-		
-		foreach ($tags as $tag) {
-			$ta = new Tag();
-			$ta->where('name', $tag)->get();
-			if ($ta->result_count() == 0) {
-				set_notice('error', _('One of the named tags doesn\'t exist.'. $tag));
-				log_message('error', 'add_joint_via_name: tag does not exist');
+			if ($value === '' || $value === NULL || $value === 0 || $value === '0')
+			{
+				continue;
+			}
+
+			$tag = new Tag();
+			if (is_numeric($value))
+			{
+				$numeric_value = (int) $value;
+				$tag->where('id', $numeric_value)->get();
+				if ($tag->result_count() == 0 && isset($ordered_tag_ids[$numeric_value - 1]))
+				{
+					$tag = new Tag();
+					$tag->where('id', $ordered_tag_ids[$numeric_value - 1])->get();
+				}
+			}
+			else
+			{
+				$tag->where('name', $value)->get();
+			}
+
+			if ($tag->result_count() == 0)
+			{
+				set_notice('error', _('One of the named tags doesn\'t exist.'));
+				log_message('error', 'add_jointag_via_name: tag does not exist');
 				return false;
 			}
-			$result[] = $ta->id;
+
+			$result[] = (int) $tag->id;
 		}
+
 		return $this->add_jointag($result);
 	}
 
 	// $tags is an array of IDs
 	public function add_jointag($tags) {
-		if (!$result = $this->check_jointag($tags)) {
-			$maxjointag = new Jointag();
-			/**
-			 * @todo select_max returns an error:
-			 * ERROR - 2011-05-31 19:58:16 --> Severity: Notice --> Undefined offset: 0 /var/www/manga/beta3/system/database/DB_active_rec.php 1719
-			*/
-			//$maxjoint->select_max('joint_id')->get();
-			$maxjointag->order_by('jointag_id', 'DESC')->limit(1)->get();
-			$max = $maxjointag->jointag_id + 1;
+		$tags = array_map('intval', (array) $tags);
+		$tags = array_values(array_unique(array_filter($tags)));
+		sort($tags);
 
-			foreach ($tags as $key => $tag) {
-				$jointag = new Jointag();
-				$jointag->jointag_id = $max;
-				$jointag->tag_id = $tag;
-				if (!$jointag->save()) {
-					if ($jointag->valid) {
-						set_notice('error', _('Check that you have inputted all the required fields.'));
-						log_message('error', 'add_jointag: validation failed');
-					}
-					else {
-						set_notice('error', _('Couldn\'t save jointag to database due to an unknown error.'));
-						log_message('error', 'add_jointag: saving failed');
-					}
+		if (empty($tags))
+		{
+			return false;
+		}
+
+		if (!$result = $this->check_jointag($tags)) {
+			$CI = & get_instance();
+			$max_row = $CI->db->select_max('jointag_id')->get('jointags')->row();
+			$max = ((int) $max_row->jointag_id) + 1;
+
+			foreach ($tags as $tag) {
+				if (!$CI->db->insert('jointags', array('jointag_id' => $max, 'tag_id' => $tag))) {
+					set_notice('error', _('Couldn\'t save jointag to database due to an unknown error.'));
+					log_message('error', 'add_jointag: saving failed');
 					return false;
 				}
 			}
+
 			return $max;
 		}
 		return $result;

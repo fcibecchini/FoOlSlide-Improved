@@ -300,12 +300,14 @@ class Page extends DataMapper
 	 */
 	public function update_page_db($data = array())
 	{
+		$CI = & get_instance();
+
 		// Check if we're updating or creating a new entry by looking at $data["id"].
 		// False is returned if the ID was not found.
-		if (isset($data["id"]))
+		if (isset($data["id"]) && $data["id"] !== '')
 		{
 			$this->where("id", $data["id"])->get();
-			if ($chapter->result_count() == 0)
+			if ($this->result_count() == 0)
 			{
 				set_notice('error', _('There isn\'t a page in the database related to this ID.'));
 				log_message('error', 'update_page_db: failed to find requested id');
@@ -354,20 +356,36 @@ class Page extends DataMapper
 			$this->$key = $value;
 		}
 
-		// let's save and give some error check. Push false if fail, true if good.
-		$success = $this->save();
+		$payload = array(
+			'chapter_id' => (int) $this->chapter_id,
+			'filename' => $this->filename,
+			'hidden' => isset($this->hidden) ? (int) $this->hidden : 0,
+			'lastseen' => isset($this->lastseen) ? $this->lastseen : NULL,
+			'creator' => $this->creator,
+			'editor' => $this->editor,
+			'width' => (int) $this->width,
+			'height' => (int) $this->height,
+			'mime' => $this->mime,
+			'size' => (int) $this->size,
+		);
+
+		if (isset($this->id) && $this->id !== '' && $this->id !== NULL)
+		{
+			$success = $CI->db->where('id', $this->id)->update('pages', $payload);
+		}
+		else
+		{
+			$success = $CI->db->insert('pages', $payload);
+			if ($success)
+			{
+				$this->id = $CI->db->insert_id();
+			}
+		}
+
 		if (!$success)
 		{
-			if (!$this->valid)
-			{
-				set_notice('error', _('Check that you have inputted all the required fields.'));
-				log_message('error', 'update_page_db: failed validation');
-			}
-			else
-			{
-				set_notice('error', _('Failed to write to database for unknown reasons.'));
-				log_message('error', 'update_page_db: failed to save');
-			}
+			set_notice('error', _('Failed to write to database for unknown reasons.'));
+			log_message('error', 'update_page_db: failed to save');
 			return false;
 		}
 		else

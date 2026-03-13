@@ -121,7 +121,7 @@ $this->buttoner[] = array(
 <script type="text/javascript">
 	jQuery(function () {
 		jQuery('#fileupload').fileupload({
-			url: '<?php echo site_url('/admin/series/upload/compressed_chapter'); ?>',
+			url: '<?php echo site_url('/admin/series/upload'); ?>',
 			sequentialUploads: true,
 			formData: [
 				{
