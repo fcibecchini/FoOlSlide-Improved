@@ -80,11 +80,13 @@ class Jointag extends DataMapper {
 			if (is_numeric($value))
 			{
 				$numeric_value = (int) $value;
-				$tag->where('id', $numeric_value)->get();
-				if ($tag->result_count() == 0 && isset($ordered_tag_ids[$numeric_value - 1]))
+				if (isset($ordered_tag_ids[$numeric_value - 1]))
 				{
-					$tag = new Tag();
 					$tag->where('id', $ordered_tag_ids[$numeric_value - 1])->get();
+				}
+				else
+				{
+					$tag->where('id', $numeric_value)->get();
 				}
 			}
 			else

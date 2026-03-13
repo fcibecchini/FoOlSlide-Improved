@@ -334,6 +334,7 @@ check_authed_post_redirect() {
 create_series_via_admin() {
 	local series_name="$1"
 	local tag_value="$2"
+	local expected_tag_id="${3:-}"
 	local data="name=${series_name// /+}&stub=&typeh_id=1&parody=&urlforum=&description=&customchapter=&format=1&author=&artist=&author_stub=&parody_stub=&id=&tags%5B%5D=${tag_value}&tags%5B%5D=0&licensed%5B%5D=&submit=Save"
 
 	curl -sS -o /dev/null \
@@ -353,6 +354,15 @@ create_series_via_admin() {
 	if [ "$stub" = "0" ] || [ "$stub" = "" ]; then
 		echo "[e2e] FAIL create series '${series_name}': stub was not generated." >&2
 		exit 1
+	fi
+
+	if [ -n "$expected_tag_id" ]; then
+		local saved_tag_id
+		saved_tag_id="$(db_query "SELECT j.tag_id FROM fs_comics c JOIN fs_jointags j ON j.jointag_id = c.jointag_id WHERE c.stub = '${stub}' ORDER BY j.tag_id LIMIT 1;")"
+		if [ "$saved_tag_id" != "$expected_tag_id" ]; then
+			echo "[e2e] FAIL create series '${series_name}': expected tag_id ${expected_tag_id}, got ${saved_tag_id:-<none>}." >&2
+			exit 1
+		fi
 	fi
 
 	check_authed_page "/admin/series/series/${stub}/" 1000 "${series_name}" >&2
@@ -490,7 +500,8 @@ else
 
 		smoke_suffix="$(date +%s)"
 		no_tag_stub="$(create_series_via_admin "Smoke Series No Tag ${smoke_suffix}" 0)"
-		tagged_stub="$(create_series_via_admin "Smoke Series Tagged ${smoke_suffix}" 1)"
+		expected_tag_id="$(db_query "SELECT id FROM fs_tags ORDER BY name ASC LIMIT 1 OFFSET 1;")"
+		tagged_stub="$(create_series_via_admin "Smoke Series Tagged ${smoke_suffix}" 2 "$expected_tag_id")"
 		seeded_upload_chapter_id="$(db_query "SELECT ch.id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE c.stub = '${SEEDED_SERIES_STUB}' AND ch.uniqid = 'seedchapter002' LIMIT 1;")"
 		if [ -z "$seeded_upload_chapter_id" ]; then
 			echo "[e2e] FAIL upload smoke: no seeded chapter found." >&2
