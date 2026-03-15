@@ -40,6 +40,9 @@
 
 ## Development Workflow
 - If the requested work is a fix or new feature and the current branch is a clean `main`, first create a feature branch before modifying files; do not wait for the user to ask.
+- For fixes and new features, use red/green TDD: add or update a failing automated test first, make the change, then rerun the tests to confirm they pass.
+- For fixes and new features, always run manual browser verification with `agent-browser` before finalizing. Official repo: https://github.com/vercel-labs/agent-browser
+- If a bug is discovered and fixed through browser automation/manual browser testing, add permanent automated coverage for that path as part of the same change.
 - Commit new features and fixes on feature branches only; do not commit directly to `main`.
 - Use the `gh` CLI to open pull requests targeting the `main` branch.
 - Always run all repository verification scripts in `scripts/` that are part of the normal workflow, especially `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke.sh`, before finalizing.
