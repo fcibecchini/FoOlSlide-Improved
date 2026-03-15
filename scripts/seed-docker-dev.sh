@@ -178,6 +178,15 @@ UPDATE fs_preferences
 SET value = '1'
 WHERE name = 'fs_dl_volume_enabled';
 
+INSERT INTO fs_preferences (name, value, \`group\`)
+SELECT 'fs_about_admin_email', 'about@example.com', 0
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_preferences WHERE name = 'fs_about_admin_email');
+
+UPDATE fs_preferences
+SET value = 'about@example.com'
+WHERE name = 'fs_about_admin_email';
+
 DELETE FROM fs_pages WHERE chapter_id = @chapter_two_id;
 
 INSERT INTO fs_pages

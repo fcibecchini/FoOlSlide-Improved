@@ -3484,7 +3484,7 @@ msgstr "è una piattaforma di lettura di manga e fumetti dedicata a fornire cont
 
 #: content/themes/default/views/about.php:41
 msgid "If you have any questions or feedback, please contact us using the information provided above."
-msgstr "Se hai domande o feedback, contattaci utilizzando le informazioni fornite sopra."
+msgstr "Se hai domande o feedback, contattaci utilizzando il modulo qui sotto."
 
 #: application/controllers/admin/preferences.php:202
 msgid "About Page"
@@ -3534,3 +3534,44 @@ msgstr "Contatto"
 #: content/themes/default/views/about.php:31 content/themes/dazen-skin/views/about.php:29
 msgid "About This Site"
 msgstr "Informazioni su Questo Sito"
+
+#: content/themes/default/views/about.php:41 content/themes/dazen-skin/views/about.php:39
+msgid "Contact Us"
+msgstr "Contattaci"
+
+#: content/themes/default/views/about.php:77 content/themes/dazen-skin/views/about.php:75
+msgid "Send Message"
+msgstr "Invia messaggio"
+
+#: application/controllers/reader.php:83
+msgid "The contact form is currently unavailable."
+msgstr "Il modulo di contatto non è attualmente disponibile."
+
+#: application/controllers/reader.php:95
+msgid "Please wait a minute before sending another message."
+msgstr "Attendi un minuto prima di inviare un altro messaggio."
+
+#: application/controllers/reader.php:128
+msgid "We couldn't send your message right now. Please try again later."
+msgstr "Non siamo riusciti a inviare il tuo messaggio in questo momento. Riprova più tardi."
+
+#: application/controllers/reader.php:137
+#, php-format
+msgid "[%s] About Page Contact: %s"
+msgstr "[%s] Contatto dalla pagina Chi Siamo: %s"
+
+#: application/controllers/reader.php:184 application/controllers/reader.php:188
+msgid "Your message has been sent."
+msgstr "Il tuo messaggio è stato inviato."
+
+#: application/helpers/notices_helper.php:95
+msgid "Success"
+msgstr "Operazione riuscita"
+
+#: application/helpers/notices_helper.php:98
+msgid "Error"
+msgstr "Errore"
+
+#: application/helpers/notices_helper.php:102
+msgid "Warning"
+msgstr "Avviso"

@@ -478,6 +478,8 @@ else
 	seed_docker_dev_state
 	check_page "/latest/" 1000 "<!DOCTYPE html"
 	check_page "/tags/" 1000 "${SEEDED_PRIMARY_TAG_NAME}"
+	check_page "/about/" 1000 'name="contact_name"'
+	check_post_page "/about/" "contact_name=&contact_email=&contact_subject=&contact_message=&contact_website=" 1000 'contact_name'
 	check_page "/account/auth/login/" 1000 'name="login"'
 	check_page "/admin/" 1000 "<!DOCTYPE html"
 	check_page "/install" 1000 "<!DOCTYPE html"
