@@ -32,7 +32,7 @@
 	<div class="group">
 		<div class="elemento">
 			<?php if (get_setting('fs_about_message')) : ?>
-				<p><?php echo get_setting('fs_about_message'); ?></p>
+				<?php echo get_setting('fs_about_message'); ?>
 			<?php else : ?>
 				<p>
 					<?php echo get_setting('fs_gen_site_title'); ?> <?php echo _('is a manga and comic reading platform dedicated to providing quality content to our community. Our mission is to make manga and comics easily accessible to everyone by maintaining an organized and user-friendly platform.'); ?>
