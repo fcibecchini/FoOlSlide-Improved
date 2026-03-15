@@ -1,10 +1,9 @@
-#
 # Translators:
 # Fabio Woxxy <woxxy@foolrulez.org>, 2011.
 msgid ""
 msgstr ""
 "Project-Id-Version: FoOlSlide\n"
-"Report-Msgid-Bugs-To: http://github.com/woxxy/FoOlSlide/issues\n"
+"Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-06-06 10:18+0200\n"
 "PO-Revision-Date: 2016-06-06 10:22+0200\n"
 "Last-Translator: Woxxy <woxxy@foolrulez.org>\n"
@@ -14,11 +13,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.8.8\n"
 "X-Poedit-Basepath: ../../../..\n"
 "X-Poedit-KeywordsList: _;gettext;gettext_noop\n"
-"X-Poedit-SourceCharset: UTF-8\n"
-"X-Generator: Poedit 1.8.8\n"
 "X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 #: application/controllers/account/auth.php:14
 msgid "Authorization"
@@ -134,7 +133,7 @@ msgstr "Lascia la posizione di capogruppo"
 #: application/controllers/admin/balancer.php:16
 #: application/libraries/Admin_Controller.php:117
 msgid "Load Balancer"
-msgstr ""
+msgstr "Bilanciatore del carico"
 
 #: application/controllers/admin/balancer.php:61
 #: application/controllers/admin/balancer.php:133
@@ -376,8 +375,8 @@ msgstr "Link al sito principale"
 
 #: application/controllers/admin/preferences.php:118
 msgid ""
-"A small URL linked to another page. This is located next to the title at the "
-"top of every page."
+"A small URL linked to another page. This is located next to the title at the"
+" top of every page."
 msgstr ""
 "Un breve URL collegato a un'altra pagina. Viene inserito dopo il titolo in "
 "alto ad ogni pagina."
@@ -427,8 +426,9 @@ msgid ""
 "<a href=\"https://help.disqus.com/customer/portal/articles/466208\">More "
 "info here</a>. If left empty, the Disqus comment section is disabled"
 msgstr ""
-"<a href=\"https://help.disqus.com/customer/portal/"
-"articles/466208\">Ulteriori informazioni</a>. Per favore, lasciare vuoto."
+"<a "
+"href=\"https://help.disqus.com/customer/portal/articles/466208\">Ulteriori "
+"informazioni</a>. Per favore, lasciare vuoto."
 
 #: application/controllers/admin/preferences.php:228
 msgid "Pre-Header Text"
@@ -444,7 +444,8 @@ msgstr "Testo Header"
 
 #: application/controllers/admin/preferences.php:245
 msgid ""
-"Inserts the text above in the header where the nagivation linkes are located."
+"Inserts the text above in the header where the nagivation linkes are "
+"located."
 msgstr ""
 "Inserisce il testo nell'header dove si trovano i link per la navigazione."
 
@@ -462,20 +463,20 @@ msgstr "Codice Header in Homepage"
 
 #: application/controllers/admin/preferences.php:267
 msgid ""
-"This will insert the HTML code above inside the &lt;HEAD&gt; in the homepage "
-"only."
+"This will insert the HTML code above inside the &lt;HEAD&gt; in the homepage"
+" only."
 msgstr "Inserisce il codice HTML all'interno dell'&lt;HEAD&gt; nella homepage"
 
 #: application/controllers/admin/preferences.php:272
 msgid "Comic Keywords"
-msgstr ""
+msgstr "Parole chiave dei fumetti"
 
 #: application/controllers/admin/preferences.php:278
 msgid ""
 "By default comic name, tags, parodies and authors will be added inside the "
-"&lt;HEAD&gt; as keywords in the main comic page. If you'd like to have other "
-"custom keywords, write them there. Note that each keyword must be separated "
-"from the others with a comma."
+"&lt;HEAD&gt; as keywords in the main comic page. If you'd like to have other"
+" custom keywords, write them there. Note that each keyword must be separated"
+" from the others with a comma."
 msgstr ""
 "Per default il nome della serie, i generi, la parodia e l'autore vengono "
 "aggiunti come keyword nell'&lt;HEAD&gt della pagina relativa alla serie. Se "
@@ -498,15 +499,16 @@ msgstr "Testo a fondo pagina"
 msgid ""
 "Inserts the text above in the footer such as disclaimers. (Note: If the "
 "content uploaded does not belong to you, do not write things like \"All "
-"Rights Reserived&copy;\" above. However, if you're releasing your own works, "
-"please consider using <a href=\"http://creativecommons.org/\">Creative "
+"Rights Reserived&copy;\" above. However, if you're releasing your own works,"
+" please consider using <a href=\"http://creativecommons.org/\">Creative "
 "Commons Licenses</a> to protect them.)"
 msgstr ""
 "Inserisce il testo a piè di pagina in qualità di disclaimer. (Nota: se il "
-"contenuto caricato non appartiene a te, non scrivere cose del tipo \"Tutti i "
-"diritti riservati &copy;\" . Se invece stai pubblicando i tuoi lavori, "
-"prendi in considerazione la possibilità di usare <a href=\"http://"
-"creativecommons.org/\">Creative Commons Licenses</a> per proteggerli.)"
+"contenuto caricato non appartiene a te, non scrivere cose del tipo \"Tutti i"
+" diritti riservati &copy;\" . Se invece stai pubblicando i tuoi lavori, "
+"prendi in considerazione la possibilità di usare <a "
+"href=\"http://creativecommons.org/\">Creative Commons Licenses</a> per "
+"proteggerli.)"
 
 #: application/controllers/admin/preferences.php:305
 msgid "Footer Code"
@@ -604,9 +606,9 @@ msgid ""
 "href=\"http://www.google.com/recaptcha\">reCAPTCHA&trade;</a>, which will "
 "provide you with a public and a private key."
 msgstr ""
-"Per usare reCAPTCHA&trade; devi registrarti a <a href=\"http://www.google."
-"com/recaptcha\">reCAPTCHA&trade;</a>, che ti fornirà una chiave pubblica e "
-"privata."
+"Per usare reCAPTCHA&trade; devi registrarti a <a "
+"href=\"http://www.google.com/recaptcha\">reCAPTCHA&trade;</a>, che ti "
+"fornirà una chiave pubblica e privata."
 
 #: application/controllers/admin/preferences.php:530
 #: application/controllers/admin/preferences.php:574
@@ -624,8 +626,8 @@ msgstr "Abilita i Download dei Volumi"
 #: application/controllers/admin/preferences.php:551
 msgid ""
 "Note: Direct downloads usually increase bandwidth usage by one-third. The "
-"issue is whether you have enough space to keep both images and ZIP archives. "
-"FoOlSlide tries to avoid this problem by using on-the-fly ZIP compression "
+"issue is whether you have enough space to keep both images and ZIP archives."
+" FoOlSlide tries to avoid this problem by using on-the-fly ZIP compression "
 "and caching."
 msgstr ""
 "Nota: i download diretti di solito incrementano l'uso della banda di un "
@@ -639,8 +641,8 @@ msgstr "Cache massima per i download diretti in Megabyte"
 
 #: application/controllers/admin/preferences.php:562
 msgid ""
-"Once this limit has been reached, ZIP archives that have not been downloaded "
-"recently will be removed. If a very large number is set, the ZIP archives "
+"Once this limit has been reached, ZIP archives that have not been downloaded"
+" recently will be removed. If a very large number is set, the ZIP archives "
 "will be cached indefinitely."
 msgstr ""
 "Quando il limite viene raggiunto, gli archivi ZIP che non sono stati "
@@ -973,8 +975,8 @@ msgstr "Devi correggere gli errori qui sotto per continuare."
 #: application/controllers/admin/system.php:345
 #, php-format
 msgid ""
-"To repair automatically by removing the unidentified data and rebuilding the "
-"missing thumbnails, enter: %s"
+"To repair automatically by removing the unidentified data and rebuilding the"
+" missing thumbnails, enter: %s"
 msgstr ""
 "Per riparare automaticamente rimuovendo i dati mancanti e ricreando le "
 "miniature mancanti, invia: %s"
@@ -1010,7 +1012,7 @@ msgstr "Nessun fumetto trovato"
 
 #: application/controllers/api/reader.php:51
 msgid "Cannot count on undefined"
-msgstr ""
+msgstr "Non posso contare su undefinito"
 
 #: application/controllers/api/reader.php:114
 msgid "You didn't use the necessary parameters"
@@ -1138,8 +1140,8 @@ msgid ""
 "FoOlSlide has installed successfully. Check the preferences and make sure "
 "you create a team for your own chapters."
 msgstr ""
-"FoOlSlide si è installato correttamente. Controlla le preferenze e accertati "
-"di creare un team per i tuoi capitoli."
+"FoOlSlide si è installato correttamente. Controlla le preferenze e accertati"
+" di creare un team per i tuoi capitoli."
 
 #: application/controllers/install.php:314
 msgid ""
@@ -1176,8 +1178,9 @@ msgstr ""
 #, php-format
 msgid ""
 "The %s directory needs to be writable as well. Use this command in your "
-"shell if possible: %s or change its permissions recursively to 777 with your "
-"own FTP software. You won't be able to install or run FoOlSlide without this."
+"shell if possible: %s or change its permissions recursively to 777 with your"
+" own FTP software. You won't be able to install or run FoOlSlide without "
+"this."
 msgstr ""
 "Anche la directory %s deve essere scrivibili. Usa questo comando dalla tua "
 "riga di comando se possibile: %s oppure cambia i permessi ricorsivamente a "
@@ -1204,10 +1207,10 @@ msgid ""
 "command in your shell if possible: %s where www-data is an example (usually "
 "it's www-data or Apache)"
 msgstr ""
-"Sarebbe preferibile avere la directory %s scrivibile, in modo da poter usare "
-"gli aggiornamenti automatici.<br/>E' stato impossibile determinare l'utente "
-"che avvia PHP. Usa questo comando nella tua riga di comando se possibile: %s "
-"dove www-data è un esempio (di solito è www-data o Apache)"
+"Sarebbe preferibile avere la directory %s scrivibile, in modo da poter usare"
+" gli aggiornamenti automatici.<br/>E' stato impossibile determinare l'utente"
+" che avvia PHP. Usa questo comando nella tua riga di comando se possibile: "
+"%s dove www-data è un esempio (di solito è www-data o Apache)"
 
 #: application/controllers/install.php:364
 #, php-format
@@ -1215,8 +1218,8 @@ msgid ""
 "If you can't do the above, after the installation you will be given a "
 "textfile to paste in config.php. More info after submitting."
 msgstr ""
-"Se non puoi fare ciò, dopo l'installazione ti verrà dato un file di testo da "
-"incollare in config.php. Più informazioni dopo aver inviato questi dati."
+"Se non puoi fare ciò, dopo l'installazione ti verrà dato un file di testo da"
+" incollare in config.php. Più informazioni dopo aver inviato questi dati."
 
 #: application/controllers/install.php:371
 msgid ""
@@ -1311,8 +1314,8 @@ msgstr "Ieri"
 msgid "Save"
 msgstr "Salva"
 
-#: application/helpers/tabler_helper.php:94 application/models/chapter.php:1127
-#: application/models/comic.php:1272
+#: application/helpers/tabler_helper.php:94
+#: application/models/chapter.php:1127 application/models/comic.php:1272
 #: application/views/admin/members/user.php:55
 msgid "Edit"
 msgstr "Modifica"
@@ -1457,7 +1460,8 @@ msgstr ""
 "Zero per il capitolo principale. Conta i sottocapitoli a partire da 1, non "
 "da 5."
 
-#: application/models/chapter.php:138 content/themes/default/views/comic.php:62
+#: application/models/chapter.php:138
+#: content/themes/default/views/comic.php:62
 msgid "Volume"
 msgstr "Volume"
 
@@ -1540,17 +1544,19 @@ msgstr "Non sono riuscito a salvare nel database per cause sconosciute."
 #: application/models/chapter.php:665
 msgid "Failed to remove the chapter from the database for unknown reasons."
 msgstr ""
-"Non sono riuscito a rimuovere il capitolo dal database per cause sconosciute."
+"Non sono riuscito a rimuovere il capitolo dal database per cause "
+"sconosciute."
 
 #: application/models/chapter.php:686 application/models/chapter.php:716
 msgid "No series related to this chapter."
 msgstr "Nessuna serie relativa a questo capitolo."
 
 #: application/models/chapter.php:695
-msgid "Failed to create the chapter directory. Please, check file permissions."
+msgid ""
+"Failed to create the chapter directory. Please, check file permissions."
 msgstr ""
-"Non sono riuscito a create la cartella del capitolo. Per favore, controlla i "
-"permessi dei file."
+"Non sono riuscito a create la cartella del capitolo. Per favore, controlla i"
+" permessi dei file."
 
 #: application/models/chapter.php:727
 msgid ""
@@ -1561,7 +1567,8 @@ msgstr ""
 "capitolo. Per favore, controlla i permessi dei file."
 
 #: application/models/chapter.php:736 application/models/team.php:278
-msgid "Failed to remove the chapter directory. Please, check file permissions."
+msgid ""
+"Failed to remove the chapter directory. Please, check file permissions."
 msgstr ""
 "Non sono riuscito a rimuovere la cartella del capitolo. Per favore, "
 "controlla i permessi dei file."
@@ -1569,19 +1576,22 @@ msgstr ""
 #: application/models/chapter.php:781
 msgid "Found a chapter entry without a comic entry, Chapter ID: "
 msgstr ""
+"È stata trovata una voce di capitolo senza una voce di fumetto, ID capitolo:"
 
 #: application/models/chapter.php:799 application/models/comic.php:841
 msgid "No directory found for:"
-msgstr ""
+msgstr "Nessuna directory trovata per:"
 
 #: application/models/chapter.php:821
 msgid ""
 "Found non writable files in the comics folder. Check your files permissions."
 msgstr ""
+"Trovati file non scrivibili nella cartella dei fumetti. Controlla i permessi"
+" dei tuoi file."
 
 #: application/models/chapter.php:866
 msgid "Unidentified file found in:"
-msgstr ""
+msgstr "File non identificato trovato in:"
 
 #: application/models/chapter.php:1013
 msgid "Vol."
@@ -1646,8 +1656,8 @@ msgstr "Titolo Capitolo personalizzato"
 
 #: application/models/comic.php:186
 msgid ""
-"Replace the default chapter title with a custom format. Example: \"{num}"
-"{ord} Stage\" returns \"2nd Stage\""
+"Replace the default chapter title with a custom format. Example: "
+"\"{num}{ord} Stage\" returns \"2nd Stage\""
 msgstr ""
 "Rimpiazza il titolo di default del capitolo con un formato personalizzato. "
 "Esempio: \"{num}{ord} Stage\" ritorna \"2nd Stage\""
@@ -1666,7 +1676,7 @@ msgstr "Non ho potuto salvare la serie nel database per motivi sconosciuti."
 
 #: application/models/comic.php:762
 msgid "The jointag of the serie couldn't be removed."
-msgstr ""
+msgstr "Impossibile rimuovere il tag comune della serie."
 
 #: application/models/comic.php:772
 msgid "The series couldn't be removed from the database for unknown reasons."
@@ -1675,7 +1685,8 @@ msgstr "Non ho potuto rimuovere la serie dal database per motivi sconosciuti."
 #: application/models/comic.php:793 application/models/tag.php:229
 msgid "The directory could not be created. Please, check file permissions."
 msgstr ""
-"Non ho potuto creare la directory. Per favore, controlla i permessi dei file."
+"Non ho potuto creare la directory. Per favore, controlla i permessi dei "
+"file."
 
 #: application/models/comic.php:815 application/models/tag.php:243
 msgid ""
@@ -1693,34 +1704,38 @@ msgstr ""
 
 #: application/models/comic.php:868
 msgid "Unidentified directory found at:"
-msgstr ""
+msgstr "Directory non identificata trovata in:"
 
 #: application/models/comic.php:896
 msgid "Unidentified file found at:"
-msgstr ""
+msgstr "File non identificato trovato in:"
 
 #: application/models/comic.php:934
 msgid "No database entry found for:"
-msgstr ""
+msgstr "Nessuna voce del database trovata per:"
 
 #: application/models/comic.php:992
 msgid "Found a non-writable directory."
-msgstr ""
+msgstr "Trovata una directory non scrivibile."
 
 #: application/models/comic.php:1008
 msgid "Found a non-writable file."
-msgstr ""
+msgstr "Trovato un file non scrivibile."
 
 #: application/models/comic.php:1037
 msgid ""
 "Failed to create the thumbnail image for the series. Check file permissions."
 msgstr ""
+"Impossibile creare l'immagine in miniatura per la serie. Controlla i "
+"permessi dei file."
 
 #: application/models/comic.php:1061
 msgid ""
 "Failed to create the thumbnail image for the series. Resize function didn't "
 "work"
 msgstr ""
+"Impossibile creare l'immagine in miniatura per la serie. La funzione di "
+"ridimensionamento non ha funzionato"
 
 #: application/models/comic.php:1076 application/models/tag.php:312
 msgid "Failed to save the thumbnail image in the database."
@@ -1751,7 +1766,8 @@ msgstr "Uno dei gruppi specificati non esiste."
 #: application/models/joint.php:108
 msgid "Couldn't save joint to database due to an unknown error."
 msgstr ""
-"Non ho potuto salvare il joint nel database a causa di un errore sconosciuto."
+"Non ho potuto salvare il joint nel database a causa di un errore "
+"sconosciuto."
 
 #: application/models/joint.php:121
 msgid "The joint couldn't be removed."
@@ -1773,27 +1789,28 @@ msgstr "Non ho potuto rimuovere il team da tutte le collaborazioni."
 
 #: application/models/jointag.php:82
 msgid "One of the named tags doesn't exist."
-msgstr ""
+msgstr "Uno dei tag nominati non esiste."
 
 #: application/models/jointag.php:113
 msgid "Couldn't save jointag to database due to an unknown error."
 msgstr ""
+"Impossibile salvare jointag nel database a causa di un errore sconosciuto."
 
 #: application/models/jointag.php:126
 msgid "The jointag couldn't be removed."
-msgstr ""
+msgstr "Impossibile rimuovere il jointag."
 
 #: application/models/jointag.php:143
 msgid "Couldn't add tag to jointag for unknown reasons."
-msgstr ""
+msgstr "Impossibile aggiungere tag a jointag per ragioni sconosciute."
 
 #: application/models/jointag.php:153
 msgid "Couldn't remove the tag from the jointag."
-msgstr ""
+msgstr "Impossibile rimuovere il tag dal jointag."
 
 #: application/models/jointag.php:163
 msgid "Couldn't remove the tag from all the joints."
-msgstr ""
+msgstr "Impossibile rimuovere l'etichetta da tutte le articolazioni."
 
 #: application/models/page.php:310
 msgid "There isn't a page in the database related to this ID."
@@ -1829,27 +1846,28 @@ msgstr ""
 
 #: application/models/page.php:490
 msgid "Found a page entry without a chapter entry, ID: "
-msgstr ""
+msgstr "È stata trovata una voce di pagina senza una voce di capitolo, ID:"
 
 #: application/models/page.php:508
 msgid "Page file not found in:"
-msgstr ""
+msgstr "File di pagina non trovato in:"
 
 #: application/models/tag.php:68
 msgid "Failed to find the selected tag's ID."
-msgstr ""
+msgstr "Impossibile trovare l'ID del tag selezionato."
 
 #: application/models/tag.php:103 application/models/typeh.php:75
 msgid "Failed to update the tag in the database for unknown reasons."
-msgstr ""
+msgstr "Impossibile aggiornare il tag nel database per motivi sconosciuti."
 
 #: application/models/tag.php:119
 msgid "Failed to remove the tag. Please, check file permissions."
 msgstr ""
+"Impossibile rimuovere il tag. Per favore, controlla i permessi dei file."
 
 #: application/models/tag.php:133
 msgid "Failed to delete the tag for unknown reasons."
-msgstr ""
+msgstr "Impossibile eliminare il tag per motivi sconosciuti."
 
 #: application/models/tag.php:188 application/models/team.php:321
 msgid "There were no groups selected."
@@ -1857,21 +1875,26 @@ msgstr "Non hai scelto alcun gruppo."
 
 #: application/models/tag.php:199
 msgid "There's no tag under this ID."
-msgstr ""
+msgstr "Non c'è nessun tag sotto questo ID."
 
 #: application/models/tag.php:207
 msgid "There's no tag found with this ID."
-msgstr ""
+msgstr "Nessun tag trovato con questo ID."
 
 #: application/models/tag.php:273
 msgid ""
 "Failed to create the thumbnail image for the tag. Check file permissions."
 msgstr ""
+"Impossibile creare l'immagine in miniatura per il tag. Controlla i permessi "
+"dei file."
 
 #: application/models/tag.php:297
 msgid ""
-"Failed to create the thumbnail image for the tag. Resize function didn't work"
+"Failed to create the thumbnail image for the tag. Resize function didn't "
+"work"
 msgstr ""
+"Impossibile creare l'immagine in miniatura per il tag. La funzione di "
+"ridimensionamento non ha funzionato"
 
 #: application/models/team.php:173
 msgid "Failed to find the selected team's ID."
@@ -1905,36 +1928,37 @@ msgstr "Non ho trovato un gruppo con questo ID."
 
 #: application/models/typeh.php:53
 msgid "Failed to find the selected type's ID."
-msgstr ""
+msgstr "Impossibile trovare l'ID del tipo selezionato."
 
 #: application/models/typeh.php:89
 msgid "Failed to remove the type. Please, check file permissions."
 msgstr ""
+"Impossibile rimuovere il tipo. Per favore, controlla i permessi dei file."
 
 #: application/models/typeh.php:96
 msgid "Failed to delete the type for unknown reasons."
-msgstr ""
+msgstr "Impossibile eliminare il tipo per motivi sconosciuti."
 
 #: application/models/upgrade2_model.php:71
 msgid ""
 "We're currently upgrading FoOlSlide. This process usually takes few seconds "
 "or a couple minutes, check back soon!"
 msgstr ""
-"Correntemente stiamo aggiornando FoOlSlide. Questo processo solitamente dura "
-"da pochi secondi a qualche minuto. Ritorna fra qualche minuto!"
+"Correntemente stiamo aggiornando FoOlSlide. Questo processo solitamente dura"
+" da pochi secondi a qualche minuto. Ritorna fra qualche minuto!"
 
 #: application/models/upgrade_model.php:106
 msgid ""
 "Can't get the update file from FoOlPod. It might be a momentary problem, or "
-"a problem with your server security configuration. Browse <a href=\"http://"
-"foolrulez.com/pod/human\">http://foolrulez.com/pod/human</a> to check if "
-"it's a known issue."
+"a problem with your server security configuration. Browse <a "
+"href=\"http://foolrulez.com/pod/human\">http://foolrulez.com/pod/human</a> "
+"to check if it's a known issue."
 msgstr ""
 "Non sono riuscito a scaricare il file d'aggiornamento da FoOlPod. Potrebbe "
 "essere un problema momentaneo, o un problema con la configurazione del tuo "
-"server. Segui il link <a href=\"http://foolrulez.com/pod/human\">http://"
-"foolrulez.com/pod/human</a> per controllare che non sia un problema "
-"conosciuto."
+"server. Segui il link <a "
+"href=\"http://foolrulez.com/pod/human\">http://foolrulez.com/pod/human</a> "
+"per controllare che non sia un problema conosciuto."
 
 #: application/models/upgrade_model.php:156
 #, php-format
@@ -1942,8 +1966,8 @@ msgid ""
 "If you can't do the above, you can follow the manual upgrade instructons at "
 "%sthis link%s."
 msgstr ""
-"Se non puoi fare ciò, puoi seguire le istruzioni per l'aggiornamento manuale "
-"a %squesto link%s."
+"Se non puoi fare ciò, puoi seguire le istruzioni per l'aggiornamento manuale"
+" a %squesto link%s."
 
 #: application/views/account/auth/change_email_form.php:34
 #: application/views/account/auth/change_password_form.php:47
@@ -2177,7 +2201,7 @@ msgstr "Spazio occupato"
 #: application/views/admin/system/tools.php:212
 #: application/views/admin/system/tools.php:258
 msgid "Pastebin It!"
-msgstr ""
+msgstr "Incollalo!"
 
 #: application/views/admin/chat/tools.php:277
 #: application/views/admin/system/information.php:251
@@ -2263,8 +2287,8 @@ msgid ""
 "operate at 50% each."
 msgstr ""
 "Le percentuali servono a distribuire il carico e puoi settare ogni host a "
-"qualunque valore. Per esempio, se setti due load balancer al 100%, in realtà "
-"opereranno entrambe al 50%."
+"qualunque valore. Per esempio, se setti due load balancer al 100%, in realtà"
+" opereranno entrambe al 50%."
 
 #: application/views/admin/loadbalancer/balancers_list.php:13
 msgid ""
@@ -2323,7 +2347,8 @@ msgid "Remove administrator"
 msgstr "Rimuovi amministratore"
 
 #: application/views/admin/members/user.php:29
-msgid "Are you sure you want to remove this user from the administrator group?"
+msgid ""
+"Are you sure you want to remove this user from the administrator group?"
 msgstr ""
 "Sei sicuro di voler rimuovere questo utente dal gruppo degli amministratori?"
 
@@ -2341,7 +2366,8 @@ msgstr "Rimuovi moderatore"
 
 #: application/views/admin/members/user.php:43
 msgid "Are you sure you want to remove this user from the moderator group?"
-msgstr "Sei sicuro di voler rimuovere questo utente dal gruppo dei moderatori?"
+msgstr ""
+"Sei sicuro di voler rimuovere questo utente dal gruppo dei moderatori?"
 
 #: application/views/admin/members/user.php:49
 msgid "Remove User"
@@ -2404,8 +2430,8 @@ msgstr "Cancella i file"
 msgid ""
 "Here you can select a directory and import chapters from it. This directory "
 "must contain ZIP, RAR or directories with each representing one single "
-"chapter. After you select a valid directory, the interface will give you the "
-"ability to fine-tune the import of each chapter. Notice that every "
+"chapter. After you select a valid directory, the interface will give you the"
+" ability to fine-tune the import of each chapter. Notice that every "
 "directory, ZIP or RAR will be scanned for images and these will all be put "
 "in the same folder. If there are two files with the same name in the same "
 "ZIP, RAR or directory, the second found will overwrite the first."
@@ -2443,7 +2469,7 @@ msgstr ""
 
 #: application/views/admin/series/import_compressed_list.php:220
 msgid "Mass Set Volumes"
-msgstr ""
+msgstr "Volumi impostati di massa"
 
 #: application/views/admin/series/import_compressed_list.php:221
 #: application/views/admin/series/import_compressed_list.php:226
@@ -2469,7 +2495,7 @@ msgstr ""
 
 #: application/views/admin/series/import_compressed_list.php:230
 msgid "Mass Set Teams"
-msgstr ""
+msgstr "Squadre di massa"
 
 #: application/views/admin/series/import_compressed_list.php:237
 msgid "Sets the teams for all the chapters listed below."
@@ -2501,7 +2527,8 @@ msgstr "Strumenti veloci"
 #: application/views/admin/series/manage.php:34
 #: application/views/admin/series/series.php:5
 msgid "Do you really want to delete this series and its chapters?"
-msgstr "Sei sicuro di voler rimuovere questa serie e il suo relativi capitoli?"
+msgstr ""
+"Sei sicuro di voler rimuovere questa serie e il suo relativi capitoli?"
 
 #: application/views/admin/series/manage.php:34
 #: application/views/admin/series/series.php:76
@@ -2535,7 +2562,7 @@ msgstr "Cancella Serie"
 
 #: application/views/admin/series/series.php:26
 msgid "Download Volume "
-msgstr ""
+msgstr "Scarica Volume"
 
 #: application/views/admin/series/series.php:48
 msgid "Import From Folder"
@@ -2556,7 +2583,7 @@ msgstr "Informazioni Server"
 
 #: application/views/admin/system/information.php:24
 msgid "Web Server Software"
-msgstr ""
+msgstr "Software per server web"
 
 #: application/views/admin/system/information.php:26
 msgid "The web server that is currently running to serve your content."
@@ -2592,7 +2619,7 @@ msgstr "Suggerimento"
 
 #: application/views/admin/system/information.php:46
 msgid "Nginx Upload Size"
-msgstr ""
+msgstr "Dimensioni di caricamento Nginx"
 
 #: application/views/admin/system/information.php:47
 msgid "This value cannot be checked via PHP."
@@ -2604,8 +2631,8 @@ msgid ""
 "receiving upload errors, and your PHP configuration looks fine, check this "
 "variable in your Nginx configuration file."
 msgstr ""
-"Il web server Nginx ha la propria variabile upload limit interna. Se ci sono "
-"errori negli upload, e la configurazione di PHP è  corretta, controlla "
+"Il web server Nginx ha la propria variabile upload limit interna. Se ci sono"
+" errori negli upload, e la configurazione di PHP è  corretta, controlla "
 "questa variabile nel file di configurazione di Nginx."
 
 #: application/views/admin/system/information.php:48
@@ -2628,7 +2655,8 @@ msgid "FoOlSlide Version"
 msgstr "Versione FoOlSlide"
 
 #: application/views/admin/system/information.php:59
-msgid "The version of FoOlSlide that you are currently running on your server."
+msgid ""
+"The version of FoOlSlide that you are currently running on your server."
 msgstr "La versione di FoOlSlide attualmente eseguita sul server."
 
 #: application/views/admin/system/information.php:62
@@ -2676,22 +2704,22 @@ msgstr ""
 #: application/views/admin/system/information.php:89
 #: application/views/admin/system/information.php:94
 msgid "Safe Mode"
-msgstr ""
+msgstr "Modalità provvisoria"
 
 #: application/views/admin/system/information.php:90
 #: application/views/admin/system/information.php:102
 msgid "On"
-msgstr ""
+msgstr "SU"
 
 #: application/views/admin/system/information.php:90
 #: application/views/admin/system/information.php:102
 msgid "Off"
-msgstr ""
+msgstr "Spento"
 
 #: application/views/admin/system/information.php:91
 msgid ""
-"The PHP safe mode is an attempt to solve the shared-server security problems "
-"and disables many important PHP functions. This is mainly used by shared "
+"The PHP safe mode is an attempt to solve the shared-server security problems"
+" and disables many important PHP functions. This is mainly used by shared "
 "hosting services to avoid implementing correct security fixes for shared-"
 "server environments."
 msgstr ""
@@ -2733,20 +2761,20 @@ msgstr "Disabilitato"
 
 #: application/views/admin/system/information.php:107
 msgid ""
-"Your PHP configuration currently has URL-aware fopen wrappers disabled. This "
-"affects FoOlSlide functions that require accessing remote files in case cURL "
-"is not installed on the system. If it is possible, this variable should be "
-"enabled with cURL installed as well."
+"Your PHP configuration currently has URL-aware fopen wrappers disabled. This"
+" affects FoOlSlide functions that require accessing remote files in case "
+"cURL is not installed on the system. If it is possible, this variable should"
+" be enabled with cURL installed as well."
 msgstr ""
 "La configurazione di PHP ha al momento URL-aware fopen wrappers "
 "disabilitato. Questo influisce sulle funzioni di FoOlSlide  che richiedono "
-"l'accesso a file remoti nel caso in cui cURL non sia installato sul sistema. "
-"Se possibile, questa variabile dovrebbe essere abilitata così come cURL "
+"l'accesso a file remoti nel caso in cui cURL non sia installato sul sistema."
+" Se possibile, questa variabile dovrebbe essere abilitata così come cURL "
 "dovrebbe essere installato."
 
 #: application/views/admin/system/information.php:113
 msgid "Max Execution Time"
-msgstr ""
+msgstr "Tempo massimo di esecuzione"
 
 #: application/views/admin/system/information.php:115
 msgid ""
@@ -2775,12 +2803,12 @@ msgstr ""
 "sulle funzioni che richiedono un tempo di esecuzione considerevole, come "
 "quelle per il caricamento delle immagini. Se il tuo server non ha un "
 "processore potente o stai caricando un gran numero di immagini, questo "
-"valore dovrebbe essere settato pari al tempo di esecuzione totale necessario "
-"a completare la funzione. "
+"valore dovrebbe essere settato pari al tempo di esecuzione totale necessario"
+" a completare la funzione. "
 
 #: application/views/admin/system/information.php:125
 msgid "File Uploads"
-msgstr ""
+msgstr "Caricamenti di file"
 
 #: application/views/admin/system/information.php:126
 msgid "Enabled"
@@ -2801,7 +2829,7 @@ msgstr ""
 
 #: application/views/admin/system/information.php:137
 msgid "Max POST Size"
-msgstr ""
+msgstr "Dimensione massima del POST"
 
 #: application/views/admin/system/information.php:139
 msgid "This is max size of post data allowed."
@@ -2819,7 +2847,7 @@ msgstr ""
 
 #: application/views/admin/system/information.php:149
 msgid "Max Upload Size"
-msgstr ""
+msgstr "Dimensione massima di caricamento"
 
 #: application/views/admin/system/information.php:151
 msgid "This is the maximum size allowed for an uploaded file."
@@ -2837,7 +2865,7 @@ msgstr ""
 
 #: application/views/admin/system/information.php:161
 msgid "Max File Uploads"
-msgstr ""
+msgstr "Numero massimo di caricamenti di file"
 
 #: application/views/admin/system/information.php:163
 msgid ""
@@ -2852,8 +2880,8 @@ msgid ""
 "may have."
 msgstr ""
 "Il valore corrente di max file uploads è basso. Questa variabile dovrebbe "
-"generalmente essere settata ad un valore maggiore del numero di pagine che i "
-"tuoi capitoli potrebbero avere."
+"generalmente essere settata ad un valore maggiore del numero di pagine che i"
+" tuoi capitoli potrebbero avere."
 
 #: application/views/admin/system/information.php:175
 msgid "Extensions"
@@ -2891,8 +2919,8 @@ msgid ""
 "it to us via <a href=\"http://pastebin.com\">Pastebin</a> or some similar "
 "service."
 msgstr ""
-"Se ti viene richiesto di fornire l'output delle informazioni sul tuo server, "
-"clicca sul bottone \"Output informazioni server\"  in alto a destra e "
+"Se ti viene richiesto di fornire l'output delle informazioni sul tuo server,"
+" clicca sul bottone \"Output informazioni server\"  in alto a destra e "
 "inviacele con <a href=\"http://pastebin.com\">Pastebin</a> o servizi simili."
 
 #: application/views/admin/system/information.php:217
@@ -2928,9 +2956,14 @@ msgstr "Importante"
 msgid ""
 "FoOlSlide has detected that your server is able to use a better compression "
 "algorithm for thumbnail generation. This optimization will create small "
-"thumbnails and reduce up to 10% bandwidth usage. However, regardless of this "
-"action, all thumbnails will be generated with this new algorithmn."
+"thumbnails and reduce up to 10% bandwidth usage. However, regardless of this"
+" action, all thumbnails will be generated with this new algorithmn."
 msgstr ""
+"FoOlSlide ha rilevato che il tuo server è in grado di utilizzare un "
+"algoritmo di compressione migliore per la generazione delle miniature. "
+"Questa ottimizzazione creerà miniature piccole e ridurrà fino a 10% be "
+"l'utilizzo della larghezza. Tuttavia, indipendentemente da questa azione, "
+"tutte le miniature verranno generate con questo nuovo algoritmo."
 
 #: application/views/admin/system/tools.php:24
 msgid "Pictures left to be processed:"
@@ -2956,9 +2989,9 @@ msgstr "Scarica backup del database"
 
 #: application/views/admin/system/tools.php:107
 msgid ""
-"This will allow you to routinely download a copy of your FoOlSlide database. "
-"Furthermore, routine backups of the FoOlSlide directory is also required in "
-"case of a complete server failure for this file to be useful."
+"This will allow you to routinely download a copy of your FoOlSlide database."
+" Furthermore, routine backups of the FoOlSlide directory is also required in"
+" case of a complete server failure for this file to be useful."
 msgstr ""
 "Questo ti permette di scaricare una copia del database del tuo FoOlSlide. "
 "Inoltre, per ripristinare correttamente il database è necessario eseguire "
@@ -2971,11 +3004,11 @@ msgstr "Ottimizza Database"
 
 #: application/views/admin/system/tools.php:115
 msgid ""
-"Performing database optimization from time to time will cause your FoOlSlide "
-"installation to be slightly faster."
+"Performing database optimization from time to time will cause your FoOlSlide"
+" installation to be slightly faster."
 msgstr ""
-"Effettuare l'ottimizzazione del database di tanto in tanto permetterà al tuo "
-"FoOlSlide di essere leggermente più veloce."
+"Effettuare l'ottimizzazione del database di tanto in tanto permetterà al tuo"
+" FoOlSlide di essere leggermente più veloce."
 
 #: application/views/admin/system/tools.php:121
 msgid "Are you sure you want to optimize your FoOlSlide database?"
@@ -2993,8 +3026,8 @@ msgid ""
 "report any 404 and missing cookie notices."
 msgstr ""
 "FoOlSlide  genera dei log giornalieri che contengono informazioni che "
-"possono aiutare gli sviluppatori a risolvere eventuali problemi.  Se vengono "
-"segnalati degli errori, ti preghiamo di segnalare qualunque errore "
+"possono aiutare gli sviluppatori a risolvere eventuali problemi.  Se vengono"
+" segnalati degli errori, ti preghiamo di segnalare qualunque errore "
 "considerevole agli sviluppatori di FoOlSlide. Non riportare errori 404 e "
 "notifiche di cookie mancanti."
 
@@ -3009,8 +3042,8 @@ msgstr "Sei sicuro di voler cancellare tutti i log di FoOlSlide?"
 
 #: application/views/admin/system/tools.php:142
 msgid ""
-"FoOlSlide logs can often use a lot of space. This function will allow you to "
-"remove all logs to save space."
+"FoOlSlide logs can often use a lot of space. This function will allow you to"
+" remove all logs to save space."
 msgstr ""
 "I log di FoOlSlide possono occupare uno spazio considerevole. Questa "
 "funzione di permette di rimuovere tutti i log per risparmiare spazio."
@@ -3042,13 +3075,13 @@ msgid ""
 "Have a backup of your database and of your FoOlSlide directory before "
 "proceeding. Perform a check before clicking on repair."
 msgstr ""
-"Fai un backup del database e della cartella di FoOlSlide prima di procedere. "
-"Effettua un controllo prima di cliccare su ripara."
+"Fai un backup del database e della cartella di FoOlSlide prima di procedere."
+" Effettua un controllo prima di cliccare su ripara."
 
 #: application/views/admin/system/tools.php:234
 msgid ""
-"It can happen that you or some server error mess with the FoOlSlide library. "
-"This will allow you to find broken database entries and missing files. The "
+"It can happen that you or some server error mess with the FoOlSlide library."
+" This will allow you to find broken database entries and missing files. The "
 "repair function will rebuild the missing thumbnails, remove the database "
 "entries for missing files and remove the unidentified files."
 msgstr ""
@@ -3072,11 +3105,11 @@ msgstr "Controlla libreria"
 
 #: application/views/admin/system/tools.php:238
 msgid ""
-"This is actually a dangerous operation. Always perform a check and make sure "
-"you have a backup of your data."
+"This is actually a dangerous operation. Always perform a check and make sure"
+" you have a backup of your data."
 msgstr ""
-"Questa operazione è pericolosa. Effettua sempre un controllo e assicurati di "
-"avere una copia di backup dei tuoi dati."
+"Questa operazione è pericolosa. Effettua sempre un controllo e assicurati di"
+" avere una copia di backup dei tuoi dati."
 
 #: application/views/admin/system/tools.php:238
 msgid "Repair library"
@@ -3154,7 +3187,8 @@ msgid ""
 "This will re-install FoOlslide automatically and repair any broken files "
 "during the process."
 msgstr ""
-"Reinstalla automaticamente FoOlSlide e ripara eventuali file non funzionanti."
+"Reinstalla automaticamente FoOlSlide e ripara eventuali file non "
+"funzionanti."
 
 #: application/views/admin/system/upgrade.php:50
 msgid "Current Version"
@@ -3193,10 +3227,10 @@ msgid ""
 "done, just press on the button on the bottom to be redirected to your "
 "FoOlSlide installation."
 msgstr ""
-"L'installazione non è stata capace di creare automaticamente il file config."
-"php. Dovrai creare %s ed incollare tutto ciò che segue all'interno del file. "
-"In seguito, premi sul bottone in fondo a questa pagina per essere rediretto "
-"alla tua installazione di FoOlSlide."
+"L'installazione non è stata capace di creare automaticamente il file "
+"config.php. Dovrai creare %s ed incollare tutto ciò che segue all'interno "
+"del file. In seguito, premi sul bottone in fondo a questa pagina per essere "
+"rediretto alla tua installazione di FoOlSlide."
 
 #: application/views/install/manual_config.php:28
 msgid "Done"
@@ -3369,195 +3403,45 @@ msgstr "Nessun leader in questo gruppo"
 msgid "No members in this team"
 msgstr "Nessun membro in questo gruppo"
 
-#~ msgid " Authors"
-#~ msgstr "Autori"
-
-#~ msgid "Developer Site"
-#~ msgstr "Sito sviluppatori"
-
-#~ msgid "Browse all Authors"
-#~ msgstr "Tutti gli Autori"
-
-#~ msgid "Browse all Parodies"
-#~ msgstr "Tutte le Parodie"
-
-#~ msgid "To search authors, type and hit enter"
-#~ msgstr "Per cercare un autore, scrivi e premi invio"
-
-#~ msgid "To search parodies, type and hit enter"
-#~ msgstr "Per cercare una parodia, scrivi e premi invio"
-
-#~ msgid "Parodia"
-#~ msgstr "Parodia"
-
-#~ msgid "Per i Doujinshi, inserisci la serie originale"
-#~ msgstr "Per i Doujinshi, inserisci la serie originale."
-
-#~ msgid "Inserisci il link al topic della serie sul forum"
-#~ msgstr "Inserisci il link al topic della serie sul forum."
-
-#~ msgid "Generi"
-#~ msgstr "Generi"
-
-#~ msgid "Cerca"
-#~ msgstr "Cerca"
-
-#~ msgid "Inserisci i generi da ricercare"
-#~ msgstr "Inserisci i generi da ricercare"
-
-#~ msgid "Autore"
-#~ msgstr "Autore"
-
-#~ msgid "Artista"
-#~ msgstr "Artista"
-
-#~ msgid "Trama"
-#~ msgstr "Trama"
-
-#~ msgid "Lista degli Autori"
-#~ msgstr "Lista degli Autori"
-
-#~ msgid "Lista delle Parodie"
-#~ msgstr "Lista delle Parodie"
-
-#~ msgid "Menu Autori"
-#~ msgstr "Menu Autori"
-
-#~ msgid "Per cercare un autore, scrivi e premi invio"
-#~ msgstr "Per cercare un autore, scrivi e premi invio"
-
-#~ msgid "Parodie Hentai"
-#~ msgstr "Parodie Hentai"
-
-#~ msgid "Per cercare una parodia, scrivi e premi invio"
-#~ msgstr "Per cercare una parodia, scrivi e premi invio."
-
-#~ msgid "Lista dei Generi"
-#~ msgstr "Lista dei Generi"
-
-#~ msgid "Nessuna serie con questi generi"
-#~ msgstr "Nessuna serie con questi generi."
-
-#~ msgid "Traduzioni"
-#~ msgstr "Traduzioni"
-
-#~ msgid "Team"
-#~ msgstr "Gruppo"
-
-#~ msgid "Series list"
-#~ msgstr "Lista delle serie"
-
-#~ msgid "Latest releases"
-#~ msgstr "Ultime pubblicazioni"
-
-#~ msgid "First"
-#~ msgstr "Primo"
-
-#~ msgid "Last"
-#~ msgstr "Ultimo"
-
-#~ msgid "Failed to create the thumbnail of the page."
-#~ msgstr "Non sono riuscito a create il thumbnail della pagina."
-
-#~ msgid ""
-#~ "Failed to remove the page's thumbnail. Please, check file permissions."
-#~ msgstr ""
-#~ "Non sono riuscito a rimuovere il thumbnail della pagina. Per favore, "
-#~ "controlla i permessi dei file."
-
-#~ msgid ""
-#~ "FoOlPod server could not be contacted: impossible to check for new "
-#~ "versions."
-#~ msgstr ""
-#~ "Non si è riuscito a contattare il server FoOlPod: impossibile controllare "
-#~ "l'esistenza di nuove versioni"
-
-#~ msgid "Account"
-#~ msgstr "Account"
-
-#~ msgid "New upgrade available:"
-#~ msgstr "Nuovo aggiornamento disponibile:"
-
-#~ msgid "Add files..."
-#~ msgstr "Add files..."
-
-#~ msgid "Do you really want to delete this serie and its chapters?"
-#~ msgstr "Sei sicuro di voler cancellare questa serie ed i suoi capitoli?"
-
-#~ msgid "Title"
-#~ msgstr "Titolo"
-
-#~ msgid "All chapters available for"
-#~ msgstr "Tutti i capitoli disponibili di"
-
-#~ msgid "Search series"
-#~ msgstr "Ricerca serie"
-
-#~ msgid "Go back to site"
-#~ msgstr "Torna al sito"
-
-#: content/themes/default/views/about.php:36
-msgid "is a manga and comic reading platform dedicated to providing quality content to our community. Our mission is to make manga and comics easily accessible to everyone by maintaining an organized and user-friendly platform."
-msgstr "è una piattaforma di lettura di manga e fumetti dedicata a fornire contenuti di qualità alla nostra comunità. La nostra missione è rendere manga e fumetti facilmente accessibili a tutti mantenendo una piattaforma organizzata e user-friendly."
-
-#: content/themes/default/views/about.php:41
-msgid "If you have any questions or feedback, please contact us using the information provided above."
-msgstr "Se hai domande o feedback, contattaci utilizzando il modulo qui sotto."
-
-#: application/controllers/admin/preferences.php:202
-msgid "About Page"
-msgstr "Pagina Chi Siamo"
-
-#: application/controllers/admin/preferences.php:205
-msgid "Administrator Name"
-msgstr "Nome Amministratore"
-
-#: application/controllers/admin/preferences.php:212
-msgid "Administrator Email"
-msgstr "Email Amministratore"
-
-#: application/controllers/admin/preferences.php:219
-msgid "About Message"
-msgstr "Messaggio Chi Siamo"
-
-#: application/controllers/admin/preferences.php:212
-msgid "The name of the person responsible for running this site."
-msgstr "Il nome della persona responsabile della gestione di questo sito."
-
-#: application/controllers/admin/preferences.php:218
-msgid "Contact email address displayed on the about page."
-msgstr "Indirizzo email di contatto visualizzato nella pagina chi siamo."
-
-#: application/controllers/admin/preferences.php:224
-msgid "Custom message to display on the about page. Leave empty for default message."
-msgstr "Messaggio personalizzato da visualizzare nella pagina chi siamo. Lascia vuoto per il messaggio predefinito."
-
-
 #: application/controllers/reader.php:24
 msgid "About"
 msgstr "Chi Siamo"
 
-#: content/themes/default/views/about.php:11 content/themes/dazen-skin/views/about.php:9
+#: content/themes/default/views/about.php:11
+#: content/themes/dazen-skin/views/about.php:9
 msgid "Site"
 msgstr "Sito"
 
-#: content/themes/default/views/about.php:16 content/themes/dazen-skin/views/about.php:14
+#: content/themes/default/views/about.php:16
+#: content/themes/dazen-skin/views/about.php:14
 msgid "Administrator"
 msgstr "Amministratore"
 
-#: content/themes/default/views/about.php:22 content/themes/dazen-skin/views/about.php:20
+#: content/themes/default/views/about.php:22
+#: content/themes/dazen-skin/views/about.php:20
 msgid "Contact"
 msgstr "Contatto"
 
-#: content/themes/default/views/about.php:31 content/themes/dazen-skin/views/about.php:29
+#: content/themes/default/views/about.php:31
+#: content/themes/dazen-skin/views/about.php:29
 msgid "About This Site"
 msgstr "Informazioni su Questo Sito"
 
-#: content/themes/default/views/about.php:41 content/themes/dazen-skin/views/about.php:39
+#: content/themes/default/views/about.php:41
+#: content/themes/dazen-skin/views/about.php:39
 msgid "Contact Us"
 msgstr "Contattaci"
 
-#: content/themes/default/views/about.php:77 content/themes/dazen-skin/views/about.php:75
+#: content/themes/default/views/about.php:45
+#: content/themes/dazen-skin/views/about.php:43
+msgid ""
+"If you have any questions or feedback, please contact us using the "
+"information provided above."
+msgstr ""
+"Se hai domande o feedback, contattaci utilizzando il modulo qui sotto."
+
+#: content/themes/default/views/about.php:77
+#: content/themes/dazen-skin/views/about.php:75
 msgid "Send Message"
 msgstr "Invia messaggio"
 
@@ -3571,14 +3455,17 @@ msgstr "Attendi un minuto prima di inviare un altro messaggio."
 
 #: application/controllers/reader.php:128
 msgid "We couldn't send your message right now. Please try again later."
-msgstr "Non siamo riusciti a inviare il tuo messaggio in questo momento. Riprova più tardi."
+msgstr ""
+"Non siamo riusciti a inviare il tuo messaggio in questo momento. Riprova più"
+" tardi."
 
 #: application/controllers/reader.php:137
 #, php-format
 msgid "[%s] About Page Contact: %s"
 msgstr "[%s] Contatto dalla pagina Chi Siamo: %s"
 
-#: application/controllers/reader.php:184 application/controllers/reader.php:188
+#: application/controllers/reader.php:184
+#: application/controllers/reader.php:188
 msgid "Your message has been sent."
 msgstr "Il tuo messaggio è stato inviato."
 
