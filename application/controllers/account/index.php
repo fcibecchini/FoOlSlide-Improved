@@ -48,7 +48,7 @@ class Index extends Account_Controller
 		if ($this->input->post())
 		{
 			$this->form_validation->set_rules('display_name', _('Display Name'), 'trim|max_length[30]|xss_clean');
-			$this->form_validation->set_rules('twitter', _('Twitter username'), 'trim|max_length[20]|xss_clean');
+			$this->form_validation->set_rules('twitter', _('X username'), 'trim|max_length[20]|xss_clean');
 			$this->form_validation->set_rules('bio', _('Bio'), 'trim|max_length[140]|xss_clean');
 
 			if ($this->form_validation->run())

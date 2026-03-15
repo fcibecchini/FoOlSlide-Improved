@@ -12,7 +12,10 @@
 <?php
 	if (isset($form_description)) echo '<span class="clearfix">' . $form_description . '</span>';
 	echo buttoner();
-	echo form_open_multipart("", array('class' => 'form-stacked'));
+	if (isset($multipart) && $multipart)
+		echo form_open_multipart("", array('class' => 'form-stacked'));
+	else
+		echo form_open("", array('class' => 'form-stacked'));
 	echo $table;
 	echo form_close();
 ?>

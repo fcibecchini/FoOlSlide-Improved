@@ -89,6 +89,10 @@ msgstr ""
 msgid "Twitter username"
 msgstr ""
 
+#: application/controllers/account/index.php:51
+msgid "X username"
+msgstr ""
+
 #: application/controllers/account/index.php:52
 #: content/themes/default/views/team.php:43
 #: content/themes/default/views/team.php:63
@@ -291,6 +295,10 @@ msgstr ""
 
 #: application/controllers/admin/members.php:453
 msgid "User not found."
+msgstr ""
+
+#: application/controllers/admin/members.php:461
+msgid "Failed to add the selected user to the team."
 msgstr ""
 
 #: application/controllers/admin/members.php:459
@@ -1840,6 +1848,10 @@ msgstr ""
 msgid "Twitter username (public)"
 msgstr ""
 
+#: application/views/account/profile/profile.php:51
+msgid "X username (public)"
+msgstr ""
+
 #: application/views/account/profile/profile.php:57
 msgid "Bio (public) (max 140 characters)"
 msgstr ""
@@ -2869,6 +2881,12 @@ msgstr ""
 #: content/themes/default/views/team.php:44
 #: content/themes/default/views/team.php:64
 msgid "Twitter"
+msgstr ""
+
+#: content/themes/default/views/team.php:22
+#: content/themes/default/views/team.php:44
+#: content/themes/default/views/team.php:64
+msgid "X"
 msgstr ""
 
 #: content/themes/default/views/team.php:24

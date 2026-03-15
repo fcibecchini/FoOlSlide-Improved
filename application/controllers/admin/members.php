@@ -241,7 +241,7 @@ class Members extends Admin_Controller
 
 			// the team members' array needs lots of buttons and links
 			$users_arr = array();
-			foreach ($users->all as $key => $item)
+			foreach ($users as $key => $item)
 			{
 				$users_arr[$key][] = '<a href="' . site_url('/admin/members/member/' . $item->id) . '">' . $item->username . '</a>';
 
@@ -310,8 +310,29 @@ class Members extends Admin_Controller
 	 */
 	function home_team()
 	{
+		$default_team_name = get_setting('fs_gen_default_team');
+		$default_team_stub = slugify(strtolower(str_replace(' ', '_', $default_team_name)));
+
 		$team = new Team();
-		$team->where('name', get_setting('fs_gen_default_team'))->get();
+		$team->where('name', $default_team_name)->limit(1)->get();
+
+		if ($team->result_count() != 1 && $default_team_stub !== '')
+		{
+			$team = new Team();
+			$team->like('stub', $default_team_stub, 'after')->order_by('id', 'ASC')->limit(1)->get();
+		}
+
+		if ($team->result_count() != 1)
+		{
+			$team = new Team();
+			$team->order_by('id', 'ASC')->limit(1)->get();
+		}
+
+		if ($team->result_count() != 1)
+		{
+			redirect('/admin/members/teams/');
+		}
+
 		redirect('/admin/members/teams/' . $team->stub);
 	}
 
@@ -333,7 +354,10 @@ class Members extends Admin_Controller
 		if ($post = $this->input->post())
 		{
 			$team = new Team();
-			$team->update_team($this->input->post());
+			if (!$team->update_team($this->input->post()))
+			{
+				redirect('/admin/members/add_team/');
+			}
 			flash_notice('notice', 'Added the team ' . $team->name . '.');
 			redirect('/admin/members/teams/' . $team->stub);
 		}
@@ -455,7 +479,11 @@ class Members extends Admin_Controller
 		}
 		$this->viewdata["function_title"] = "Making team leader...";
 		$member = new Membership();
-		$member->make_team_leader($team_id, $user->id);
+		if (!$member->make_team_leader($team_id, $user->id))
+		{
+			flash_notice('error', _('Failed to add the selected user to the team.'));
+			redirect('/admin/members/teams/' . $team->stub);
+		}
 		flash_notice('notice', sprintf(_('You have added %s to the team with the position of team leader.'), $user->username));
 		redirect('/admin/members/teams/' . $team->stub);
 	}
