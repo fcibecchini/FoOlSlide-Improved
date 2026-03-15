@@ -36,6 +36,10 @@ db_query() {
 	docker compose exec -T db sh -lc "mysql -u foolslide_user -pfoobar -D foolslide_db -Nse \"$sql\"" 2>/dev/null | tr -d '\r'
 }
 
+current_theme_dir() {
+	db_query "SELECT value FROM fs_preferences WHERE name = 'fs_theme_dir' LIMIT 1;"
+}
+
 echo "[e2e] Starting Docker Compose stack"
 docker compose up -d --build
 
@@ -505,8 +509,8 @@ add_team_leader_via_admin() {
 		exit 1
 	fi
 
-	check_authed_page "/admin/members/teams/${team_stub}" 1000 "Leader" >&2
-	check_page_fragment "/team/${team_stub}" 600 "Team leaders" >&2
+	check_authed_page "/admin/members/teams/${team_stub}" 1000 "${username}" >&2
+	check_page_fragment "/team/${team_stub}" 600 "teamworks/${team_stub}" >&2
 }
 
 create_chapter_via_admin() {
@@ -614,8 +618,13 @@ if detect_install_state; then
 	check_page "/install" 1000 "Installing FoOlSlide"
 else
 	seed_docker_dev_state
+	series_marker='id="tablelist"'
+	if [ "$(current_theme_dir)" = "dazen-skin" ]; then
+		series_marker="comic-hero--no-cover"
+	fi
 	check_page "/latest/" 1000 "<!DOCTYPE html"
 	check_page "/tags/" 1000 "${SEEDED_PRIMARY_TAG_NAME}"
+	check_post_page "/series/${SEEDED_SERIES_STUB}/" "adult=true" 1000 "${series_marker}"
 	check_page "/about/" 1000 'name="contact_name"'
 	check_post_page "/about/" "contact_name=&contact_email=&contact_subject=&contact_message=&contact_website=" 1000 'contact_name'
 	check_page "/account/auth/login/" 1000 'name="login"'
@@ -644,7 +653,7 @@ else
 		if [ -n "$seeded_team_stub" ]; then
 			check_authed_redirect "/admin/members/home_team/" "/admin/members/teams/${seeded_team_stub}"
 			check_authed_page "/admin/members/teams/${seeded_team_stub}" 1000 "<!DOCTYPE html"
-			check_page_fragment "/team/${seeded_team_stub}" 600 "Team's page"
+			check_page_fragment "/team/${seeded_team_stub}" 600 "teamworks/${seeded_team_stub}"
 		fi
 		team_stub="$(create_team_via_admin "Smoke Team ${smoke_suffix}")"
 		add_team_leader_via_admin "$team_stub" "$ADMIN_USER"
