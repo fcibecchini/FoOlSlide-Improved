@@ -59,6 +59,9 @@ class Membership extends DataMapper {
 			return FALSE;
 		$this->team_id = $team_id;
 		$this->user_id = $user_id;
+		$this->is_leader = 0;
+		$this->accepted = 0;
+		$this->requested = 0;
 		$this->applied = 1;
 		if (!$this->save())
 			return FALSE;
@@ -73,7 +76,10 @@ class Membership extends DataMapper {
 			return FALSE;
 		$this->team_id = $team_id;
 		$this->user_id = $user_id;
+		$this->is_leader = 0;
+		$this->accepted = 0;
 		$this->requested = 1;
+		$this->applied = 0;
 		if (!$this->save())
 			return FALSE;
 		return TRUE;
@@ -253,19 +259,34 @@ class Membership extends DataMapper {
 			return FALSE;
 		}
 
-		if ($CI->tank_auth->is_allowed()) {
-			$this->request($team_id, $user_id);
-			$this->accept($team_id, $user_id);
-			$this->clear();
+		$payload = array(
+			'team_id' => (int) $team_id,
+			'user_id' => (int) $user_id,
+			'is_leader' => 1,
+			'accepted' => 1,
+			'requested' => 0,
+			'applied' => 0,
+			'updated' => date('Y-m-d H:i:s'),
+		);
+
+		$existing = $CI->db
+			->select('id')
+			->from($CI->db->dbprefix('memberships'))
+			->where('team_id', (int) $team_id)
+			->where('user_id', (int) $user_id)
+			->limit(1)
+			->get()
+			->row();
+
+		if ($existing)
+		{
+			return (bool) $CI->db
+				->where('id', (int) $existing->id)
+				->update($CI->db->dbprefix('memberships'), $payload);
 		}
 
-		$this->where('team_id', $team_id)->where('user_id', $user_id)->where('accepted', 1)->get();
-		if ($this->result_count() != 1)
-			return FALSE;
-
-		$this->is_leader = 1;
-		$this->save();
-		return TRUE;
+		$payload['created'] = date('Y-m-d H:i:s');
+		return (bool) $CI->db->insert($CI->db->dbprefix('memberships'), $payload);
 	}
 
 	/**
@@ -299,17 +320,24 @@ class Membership extends DataMapper {
 	 * @return object Users with ->is_leader
 	 */
 	function get_members($team_id) {
-		$this->where('team_id', $team_id)->where('accepted', 1)->get();
-		$members = new User();
-		if ($this->result_count() == 0)
-			return $members;
-		foreach ($this->all as $member) {
-			$members->or_where('id', $member->user_id);
+		$CI = & get_instance();
+		$query = $CI->db
+			->select('u.id, u.username, u.email, u.last_login, p.display_name AS profile_display_name, p.twitter AS profile_twitter, p.bio AS profile_bio, m.is_leader')
+			->from($CI->db->dbprefix('memberships') . ' m')
+			->join($CI->db->dbprefix('users') . ' u', 'u.id = m.user_id')
+			->join($CI->db->dbprefix('profiles') . ' p', 'p.user_id = u.id', 'left')
+			->where('m.team_id', (int) $team_id)
+			->where('m.accepted', 1)
+			->order_by('m.is_leader', 'DESC')
+			->order_by('u.username', 'ASC')
+			->get();
+
+		$members = array();
+		foreach ($query->result() as $member) {
+			$member->is_leader = ($member->is_leader == 1) ? '1' : '0';
+			$members[] = $member;
 		}
-		$members->include_related('profile')->get();
-		foreach ($members->all as $key => $member) {
-			$member->is_leader = ($this->all[$key]->is_leader == 1) ? '1' : '0';
-		}
+
 		return $members;
 	}
 

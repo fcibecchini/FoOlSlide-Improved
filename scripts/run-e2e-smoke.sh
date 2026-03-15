@@ -159,6 +159,48 @@ check_post_page() {
 	fi
 }
 
+check_page_fragment() {
+	local path="$1"
+	local min_bytes="$2"
+	local marker="${3:-}"
+
+	local safe_name
+	safe_name="$(echo "fragment_${path}" | tr '/:?&=' '_')"
+	local headers_file="$tmp_dir/${safe_name}.headers"
+	local body_file="$tmp_dir/${safe_name}.body"
+
+	curl -sS -L -D "$headers_file" -o "$body_file" "$BASE_URL$path"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	local content_type
+	content_type="$(awk 'BEGIN{IGNORECASE=1} /^Content-Type:/ { val=$0 } END { sub(/\r$/, "", val); print val }' "$headers_file")"
+	local body_bytes
+	body_bytes="$(wc -c < "$body_file" | tr -d ' ')"
+
+	echo "[e2e] $path -> status=$http_code bytes=$body_bytes"
+
+	if [ "$http_code" != "200" ]; then
+		echo "[e2e] FAIL $path: expected HTTP 200, got $http_code" >&2
+		exit 1
+	fi
+
+	if [ "$body_bytes" -lt "$min_bytes" ]; then
+		echo "[e2e] FAIL $path: expected at least $min_bytes bytes, got $body_bytes" >&2
+		exit 1
+	fi
+
+	if [ -n "$marker" ] && ! grep -q "$marker" "$body_file"; then
+		echo "[e2e] FAIL $path: marker '$marker' not found" >&2
+		exit 1
+	fi
+
+	if ! echo "$content_type" | grep -qi 'text/html'; then
+		echo "[e2e] FAIL $path: unexpected content type ($content_type)" >&2
+		exit 1
+	fi
+}
+
 check_download_archive() {
 	local path="$1"
 	local min_bytes="$2"
@@ -331,6 +373,37 @@ check_authed_post_redirect() {
 	validate_header_size "$headers_file" "$path"
 }
 
+check_authed_redirect() {
+	local path="$1"
+	local expected_location_fragment="$2"
+
+	local safe_name
+	safe_name="$(echo "authed_get_${path}" | tr '/:?&=' '_')"
+	local headers_file="$tmp_dir/${safe_name}.headers"
+	local body_file="$tmp_dir/${safe_name}.body"
+
+	curl -sS -D "$headers_file" -o "$body_file" \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		"$BASE_URL$path"
+
+	local http_code
+	http_code="$(awk '/^HTTP\// { code=$2 } END { print code }' "$headers_file")"
+	local location
+	location="$(awk 'BEGIN{IGNORECASE=1} /^Location:/ { val=$2 } END { sub(/\r$/, "", val); print val }' "$headers_file")"
+
+	echo "[e2e] AUTH GET $path -> status=$http_code location=$location"
+
+	if [ "$http_code" != "302" ]; then
+		echo "[e2e] FAIL AUTH GET $path: expected HTTP 302, got $http_code" >&2
+		exit 1
+	fi
+
+	if [[ "$location" != *"$expected_location_fragment"* ]]; then
+		echo "[e2e] FAIL AUTH GET $path: expected redirect containing '$expected_location_fragment', got '$location'" >&2
+		exit 1
+	fi
+}
+
 create_series_via_admin() {
 	local series_name="$1"
 	local tag_value="$2"
@@ -369,6 +442,68 @@ create_series_via_admin() {
 	check_authed_page "/admin/series/add_new/${stub}" 1000 "<!DOCTYPE html" >&2
 
 	echo "$stub"
+}
+
+create_team_via_admin() {
+	local team_name="$1"
+	local data="name=${team_name// /+}&stub=&url=&forum=&irc=&twitter=&facebook=&facebookid=&submit=Save"
+
+	curl -sS -o /dev/null \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "$data" \
+		"$BASE_URL/admin/members/add_team/"
+
+	local team_stub
+	team_stub="$(db_query "SELECT stub FROM fs_teams WHERE name = '${team_name}' ORDER BY id DESC LIMIT 1;")"
+	if [ -z "$team_stub" ]; then
+		echo "[e2e] FAIL create team '${team_name}': no team row found." >&2
+		exit 1
+	fi
+
+	if [ "$team_stub" = "0" ] || [ "$team_stub" = "" ]; then
+		echo "[e2e] FAIL create team '${team_name}': stub was not generated." >&2
+		exit 1
+	fi
+
+	check_authed_page "/admin/members/teams/${team_stub}" 1000 "${team_name}" >&2
+	check_page_fragment "/team/${team_stub}" 600 "${team_name}" >&2
+	check_page "/teamworks/${team_stub}" 800 "<!DOCTYPE html" >&2
+
+	echo "$team_stub"
+}
+
+add_team_leader_via_admin() {
+	local team_stub="$1"
+	local username="$2"
+	local user_id
+	local team_id
+
+	user_id="$(db_query "SELECT id FROM fs_users WHERE username = '${username}' ORDER BY id DESC LIMIT 1;")"
+	team_id="$(db_query "SELECT id FROM fs_teams WHERE stub = '${team_stub}' ORDER BY id DESC LIMIT 1;")"
+
+	if [ -z "$user_id" ] || [ -z "$team_id" ]; then
+		echo "[e2e] FAIL add team leader: missing team_id or user_id for ${team_stub}/${username}." >&2
+		exit 1
+	fi
+
+	curl -sS -o /dev/null \
+		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
+		-X POST \
+		-H 'Content-Type: application/x-www-form-urlencoded' \
+		--data "username=${username}" \
+		"$BASE_URL/admin/members/make_team_leader_username/${team_id}"
+
+	local membership_count
+	membership_count="$(db_query "SELECT COUNT(*) FROM fs_memberships WHERE team_id = ${team_id} AND user_id = ${user_id} AND accepted = 1 AND is_leader = 1;")"
+	if [ "$membership_count" != "1" ]; then
+		echo "[e2e] FAIL add team leader: expected accepted leader membership for ${username} in ${team_stub}." >&2
+		exit 1
+	fi
+
+	check_authed_page "/admin/members/teams/${team_stub}" 1000 "Leader" >&2
+	check_page_fragment "/team/${team_stub}" 600 "Team leaders" >&2
 }
 
 create_chapter_via_admin() {
@@ -501,6 +636,15 @@ else
 		fi
 
 		smoke_suffix="$(date +%s)"
+		check_authed_page "/admin/members/teams/" 1000 "<!DOCTYPE html"
+		seeded_team_stub="$(db_query "SELECT stub FROM fs_teams ORDER BY id LIMIT 1;")"
+		if [ -n "$seeded_team_stub" ]; then
+			check_authed_redirect "/admin/members/home_team/" "/admin/members/teams/${seeded_team_stub}"
+			check_authed_page "/admin/members/teams/${seeded_team_stub}" 1000 "<!DOCTYPE html"
+			check_page_fragment "/team/${seeded_team_stub}" 600 "Team's page"
+		fi
+		team_stub="$(create_team_via_admin "Smoke Team ${smoke_suffix}")"
+		add_team_leader_via_admin "$team_stub" "$ADMIN_USER"
 		no_tag_stub="$(create_series_via_admin "Smoke Series No Tag ${smoke_suffix}" 0)"
 		expected_tag_id="$(db_query "SELECT id FROM fs_tags ORDER BY name ASC LIMIT 1 OFFSET 1;")"
 		tagged_stub="$(create_series_via_admin "Smoke Series Tagged ${smoke_suffix}" 2 "$expected_tag_id")"

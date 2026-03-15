@@ -36,7 +36,7 @@ class Team extends DataMapper
 		),
 		'twitter' => array(
 			'rules' => array(),
-			'label' => 'Twitter username',
+			'label' => 'X username',
 			'type' => 'input'
 		),
 		'facebook' => array(
@@ -209,7 +209,7 @@ class Team extends DataMapper
 		// Double check that we have all the necessary automated variables
 		if (!isset($this->uniqid))
 			$this->uniqid = uniqid();
-		if (!isset($this->stub))
+		if (trim((string) $this->stub) === '')
 			$this->stub = $this->stub();
 
 		// Create a new stub if the name has changed
@@ -250,25 +250,52 @@ class Team extends DataMapper
 			}
 		}
 
-		// let's save and give some error check. Push false if fail, true if good.
-		if (!$this->save())
+		if (trim((string) $this->name) === '' || trim((string) $this->stub) === '')
 		{
-			if (!$this->valid)
-			{
-				set_notice('error', _('Check that you have inputted all the required fields.'));
-				log_message('error', 'update_team: failed validation');
-			}
-			else
+			set_notice('error', _('Check that you have inputted all the required fields.'));
+			log_message('error', 'update_team: failed validation');
+			return false;
+		}
+
+		$persist = array(
+			'name' => $this->name,
+			'stub' => $this->stub,
+			'url' => isset($this->url) ? $this->url : '',
+			'forum' => isset($this->forum) ? $this->forum : '',
+			'irc' => isset($this->irc) ? $this->irc : '',
+			'twitter' => isset($this->twitter) ? $this->twitter : '',
+			'facebook' => isset($this->facebook) ? $this->facebook : '',
+			'facebookid' => isset($this->facebookid) ? $this->facebookid : '',
+			'editor' => (int) $this->editor,
+			'updated' => date('Y-m-d H:i:s'),
+		);
+
+		if (!isset($this->id) || $this->id == '')
+		{
+			$persist['creator'] = (int) $this->creator;
+			$persist['created'] = date('Y-m-d H:i:s');
+			$persist['lastseen'] = isset($this->lastseen) && $this->lastseen !== '' ? $this->lastseen : '0000-00-00 00:00:00';
+
+			if (!$CI->db->insert($CI->db->dbprefix('teams'), $persist))
 			{
 				set_notice('error', _('Failed to update the team in the database for unknown reasons.'));
-				log_message('error', 'update_team: failed to save');
+				log_message('error', 'update_team: failed to insert');
+				return false;
 			}
-			return false;
+
+			$this->id = $CI->db->insert_id();
 		}
 		else
 		{
-			return true;
+			if (!$CI->db->where('id', $this->id)->update($CI->db->dbprefix('teams'), $persist))
+			{
+				set_notice('error', _('Failed to update the team in the database for unknown reasons.'));
+				log_message('error', 'update_team: failed to update');
+				return false;
+			}
 		}
+
+		return true;
 	}
 
 

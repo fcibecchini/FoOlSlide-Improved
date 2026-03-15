@@ -48,7 +48,7 @@
             </div>
 
             <div class="formgroup">
-                <div><?php echo form_label(_('Twitter username (public)'), $twitter['id']); ?></div>
+                <div><?php echo form_label(_('X username (public)'), $twitter['id']); ?></div>
                 <div><?php echo form_input($twitter); ?></div>
                 <div style="color: red;"><?php echo form_error($twitter['name']); ?><?php echo isset($errors[$twitter['name']]) ? $errors[$twitter['name']] : ''; ?></div>
             </div>

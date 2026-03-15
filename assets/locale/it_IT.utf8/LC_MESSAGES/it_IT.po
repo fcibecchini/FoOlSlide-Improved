@@ -93,6 +93,10 @@ msgstr "Nome pubblico"
 msgid "Twitter username"
 msgstr "Nome utente twitter"
 
+#: application/controllers/account/index.php:51
+msgid "X username"
+msgstr "Nome utente X"
+
 #: application/controllers/account/index.php:52
 #: content/themes/default/views/team.php:43
 #: content/themes/default/views/team.php:63
@@ -305,6 +309,10 @@ msgstr "Hai promosso %s a team leader."
 #: application/controllers/admin/members.php:453
 msgid "User not found."
 msgstr "Utente non trovato."
+
+#: application/controllers/admin/members.php:461
+msgid "Failed to add the selected user to the team."
+msgstr "Impossibile aggiungere l'utente selezionato al team."
 
 #: application/controllers/admin/members.php:459
 #, php-format
@@ -2059,6 +2067,10 @@ msgstr "Nome pubblico (pubblico)"
 msgid "Twitter username (public)"
 msgstr "Nome utente twitter (pubblico)"
 
+#: application/views/account/profile/profile.php:51
+msgid "X username (public)"
+msgstr "Nome utente X (pubblico)"
+
 #: application/views/account/profile/profile.php:57
 msgid "Bio (public) (max 140 characters)"
 msgstr "Biografia (pubblico) (massimo 140 caratteri)"
@@ -3334,6 +3346,12 @@ msgstr "IRC"
 #: content/themes/default/views/team.php:64
 msgid "Twitter"
 msgstr "Twitter"
+
+#: content/themes/default/views/team.php:22
+#: content/themes/default/views/team.php:44
+#: content/themes/default/views/team.php:64
+msgid "X"
+msgstr "X"
 
 #: content/themes/default/views/team.php:24
 msgid "Facebook"

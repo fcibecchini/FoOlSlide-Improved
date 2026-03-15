@@ -56,11 +56,14 @@ class Members extends REST_Controller {
 			$memb = $members->get_members($team->id);
 			
 			// we have to select the user array manually because... we don't want to expose password hashes
-			foreach($memb->all as $key => $mem) {
-				$result['members'][$key] = $mem->to_array(array('id','username'));
-				$result['members'][$key]['display_name'] = $mem->profile_display_name;
-				$result['members'][$key]['twitter'] = $mem->profile_twitter;
-				$result['members'][$key]['bio'] = $mem->profile_bio;
+			foreach($memb as $key => $mem) {
+				$result['members'][$key] = array(
+					'id' => $mem->id,
+					'username' => $mem->username,
+					'display_name' => $mem->profile_display_name,
+					'twitter' => $mem->profile_twitter,
+					'bio' => $mem->profile_bio
+				);
 			}
 			
 			// all good

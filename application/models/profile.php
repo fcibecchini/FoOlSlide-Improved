@@ -23,7 +23,7 @@ class Profile extends DataMapper {
 		), 
 		'twitter' => array(
 			'rules' => array('max_length' => 30),
-			'label' => 'Twitter username',
+			'label' => 'X username',
 			'type'	=> 'input'
 		),
 		'bio' => array(
