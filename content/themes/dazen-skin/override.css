@@ -239,6 +239,9 @@
      gap: 18px;
      margin-bottom: 14px;
    }
+   .comic-hero--no-cover{
+     grid-template-columns: 1fr;
+   }
    @media (max-width: 768px){
      .comic-hero{
        grid-template-columns: 1fr;  /* mobile: cover sopra */

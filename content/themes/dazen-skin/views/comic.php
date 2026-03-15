@@ -12,14 +12,14 @@ $tags_arr = is_array($comic->tags) ? $comic->tags : [];
 ?>
 
 <!-- ============ TESTATA FUMETTO ============ -->
-<section class="comic-hero">
+<section class="comic-hero<?php if (!$cover): ?> comic-hero--no-cover<?php endif; ?>">
   <?php if ($cover): ?>
     <div class="comic-hero__cover">
       <img src="<?php echo $cover; ?>" alt="<?php echo htmlspecialchars($comic->name, ENT_QUOTES, 'UTF-8'); ?>" loading="lazy">
     </div>
   <?php endif; ?>
 
-  <div class="comic-hero__body">
+  <div class="comic-hero__body<?php if (!$cover): ?> comic-hero__body--full<?php endif; ?>"<?php if (!$cover): ?> style="grid-column: 1 / -1; width: 100%;"<?php endif; ?>>
     <h1 class="comic-hero__title"><?php echo htmlspecialchars($comic->name, ENT_QUOTES, 'UTF-8'); ?></h1>
 
     <div class="comic-hero__meta">
