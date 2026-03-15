@@ -446,13 +446,16 @@ create_series_via_admin() {
 
 create_team_via_admin() {
 	local team_name="$1"
-	local data="name=${team_name// /+}&stub=&url=&forum=&irc=&twitter=&facebook=&facebookid=&submit=Save"
-
 	curl -sS -o /dev/null \
 		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
-		-X POST \
-		-H 'Content-Type: application/x-www-form-urlencoded' \
-		--data "$data" \
+		-F "name=${team_name}" \
+		-F "url=" \
+		-F "forum=" \
+		-F "irc=" \
+		-F "twitter=" \
+		-F "facebook=" \
+		-F "facebookid=" \
+		-F "id=" \
 		"$BASE_URL/admin/members/add_team/"
 
 	local team_stub
