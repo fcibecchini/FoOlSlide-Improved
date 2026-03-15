@@ -21,9 +21,195 @@ class Reader extends Public_Controller
 
 	public function about()
 	{
+		$contact_email = $this->get_about_contact_email();
+		$form = $this->get_about_contact_form_defaults();
+		$focus_contact_form = FALSE;
+
+		if ($this->input->post())
+		{
+			$form = $this->handle_about_contact_form($contact_email);
+			$focus_contact_form = TRUE;
+		}
+		elseif (isset($this->session))
+		{
+			$flash_notices = $this->session->flashdata('notices');
+			if (is_array($flash_notices) && !empty($flash_notices))
+			{
+				$focus_contact_form = TRUE;
+			}
+		}
+
 		$this->template->title(about_label('About'), get_setting('fs_gen_site_title'));
 		$this->template->set('show_sidebar', TRUE);
+		$this->template->set('about_contact_email', $contact_email);
+		$this->template->set('about_contact_form', $form);
+		$this->template->set('about_contact_focus_form', $focus_contact_form);
 		$this->template->build('about');
+	}
+
+	protected function get_about_contact_email()
+	{
+		$contact_email = trim((string) get_setting('fs_about_admin_email'));
+		if ($contact_email !== '' && filter_var($contact_email, FILTER_VALIDATE_EMAIL))
+		{
+			return $contact_email;
+		}
+
+		return FALSE;
+	}
+
+	protected function get_about_contact_form_defaults()
+	{
+		return array(
+			'name' => '',
+			'email' => '',
+			'subject' => '',
+			'message' => '',
+			'website' => '',
+		);
+	}
+
+	protected function handle_about_contact_form($contact_email)
+	{
+		$form = array(
+			'name' => trim((string) $this->input->post('contact_name')),
+			'email' => trim((string) $this->input->post('contact_email')),
+			'subject' => trim((string) $this->input->post('contact_subject')),
+			'message' => trim((string) $this->input->post('contact_message')),
+			'website' => trim((string) $this->input->post('contact_website')),
+		);
+
+		if (!$contact_email)
+		{
+			set_notice('error', _('The contact form is currently unavailable.'));
+			return $form;
+		}
+
+		if ($form['website'] !== '')
+		{
+			$this->set_about_contact_success_notice();
+			redirect('about#contact-form');
+		}
+
+		if ($this->is_about_contact_rate_limited())
+		{
+			set_notice('error', _('Please wait a minute before sending another message.'));
+			return $form;
+		}
+
+		$form_validation = $this->get_form_validation();
+		$form_validation->set_rules('contact_name', _('Name'), 'trim|required|xss_clean|max_length[100]');
+		$form_validation->set_rules('contact_email', _('Email'), 'trim|required|xss_clean|valid_email|max_length[255]');
+		$form_validation->set_rules('contact_subject', _('Subject'), 'trim|required|xss_clean|max_length[150]');
+		$form_validation->set_rules('contact_message', _('Message'), 'trim|required|xss_clean|max_length[5000]');
+
+		if (!$form_validation->run())
+		{
+			return $form;
+		}
+
+		$form['name'] = trim((string) $form_validation->set_value('contact_name'));
+		$form['email'] = trim((string) $form_validation->set_value('contact_email'));
+		$form['subject'] = trim((string) $form_validation->set_value('contact_subject'));
+		$form['message'] = trim((string) $form_validation->set_value('contact_message'));
+
+		if (!$this->send_about_contact_email($contact_email, $form))
+		{
+			set_notice('error', _('We couldn\'t send your message right now. Please try again later.'));
+			return $form;
+		}
+
+		$this->session->set_userdata('about_contact_last_sent', time());
+		$this->set_about_contact_success_notice();
+		redirect('about#contact-form');
+	}
+
+	protected function send_about_contact_email($contact_email, $form)
+	{
+		$email = $this->get_email_library();
+		if (method_exists($email, 'clear'))
+		{
+			$email->clear(TRUE);
+		}
+
+		$site_title = (string) get_setting('fs_gen_site_title');
+		$email->from($contact_email, $site_title);
+		$email->reply_to($form['email'], $form['name']);
+		$email->to($contact_email);
+		$email->subject(sprintf(_('[%s] About Page Contact: %s'), $site_title, $form['subject']));
+		$email->message($this->build_about_contact_html_message($form));
+		$email->set_alt_message($this->build_about_contact_text_message($form));
+
+		$result = $email->send();
+		if (!$result)
+		{
+			log_message('error', 'reader/about: failed sending contact form email to ' . $contact_email);
+		}
+
+		return (bool) $result;
+	}
+
+	protected function build_about_contact_html_message($form)
+	{
+		return '<p><strong>' . _('Name') . ':</strong> ' . htmlspecialchars($form['name']) . '</p>'
+			. '<p><strong>' . _('Email') . ':</strong> ' . htmlspecialchars($form['email']) . '</p>'
+			. '<p><strong>' . _('Subject') . ':</strong> ' . htmlspecialchars($form['subject']) . '</p>'
+			. '<p><strong>' . _('Message') . ':</strong><br>' . nl2br(htmlspecialchars($form['message'])) . '</p>';
+	}
+
+	protected function build_about_contact_text_message($form)
+	{
+		return _('Name') . ': ' . $form['name'] . "\n"
+			. _('Email') . ': ' . $form['email'] . "\n"
+			. _('Subject') . ': ' . $form['subject'] . "\n\n"
+			. _('Message') . ":\n" . $form['message'] . "\n";
+	}
+
+	protected function is_about_contact_rate_limited()
+	{
+		$last_sent = (int) $this->session->userdata('about_contact_last_sent');
+		return ($last_sent > 0 && (time() - $last_sent) < 60);
+	}
+
+	protected function set_about_contact_success_notice()
+	{
+		if (function_exists('flash_notice'))
+		{
+			flash_notice('notice', _('Your message has been sent.'));
+			return;
+		}
+
+		set_notice('notice', _('Your message has been sent.'));
+	}
+
+	protected function get_form_validation()
+	{
+		if (!isset($this->form_validation))
+		{
+			$this->load->library('form_validation');
+		}
+
+		return $this->form_validation;
+	}
+
+	protected function get_email_library()
+	{
+		if (!isset($this->email))
+		{
+			$this->load->library('email');
+		}
+
+		return $this->email;
+	}
+
+	protected function config_item($key, $group = '')
+	{
+		if (!isset($this->config))
+		{
+			return NULL;
+		}
+
+		return $this->config->item($key, $group);
 	}
 
 	function sitemap()

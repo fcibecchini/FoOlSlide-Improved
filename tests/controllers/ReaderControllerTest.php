@@ -9,6 +9,13 @@ class ReaderControllerTest extends TestCase
 		return new ReaderTestController();
 	}
 
+	protected function setUp(): void
+	{
+		$GLOBALS['__test_settings'] = array();
+		$GLOBALS['__test_notices'] = array();
+		$GLOBALS['__test_flash_notices'] = array();
+	}
+
 	public function testIndexDelegatesToLatest()
 	{
 		$controller = new ReaderLatestSpyController();
@@ -118,6 +125,117 @@ class ReaderControllerTest extends TestCase
 
 		$this->assertSame('search_pre', $template->builtView);
 		Comic::$throwOnIlike = false;
+	}
+
+	public function testAboutBuildsViewWithConfiguredContactEmail()
+	{
+		$GLOBALS['__test_settings'] = array(
+			'fs_about_admin_email' => 'about@example.com',
+			'fs_gen_site_title' => 'Demo Site',
+		);
+
+		$controller = $this->newController();
+		$template = new StubTemplate();
+		$controller->template = $template;
+		$controller->input = new StubInput(array());
+		$controller->session = new StubSession();
+
+		$controller->about();
+
+		$this->assertSame('about', $template->builtView);
+		$this->assertTrue($template->values['show_sidebar']);
+		$this->assertSame('about@example.com', $template->values['about_contact_email']);
+		$this->assertSame('', $template->values['about_contact_form']['name']);
+	}
+
+	public function testAboutHidesContactFormWhenConfiguredContactEmailMissing()
+	{
+		$GLOBALS['__test_settings'] = array(
+			'fs_gen_site_title' => 'Demo Site',
+		);
+
+		$controller = $this->newController();
+		$template = new StubTemplate();
+		$controller->template = $template;
+		$controller->input = new StubInput(array());
+		$controller->session = new StubSession();
+
+		$controller->about();
+
+		$this->assertFalse($template->values['about_contact_email']);
+	}
+
+	public function testAboutContactSubmissionSendsEmailAndRedirects()
+	{
+		$GLOBALS['__test_settings'] = array(
+			'fs_about_admin_email' => 'about@example.com',
+			'fs_gen_site_title' => 'Demo Site',
+		);
+
+		$controller = $this->newController();
+		$controller->template = new StubTemplate();
+		$controller->input = new StubInput(array(
+			'contact_name' => 'Alice',
+			'contact_email' => 'alice@example.com',
+			'contact_subject' => 'Help',
+			'contact_message' => 'Need assistance',
+			'contact_website' => '',
+		));
+		$controller->session = new StubSession();
+		$controller->form_validation = new StubFormValidation(array(
+			'contact_name' => 'Alice',
+			'contact_email' => 'alice@example.com',
+			'contact_subject' => 'Help',
+			'contact_message' => 'Need assistance',
+		), true);
+		$controller->email = new StubEmail(true);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('redirect:about');
+
+		try
+		{
+			$controller->about();
+		}
+		finally
+		{
+			$this->assertSame('about@example.com', $controller->email->fromAddress);
+			$this->assertSame('alice@example.com', $controller->email->replyToAddress);
+			$this->assertSame('about@example.com', $controller->email->toAddress);
+			$this->assertStringContainsString('Help', $controller->email->subjectLine);
+			$this->assertSame(1, count($GLOBALS['__test_flash_notices']));
+			$this->assertArrayHasKey('about_contact_last_sent', $controller->session->data);
+		}
+	}
+
+	public function testAboutContactSubmissionHonorsRateLimit()
+	{
+		$GLOBALS['__test_settings'] = array(
+			'fs_about_admin_email' => 'about@example.com',
+			'fs_gen_site_title' => 'Demo Site',
+		);
+
+		$controller = $this->newController();
+		$template = new StubTemplate();
+		$controller->template = $template;
+		$controller->input = new StubInput(array(
+			'contact_name' => 'Alice',
+			'contact_email' => 'alice@example.com',
+			'contact_subject' => 'Help',
+			'contact_message' => 'Need assistance',
+			'contact_website' => '',
+		));
+		$controller->session = new StubSession();
+		$controller->session->set_userdata('about_contact_last_sent', time());
+		$controller->form_validation = new StubFormValidation(array(), true);
+		$controller->email = new StubEmail(true);
+
+		$controller->about();
+
+		$this->assertSame('about', $template->builtView);
+		$this->assertSame(0, $controller->email->sendCalls);
+		$this->assertNotEmpty($GLOBALS['__test_notices']);
+		$this->assertSame('Please wait a minute before sending another message.', $GLOBALS['__test_notices'][0]['message']);
 	}
 
 	public function testSearchTagsRedirectsToTagsWhenNoPostPayload()
@@ -285,6 +403,7 @@ class StubInput
 class StubSession
 {
 	public $data = array();
+	public $flash = array();
 
 	public function set_userdata($key, $value)
 	{
@@ -296,6 +415,133 @@ class StubSession
 		if (array_key_exists($key, $this->data))
 		{
 			return $this->data[$key];
+		}
+
+		return null;
+	}
+
+	public function flashdata($key)
+	{
+		if (array_key_exists($key, $this->flash))
+		{
+			return $this->flash[$key];
+		}
+
+		return null;
+	}
+}
+
+class StubFormValidation
+{
+	private $values;
+	private $runResult;
+
+	public function __construct(array $values, $runResult)
+	{
+		$this->values = $values;
+		$this->runResult = $runResult;
+	}
+
+	public function set_rules($field, $label, $rules)
+	{
+		return $this;
+	}
+
+	public function run()
+	{
+		return $this->runResult;
+	}
+
+	public function set_value($field)
+	{
+		if (array_key_exists($field, $this->values))
+		{
+			return $this->values[$field];
+		}
+
+		return null;
+	}
+}
+
+class StubEmail
+{
+	public $fromAddress;
+	public $replyToAddress;
+	public $toAddress;
+	public $subjectLine;
+	public $messageBody;
+	public $altMessageBody;
+	public $sendCalls = 0;
+
+	private $sendResult;
+
+	public function __construct($sendResult)
+	{
+		$this->sendResult = $sendResult;
+	}
+
+	public function clear($clear_attachments = FALSE)
+	{
+		return $this;
+	}
+
+	public function from($address, $name = '')
+	{
+		$this->fromAddress = $address;
+		return $this;
+	}
+
+	public function reply_to($address, $name = '')
+	{
+		$this->replyToAddress = $address;
+		return $this;
+	}
+
+	public function to($address)
+	{
+		$this->toAddress = $address;
+		return $this;
+	}
+
+	public function subject($subject)
+	{
+		$this->subjectLine = $subject;
+		return $this;
+	}
+
+	public function message($message)
+	{
+		$this->messageBody = $message;
+		return $this;
+	}
+
+	public function set_alt_message($message)
+	{
+		$this->altMessageBody = $message;
+		return $this;
+	}
+
+	public function send()
+	{
+		$this->sendCalls++;
+		return $this->sendResult;
+	}
+}
+
+class StubConfig
+{
+	private $items;
+
+	public function __construct(array $items)
+	{
+		$this->items = $items;
+	}
+
+	public function item($key, $group = '')
+	{
+		if (array_key_exists($key, $this->items))
+		{
+			return $this->items[$key];
 		}
 
 		return null;
@@ -567,9 +813,23 @@ class ReaderTestController extends Reader
 	public $session;
 	public $agent;
 	public $RC;
+	public $form_validation;
+	public $email;
+	public $config;
 
 	public function __construct()
 	{
+	}
+}
+
+if (!function_exists('flash_notice'))
+{
+	function flash_notice($type, $message)
+	{
+		$GLOBALS['__test_flash_notices'][] = array(
+			'type' => $type,
+			'message' => $message
+		);
 	}
 }
 

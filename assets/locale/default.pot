@@ -2907,3 +2907,48 @@ msgstr ""
 #: content/themes/default/views/about.php:31 content/themes/dazen-skin/views/about.php:29
 msgid "About This Site"
 msgstr ""
+
+#: content/themes/default/views/about.php:41 content/themes/dazen-skin/views/about.php:39
+msgid "Contact Us"
+msgstr ""
+
+#: content/themes/default/views/about.php:45 content/themes/dazen-skin/views/about.php:43
+msgid "If you have any questions or feedback, please contact us using the information provided above."
+msgstr ""
+
+#: content/themes/default/views/about.php:77 content/themes/dazen-skin/views/about.php:75
+msgid "Send Message"
+msgstr ""
+
+#: application/controllers/reader.php:83
+msgid "The contact form is currently unavailable."
+msgstr ""
+
+#: application/controllers/reader.php:95
+msgid "Please wait a minute before sending another message."
+msgstr ""
+
+#: application/controllers/reader.php:128
+msgid "We couldn't send your message right now. Please try again later."
+msgstr ""
+
+#: application/controllers/reader.php:137
+#, php-format
+msgid "[%s] About Page Contact: %s"
+msgstr ""
+
+#: application/controllers/reader.php:184 application/controllers/reader.php:188
+msgid "Your message has been sent."
+msgstr ""
+
+#: application/helpers/notices_helper.php:95
+msgid "Success"
+msgstr ""
+
+#: application/helpers/notices_helper.php:98
+msgid "Error"
+msgstr ""
+
+#: application/helpers/notices_helper.php:102
+msgid "Warning"
+msgstr ""
