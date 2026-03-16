@@ -329,6 +329,18 @@ class ReaderControllerTest extends TestCase
 		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM fs_chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
 	}
 
+	public function testTeamsHonorsExplicitEmptyDbPrefix()
+	{
+		$controller = $this->newController();
+		$controller->template = new StubTemplate();
+		$controller->config = new StubConfig(array('db_table_prefix' => ''));
+		Team::reset();
+
+		$controller->teams();
+
+		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
+	}
+
 	public function testRemapCallsReaderMethodWhenAvailable()
 	{
 		$controller = new ReaderPingController();

@@ -1044,7 +1044,20 @@ class Reader extends Public_Controller
 	{
 		$chapters = new Chapter();
 		$db_table_prefix = $this->config_item('db_table_prefix');
-		$chapters_table = ($db_table_prefix ? $db_table_prefix : 'fs_') . $chapters->table;
+		if (!is_string($db_table_prefix))
+		{
+			$db_table_prefix = '';
+			if (file_exists(FCPATH . 'config.php'))
+			{
+				$db = array();
+				require(FCPATH . 'config.php');
+				if (isset($db['default']['dbprefix']) && is_string($db['default']['dbprefix']))
+				{
+					$db_table_prefix = $db['default']['dbprefix'];
+				}
+			}
+		}
+		$chapters_table = $db_table_prefix . $chapters->table;
 		$teams = new Team();
 		$teams->where('id IN (SELECT DISTINCT team_id FROM ' . $chapters_table . ' WHERE hidden = 0 AND team_id != 0)', NULL, FALSE);
 
