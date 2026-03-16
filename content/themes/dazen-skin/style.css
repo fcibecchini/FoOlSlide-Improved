@@ -385,6 +385,26 @@ input[class="menu"]{
 	position: relative;
 	z-index: 100;
 }
+.list .element.team-member{
+	display: block;
+	overflow: hidden;
+}
+.list .element.team-member .image img{
+	display: block;
+	height: 75px;
+	width: 75px;
+}
+.list .element.team-member .member-details{
+	overflow: hidden;
+}
+.list .element.team-member .member-details .title{
+	float: none;
+}
+.list .element.team-member .member-meta{
+	color: #c8cdd8;
+	line-height: 1.4;
+	margin-top: 4px;
+}
 .large{
 	background: #f7f7f7;
 	background-image: url(images/background_noise_light.png);
