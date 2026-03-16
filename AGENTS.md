@@ -46,6 +46,7 @@
 - Commit new features and fixes on feature branches only; do not commit directly to `main`.
 - Use the `gh` CLI to open pull requests targeting the `main` branch.
 - Always run all repository verification scripts in `scripts/` that are part of the normal workflow, especially `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke.sh`, before finalizing.
+- Verification script selection rule: always run `./scripts/run-tests.sh`, and for smoke tests run `./scripts/run-e2e-smoke-local.sh` when `CODEX_VIRTUAL_ENV=1`; otherwise run `./scripts/run-e2e-smoke.sh` (Docker-based).
 - Run e2e smoke tests in addition to the automated test suite when the change affects browser flows or integration behavior.
 - Do not attempt remote deployments unless the user explicitly requests them.
 - If browser testing is performed locally or remotely, do not mention the specific URLs tested in summaries or PR text.
