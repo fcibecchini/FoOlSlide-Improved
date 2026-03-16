@@ -654,7 +654,7 @@ else
 		if [ -n "$seeded_team_stub" ]; then
 			check_authed_page "/admin/members/home_team/" 1000 "<!DOCTYPE html"
 			check_authed_page "/admin/members/teams/${seeded_team_stub}" 1000 "<!DOCTYPE html"
-			check_page_fragment "/team/${seeded_team_stub}" 400 "teamworks/${seeded_team_stub}"
+			check_page "/team/${seeded_team_stub}" 1000 "teamworks/${seeded_team_stub}"
 		fi
 		team_stub="$(create_team_via_admin "Smoke Team ${smoke_suffix}")"
 		add_team_leader_via_admin "$team_stub" "$ADMIN_USER"
