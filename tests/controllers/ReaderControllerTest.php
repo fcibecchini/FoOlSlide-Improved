@@ -306,7 +306,7 @@ class ReaderControllerTest extends TestCase
 		$this->assertSame('name', $template->values['item_name_field']);
 		$this->assertSame('stub', $template->values['item_stub_field']);
 		$this->assertSame('teams', $template->values['items_name']);
-		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM fs_chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
+		$this->assertSame(array('id IN (SELECT DISTINCT ch.team_id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0)', null, false), Team::$whereArgs[0]);
 	}
 
 	public function testSearchTeamBuildsMenuViewUsingPublishedTeamsOnly()
@@ -326,7 +326,7 @@ class ReaderControllerTest extends TestCase
 		$this->assertSame('search_team/', $template->values['search_action']);
 		$this->assertSame('teamworks', $template->values['item_link_prefix']);
 		$this->assertSame(array('name', 'scan'), Team::$ilikeArgs);
-		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM fs_chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
+		$this->assertSame(array('id IN (SELECT DISTINCT ch.team_id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0)', null, false), Team::$whereArgs[0]);
 	}
 
 	public function testTeamsHonorsExplicitEmptyDbPrefix()
@@ -338,7 +338,7 @@ class ReaderControllerTest extends TestCase
 
 		$controller->teams();
 
-		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
+		$this->assertSame(array('id IN (SELECT DISTINCT ch.team_id FROM chapters ch JOIN comics c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0)', null, false), Team::$whereArgs[0]);
 	}
 
 	public function testRemapCallsReaderMethodWhenAvailable()
@@ -720,6 +720,7 @@ if (!class_exists('Comic'))
 	class Comic
 	{
 		public static $throwOnIlike = false;
+		public $table = 'comics';
 		public $id = 7;
 		public $typeh_id = 1;
 		public $creator = 1;

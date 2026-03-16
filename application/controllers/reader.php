@@ -1043,6 +1043,7 @@ class Reader extends Public_Controller
 	private function get_published_teams()
 	{
 		$chapters = new Chapter();
+		$comics = new Comic();
 		$db_table_prefix = $this->config_item('db_table_prefix');
 		if (!is_string($db_table_prefix))
 		{
@@ -1058,8 +1059,13 @@ class Reader extends Public_Controller
 			}
 		}
 		$chapters_table = $db_table_prefix . $chapters->table;
+		$comics_table = $db_table_prefix . $comics->table;
 		$teams = new Team();
-		$teams->where('id IN (SELECT DISTINCT team_id FROM ' . $chapters_table . ' WHERE hidden = 0 AND team_id != 0)', NULL, FALSE);
+		$teams->where(
+			'id IN (SELECT DISTINCT ch.team_id FROM ' . $chapters_table . ' ch JOIN ' . $comics_table . ' c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0)',
+			NULL,
+			FALSE
+		);
 
 		return $teams;
 	}
