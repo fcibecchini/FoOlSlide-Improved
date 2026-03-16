@@ -289,6 +289,46 @@ class ReaderControllerTest extends TestCase
 		$this->assertIsArray($template->values['comics']);
 	}
 
+	public function testTeamsBuildsMenuViewUsingPublishedTeamsOnly()
+	{
+		$controller = $this->newController();
+		$template = new StubTemplate();
+		$controller->template = $template;
+		Team::reset();
+
+		$controller->teams();
+
+		$this->assertSame('menu', $template->builtView);
+		$this->assertSame('Teams List', $template->values['title']);
+		$this->assertSame('teams', $template->values['link']);
+		$this->assertSame('search_team/', $template->values['search_action']);
+		$this->assertSame('teamworks', $template->values['item_link_prefix']);
+		$this->assertSame('name', $template->values['item_name_field']);
+		$this->assertSame('stub', $template->values['item_stub_field']);
+		$this->assertSame('teams', $template->values['items_name']);
+		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM fs_chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
+	}
+
+	public function testSearchTeamBuildsMenuViewUsingPublishedTeamsOnly()
+	{
+		$controller = $this->newController();
+		$template = new StubTemplate();
+		$controller->template = $template;
+		$controller->input = new StubInput(array('search' => 'scan'));
+		Team::reset();
+
+		$controller->search_team();
+
+		$this->assertSame('menu', $template->builtView);
+		$this->assertSame('scan', $template->values['search']);
+		$this->assertSame('Teams List', $template->values['title']);
+		$this->assertSame('teams', $template->values['link']);
+		$this->assertSame('search_team/', $template->values['search_action']);
+		$this->assertSame('teamworks', $template->values['item_link_prefix']);
+		$this->assertSame(array('name', 'scan'), Team::$ilikeArgs);
+		$this->assertSame(array('id IN (SELECT DISTINCT team_id FROM fs_chapters WHERE hidden = 0 AND team_id != 0)', null, false), Team::$whereArgs[0]);
+	}
+
 	public function testRemapCallsReaderMethodWhenAvailable()
 	{
 		$controller = new ReaderPingController();
@@ -618,6 +658,51 @@ if (!class_exists('Tag'))
 	}
 }
 
+if (!class_exists('Team'))
+{
+	class Team
+	{
+		public static $ilikeArgs = null;
+		public static $whereArgs = array();
+		public $all = array();
+
+		public static function reset()
+		{
+			self::$ilikeArgs = null;
+			self::$whereArgs = array();
+		}
+
+		public function order_by($field, $direction)
+		{
+			return $this;
+		}
+
+		public function ilike($field, $value)
+		{
+			self::$ilikeArgs = array($field, $value);
+			return $this;
+		}
+
+		public function where($field, $value = null, $escape = true)
+		{
+			self::$whereArgs[] = array($field, $value, $escape);
+			return $this;
+		}
+
+		public function get_paged($page = 1, $page_size = 50)
+		{
+			$this->all = array((object) array('name' => 'Demo Team', 'stub' => 'demo-team'));
+			return $this;
+		}
+
+		public function get()
+		{
+			$this->all = array((object) array('name' => 'Demo Team', 'stub' => 'demo-team'));
+			return $this;
+		}
+	}
+}
+
 if (!class_exists('Comic'))
 {
 	class Comic
@@ -739,6 +824,9 @@ if (!class_exists('Chapter'))
 {
 	class Chapter
 	{
+		public $table = 'chapters';
+		public $all = array();
+
 		public function where($key, $value)
 		{
 			return $this;
@@ -756,6 +844,7 @@ if (!class_exists('Chapter'))
 
 		public function get()
 		{
+			$this->all = array((object) array('team_id' => 5));
 			return $this;
 		}
 

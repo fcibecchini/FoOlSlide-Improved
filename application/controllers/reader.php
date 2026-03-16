@@ -256,6 +256,13 @@ class Reader extends Public_Controller
 				'lastmod' => '',
 				'changefreq' => 'weekly',
 				'priority' => '0.5'
+			),
+			array(
+				// teams page
+				'loc' => site_url('teams'),
+				'lastmod' => '',
+				'changefreq' => 'weekly',
+				'priority' => '0.5'
 			)
 		);
 
@@ -529,6 +536,24 @@ class Reader extends Public_Controller
 		$this->template->set('param_stub', 'parody_stub');
 		$this->template->set('show_sidebar', TRUE);
 		$this->template->set('comics', $comics);
+		$this->template->build('menu');
+	}
+
+	public function teams($page = 1)
+	{
+		$teams = $this->get_published_teams();
+		$teams->order_by('name', 'ASC')->get_paged($page, 100);
+
+		$this->template->title(_('Teams'), get_setting('fs_gen_site_title'));
+		$this->template->set('title', _('Teams List'));
+		$this->template->set('link', 'teams');
+		$this->template->set('search_action', 'search_team/');
+		$this->template->set('items_name', 'teams');
+		$this->template->set('item_name_field', 'name');
+		$this->template->set('item_stub_field', 'stub');
+		$this->template->set('item_link_prefix', 'teamworks');
+		$this->template->set('show_sidebar', TRUE);
+		$this->template->set('items', $teams);
 		$this->template->build('menu');
 	}
 	
@@ -992,6 +1017,38 @@ class Reader extends Public_Controller
 		$this->template->set('param', 'parody');
 		$this->template->set('param_stub', 'parody_stub');
 		$this->template->build('menu');
+	}
+
+	public function search_team()
+	{
+		$search = $this->sanitize_search_query($this->input->post('search'));
+		$this->template->title(_('Search Team'));
+
+		$teams = $this->get_published_teams();
+		$teams->ilike('name', $search)->order_by('name', 'ASC')->get();
+
+		$this->template->set('title', _('Teams List'));
+		$this->template->set('show_sidebar', TRUE);
+		$this->template->set('search', $search);
+		$this->template->set('link', 'teams');
+		$this->template->set('search_action', 'search_team/');
+		$this->template->set('items_name', 'teams');
+		$this->template->set('item_name_field', 'name');
+		$this->template->set('item_stub_field', 'stub');
+		$this->template->set('item_link_prefix', 'teamworks');
+		$this->template->set('items', $teams);
+		$this->template->build('menu');
+	}
+
+	private function get_published_teams()
+	{
+		$chapters = new Chapter();
+		$db_table_prefix = $this->config_item('db_table_prefix');
+		$chapters_table = ($db_table_prefix ? $db_table_prefix : 'fs_') . $chapters->table;
+		$teams = new Team();
+		$teams->where('id IN (SELECT DISTINCT team_id FROM ' . $chapters_table . ' WHERE hidden = 0 AND team_id != 0)', NULL, FALSE);
+
+		return $teams;
 	}
 
 

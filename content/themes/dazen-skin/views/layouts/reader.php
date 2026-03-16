@@ -86,6 +86,7 @@
 						<li><a href="<?php echo site_url('tags') ?>"><span class="mh"><?php echo _('Tags'); ?></span></a></li>
 						<li><a href="<?php echo site_url('authors') ?>"><span class="mh"> <?php echo _('Authors'); ?></span></a></li>
 						<li><a href="<?php echo site_url('parodies') ?>"><span class="mh"> <?php echo _('Parodies'); ?></span></a></li>
+						<li><a href="<?php echo site_url('teams') ?>"><span class="mh"> <?php echo _('Teams'); ?></span></a></li>
 							<li><a href="<?php echo site_url('most_downloaded') ?>"><span class="mh"> <?php echo _('Most Downloaded'); ?></span></a></li>
 							<?php if (has_about_page()) : ?>
 								<li><a href="<?php echo site_url('about') ?>"><span class="mh"> <?php echo about_label('About'); ?></span></a></li>
