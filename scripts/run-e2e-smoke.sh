@@ -41,13 +41,13 @@ require_cmd() {
 }
 
 ensure_local_dependencies() {
-	if command -v mysql >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v php >/dev/null 2>&1 && command -v mysqld >/dev/null 2>&1; then
-		return 0
+	if ! (command -v mysql >/dev/null 2>&1 && command -v curl >/dev/null 2>&1 && command -v php >/dev/null 2>&1 && command -v mysqld >/dev/null 2>&1); then
+		require_cmd apt-get
+		echo "[e2e] Installing local dependencies (curl, mysql, php)."
+		DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
+		DEBIAN_FRONTEND=noninteractive apt-get install -y curl mysql-server php-cli php-mysql >/dev/null
 	fi
-	require_cmd apt-get
-	echo "[e2e] Installing local dependencies (curl, mysql, php)."
-	DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
-	DEBIAN_FRONTEND=noninteractive apt-get install -y curl mysql-server php-cli php-mysql >/dev/null
+
 	if ! grep -qE '^127\.0\.0\.1\s+db(\s|$)' /etc/hosts 2>/dev/null; then
 		echo '127.0.0.1 db' >> /etc/hosts
 	fi
