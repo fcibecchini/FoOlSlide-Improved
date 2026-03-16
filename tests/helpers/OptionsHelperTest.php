@@ -30,4 +30,13 @@ class OptionsHelperTest extends TestCase
 		$this->assertSame('Chi Siamo', about_label('About'));
 		$this->assertSame('Informazioni su Questo Sito', about_label('About This Site'));
 	}
+
+	public function testRandomStringContainsAlphaNumericCharacters()
+	{
+		$random = random_string(200);
+
+		$this->assertSame(200, strlen($random));
+		$this->assertMatchesRegularExpression('/^[a-z0-9]+$/', $random);
+		$this->assertMatchesRegularExpression('/[a-z]/', $random);
+	}
 }
