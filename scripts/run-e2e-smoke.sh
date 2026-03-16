@@ -58,6 +58,15 @@ ensure_local_mysql_runtime() {
 		return 0
 	fi
 	echo "[e2e] Starting local MySQL runtime on ${DB_HOST}:${DB_PORT}."
+	mkdir -p /var/lib/mysql-files
+	chown mysql:mysql /var/lib/mysql-files >/dev/null 2>&1 || true
+	if [ ! -f /var/lib/mysql/mysql/user.ibd ]; then
+		echo "[e2e] Initializing local MySQL data directory."
+		mkdir -p /var/lib/mysql
+		chown mysql:mysql /var/lib/mysql >/dev/null 2>&1 || true
+		rm -rf /var/lib/mysql/*
+		mysqld --initialize-insecure --user=mysql --datadir=/var/lib/mysql
+	fi
 	rm -f "$MYSQL_SOCKET" "$MYSQL_SOCKET.lock" "$MYSQL_PID_FILE"
 	mysqld --user=mysql \
 		--datadir=/var/lib/mysql \
@@ -122,6 +131,7 @@ start_local_app() {
 }
 
 require_cmd curl
+trap cleanup_runtime EXIT
 
 if [ "$LOCAL_MODE" -eq 1 ]; then
 	ensure_local_dependencies
@@ -173,7 +183,6 @@ if [ "$ready" -ne 1 ]; then
 fi
 
 tmp_dir="$(mktemp -d)"
-trap cleanup_runtime EXIT
 COOKIE_JAR="$tmp_dir/cookies.txt"
 check_page() {
 	local path="$1"
