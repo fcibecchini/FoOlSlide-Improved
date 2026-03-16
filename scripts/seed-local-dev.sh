@@ -1,0 +1,304 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+BASE_URL="${BASE_URL:-http://localhost:8080}"
+ADMIN_USER="${ADMIN_USER:-admin}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-admin}"
+SERIES_STUB="${SERIES_STUB:-again-my-childhood-friend}"
+SERIES_NAME="${SERIES_NAME:-Again My Childhood Friend}"
+SEED_COMIC_UNIQID="${SEED_COMIC_UNIQID:-seedcomic001}"
+SEED_CHAPTER_TWO_UNIQID="${SEED_CHAPTER_TWO_UNIQID:-seedchapter002}"
+PRIMARY_TYPE_NAME="${PRIMARY_TYPE_NAME:-Manga}"
+SECONDARY_TYPE_NAME="${SECONDARY_TYPE_NAME:-Doujinshi}"
+PRIMARY_TAG_NAME="${PRIMARY_TAG_NAME:-School Life}"
+SECONDARY_TAG_NAME="${SECONDARY_TAG_NAME:-Romance}"
+SEED_PAGE1_SOURCE="${SEED_PAGE1_SOURCE:-$ROOT_DIR/scripts/page1.png}"
+SEED_PAGE2_SOURCE="${SEED_PAGE2_SOURCE:-$ROOT_DIR/scripts/page2.jpg}"
+DB_HOST="${DB_HOST:-db}"
+DB_PORT="${DB_PORT:-3306}"
+DB_NAME="${DB_NAME:-foolslide_db}"
+DB_USER="${DB_USER:-foolslide_user}"
+DB_PASSWORD="${DB_PASSWORD:-foobar}"
+MYSQL_SOCKET="${MYSQL_SOCKET:-/tmp/foolslide-local-mysql.sock}"
+MYSQL_BIND_HOST="${MYSQL_BIND_HOST:-127.0.0.1}"
+MYSQL_PID_FILE="${MYSQL_PID_FILE:-/tmp/foolslide-local-mysqld.pid}"
+SEED_PHP_BIN="${SEED_PHP_BIN:-}"
+SEED_DEPS_ONLY=0
+
+for arg in "$@"; do
+	case "$arg" in
+		--deps-only)
+			SEED_DEPS_ONLY=1
+			;;
+		*)
+			echo "[seed-local] Unknown argument: $arg" >&2
+			exit 2
+			;;
+	esac
+done
+
+ensure_local_dependencies() {
+	local need_apt=0
+
+	if ! command -v curl >/dev/null 2>&1; then
+		need_apt=1
+	fi
+	if ! command -v mysql >/dev/null 2>&1; then
+		need_apt=1
+	fi
+	if ! command -v php8.3 >/dev/null 2>&1 && ! command -v php >/dev/null 2>&1; then
+		need_apt=1
+	fi
+	if ! command -v npm >/dev/null 2>&1; then
+		need_apt=1
+	fi
+
+	if [ "$need_apt" -eq 1 ]; then
+		if ! command -v apt-get >/dev/null 2>&1; then
+			echo "[seed-local] Missing required packages and apt-get is unavailable." >&2
+			exit 127
+		fi
+
+		echo "[seed-local] Installing local smoke dependencies (curl, mysql client/server, php, npm)."
+		DEBIAN_FRONTEND=noninteractive apt-get update >/dev/null
+		DEBIAN_FRONTEND=noninteractive apt-get install -y 			curl mysql-server php-cli php-mysql npm >/dev/null
+	fi
+
+
+	if ! grep -qE '^127\.0\.0\.1\s+db(\s|$)' /etc/hosts 2>/dev/null; then
+		echo '127.0.0.1 db' >> /etc/hosts
+	fi
+	if ! command -v agent-browser >/dev/null 2>&1; then
+		echo "[seed-local] Installing agent-browser CLI dependency."
+		npm install -g agent-browser >/dev/null
+	fi
+}
+
+ensure_local_mysql_runtime() {
+	if mysqladmin --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" --silent ping >/dev/null 2>&1; then
+		return 0
+	fi
+
+	echo "[seed-local] Starting local MySQL runtime on ${DB_HOST}:${DB_PORT}."
+	rm -f "$MYSQL_SOCKET" "$MYSQL_SOCKET.lock" "$MYSQL_PID_FILE"
+	mysqld --user=mysql \
+		--datadir=/var/lib/mysql \
+		--socket="$MYSQL_SOCKET" \
+		--pid-file="$MYSQL_PID_FILE" \
+		--bind-address="$MYSQL_BIND_HOST" \
+		--port="$DB_PORT" \
+		--mysqlx=0 \
+		--sql-mode="NO_ENGINE_SUBSTITUTION" \
+		--daemonize
+
+	for ((i = 1; i <= 40; i++)); do
+		if mysqladmin --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" --silent ping >/dev/null 2>&1; then
+			return 0
+		fi
+		sleep 1
+	done
+
+	echo "[seed-local] MySQL server did not become reachable on ${DB_HOST}:${DB_PORT}." >&2
+	exit 1
+}
+
+ensure_local_database() {
+	local mysql_root=(mysql -uroot)
+	if [ -S "$MYSQL_SOCKET" ]; then
+		mysql_root+=("--protocol=SOCKET" "--socket=$MYSQL_SOCKET")
+	fi
+
+	"${mysql_root[@]}" <<SQL
+CREATE DATABASE IF NOT EXISTS \
+	\`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+ALTER USER '${DB_USER}'@'%' IDENTIFIED BY '${DB_PASSWORD}';
+GRANT ALL PRIVILEGES ON \
+	\`${DB_NAME}\`.* TO '${DB_USER}'@'%';
+FLUSH PRIVILEGES;
+SET GLOBAL sql_mode = "NO_ENGINE_SUBSTITUTION";
+SQL
+}
+
+require_cmd() {
+	local cmd="$1"
+	if ! command -v "$cmd" >/dev/null 2>&1; then
+		echo "[seed-local] Missing required command: $cmd" >&2
+		exit 127
+	fi
+}
+
+ensure_local_dependencies
+ensure_local_mysql_runtime
+ensure_local_database
+
+if [ "$SEED_DEPS_ONLY" = "1" ]; then
+	echo "[seed-local] Dependencies are installed."
+	exit 0
+fi
+
+require_cmd curl
+require_cmd mysql
+
+if [ -z "$SEED_PHP_BIN" ]; then
+	if command -v php8.3 >/dev/null 2>&1; then
+		SEED_PHP_BIN="php8.3"
+	else
+		SEED_PHP_BIN="php"
+	fi
+fi
+require_cmd "$SEED_PHP_BIN"
+
+if [ ! -f "$SEED_PAGE1_SOURCE" ] || [ ! -f "$SEED_PAGE2_SOURCE" ]; then
+	echo "[seed-local] Missing seeded chapter sample pages in scripts/." >&2
+	exit 1
+fi
+
+for ((i = 1; i <= 90; i++)); do
+	if curl -fsS "$BASE_URL/" >/dev/null 2>&1; then
+		break
+	fi
+	sleep 1
+done
+
+curl -fsS "$BASE_URL/" >/dev/null
+
+admin_hash="$({
+	ADMIN_PASSWORD="$ADMIN_PASSWORD" "$SEED_PHP_BIN" -r 'require "application/libraries/phpass-0.1/PasswordHash.php"; $hasher = new PasswordHash(8, FALSE); echo $hasher->HashPassword(getenv("ADMIN_PASSWORD")), PHP_EOL;' ;
+} | tr -d '\r\n')"
+
+mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "-p$DB_PASSWORD" -D "$DB_NAME" <<SQL
+SET @admin_user_id := (SELECT id FROM fs_users WHERE username = '${ADMIN_USER}' LIMIT 1);
+
+UPDATE fs_users
+SET password = '${admin_hash}',
+	email = 'admin@example.com',
+	activated = 1,
+	updated = NOW()
+WHERE id = @admin_user_id;
+
+INSERT INTO fs_users (username, password, email, activated, banned, last_ip, last_login, created, modified, updated)
+SELECT '${ADMIN_USER}', '${admin_hash}', 'admin@example.com', 1, 0, '', '0000-00-00 00:00:00', NOW(), NOW(), NOW()
+FROM DUAL
+WHERE @admin_user_id IS NULL;
+
+SET @admin_user_id := IFNULL(@admin_user_id, LAST_INSERT_ID());
+
+INSERT INTO fs_profiles (user_id, group_id, display_name, twitter, bio)
+SELECT @admin_user_id, 1, 'Administrator', '', ''
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_profiles WHERE user_id = @admin_user_id);
+
+INSERT INTO fs_typehs (name, description)
+SELECT '${PRIMARY_TYPE_NAME}', 'Seed type'
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_typehs WHERE name = '${PRIMARY_TYPE_NAME}');
+
+INSERT INTO fs_typehs (name, description)
+SELECT '${SECONDARY_TYPE_NAME}', 'Seed type'
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_typehs WHERE name = '${SECONDARY_TYPE_NAME}');
+
+INSERT INTO fs_tags (name, description, thumbnail)
+SELECT '${PRIMARY_TAG_NAME}', 'Seed tag', ''
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_tags WHERE name = '${PRIMARY_TAG_NAME}');
+
+INSERT INTO fs_tags (name, description, thumbnail)
+SELECT '${SECONDARY_TAG_NAME}', 'Seed tag', ''
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_tags WHERE name = '${SECONDARY_TAG_NAME}');
+
+SET @team_id := (SELECT id FROM fs_teams ORDER BY id LIMIT 1);
+SET @typeh_id := (SELECT id FROM fs_typehs WHERE name = '${PRIMARY_TYPE_NAME}' LIMIT 1);
+SET @second_tag_id := (SELECT id FROM fs_tags WHERE name = '${SECONDARY_TAG_NAME}' LIMIT 1);
+SET @first_tag_id := (SELECT id FROM fs_tags WHERE name = '${PRIMARY_TAG_NAME}' LIMIT 1);
+SET @jointag_id := (
+	SELECT jointag_id
+	FROM fs_jointags
+	WHERE tag_id = @first_tag_id
+		AND jointag_id IN (SELECT jointag_id FROM fs_jointags WHERE tag_id = @second_tag_id)
+	LIMIT 1
+);
+SET @next_jointag_id := (SELECT IFNULL(MAX(jointag_id), 0) + 1 FROM fs_jointags);
+SET @jointag_id := IFNULL(@jointag_id, @next_jointag_id);
+
+INSERT INTO fs_jointags (jointag_id, tag_id)
+SELECT @jointag_id, @first_tag_id
+FROM DUAL
+WHERE @first_tag_id IS NOT NULL
+	AND NOT EXISTS (SELECT 1 FROM fs_jointags WHERE jointag_id = @jointag_id AND tag_id = @first_tag_id);
+
+INSERT INTO fs_jointags (jointag_id, tag_id)
+SELECT @jointag_id, @second_tag_id
+FROM DUAL
+WHERE @second_tag_id IS NOT NULL
+	AND NOT EXISTS (SELECT 1 FROM fs_jointags WHERE jointag_id = @jointag_id AND tag_id = @second_tag_id);
+
+SET @comic_id := (SELECT id FROM fs_comics WHERE stub = '${SERIES_STUB}' LIMIT 1);
+
+INSERT INTO fs_comics
+	(name, stub, uniqid, hidden, author, author_stub, artist, description, parody, parody_stub, urlforum, typeh_id, jointag_id, thumbnail, customchapter, format, adult, created, lastseen, updated, creator, editor)
+SELECT
+	'${SERIES_NAME}', '${SERIES_STUB}', 'seedcomic001', 0, 'Seed Author', 'seed-author', 'Seed Artist', 'Seed description', '', '', '', @typeh_id, @jointag_id, '', 'Chapter', 0, 1, NOW(), NOW(), NOW(), @admin_user_id, @admin_user_id
+FROM DUAL
+WHERE @comic_id IS NULL;
+
+SET @comic_id := IFNULL(@comic_id, LAST_INSERT_ID());
+UPDATE fs_comics
+SET typeh_id = @typeh_id,
+	jointag_id = @jointag_id,
+	updated = NOW()
+WHERE id = @comic_id;
+
+SET @chapter_two_id := (SELECT id FROM fs_chapters WHERE comic_id = @comic_id AND chapter = 2 AND subchapter = 0 LIMIT 1);
+
+INSERT INTO fs_chapters
+	(comic_id, team_id, joint_id, chapter, subchapter, volume, language, name, stub, uniqid, hidden, description, thumbnail, created, lastseen, updated, creator, editor, downloads)
+SELECT
+	@comic_id, @team_id, 0, 2, 0, 1, 'it', 'Seed Chapter Two', 'seed-chapter-two', 'seedchapter002', 0, 'Seed chapter two', '', NOW(), NOW(), NOW(), @admin_user_id, @admin_user_id, 0
+FROM DUAL
+WHERE @chapter_two_id IS NULL;
+
+SET @chapter_two_id := IFNULL(@chapter_two_id, LAST_INSERT_ID());
+
+INSERT INTO fs_preferences (name, value, \`group\`)
+SELECT 'fs_dl_enabled', '1', 0
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_preferences WHERE name = 'fs_dl_enabled');
+
+UPDATE fs_preferences SET value = '1' WHERE name = 'fs_dl_enabled';
+
+INSERT INTO fs_preferences (name, value, \`group\`)
+SELECT 'fs_dl_volume_enabled', '1', 0
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_preferences WHERE name = 'fs_dl_volume_enabled');
+
+UPDATE fs_preferences SET value = '1' WHERE name = 'fs_dl_volume_enabled';
+
+INSERT INTO fs_preferences (name, value, \`group\`)
+SELECT 'fs_about_admin_email', 'about@example.com', 0
+FROM DUAL
+WHERE NOT EXISTS (SELECT 1 FROM fs_preferences WHERE name = 'fs_about_admin_email');
+
+UPDATE fs_preferences SET value = 'about@example.com' WHERE name = 'fs_about_admin_email';
+
+DELETE FROM fs_pages WHERE chapter_id = @chapter_two_id;
+
+INSERT INTO fs_pages
+	(chapter_id, filename, hidden, created, lastseen, updated, creator, editor, height, width, mime, size)
+VALUES
+	(@chapter_two_id, '001.png', 0, NOW(), CURRENT_TIMESTAMP, NOW(), @admin_user_id, @admin_user_id, 1740, 1247, 'image/png', 1879978),
+	(@chapter_two_id, '002.jpg', 0, NOW(), CURRENT_TIMESTAMP, NOW(), @admin_user_id, @admin_user_id, 1073, 736, 'image/jpeg', 132961);
+SQL
+
+comic_dir="$ROOT_DIR/content/comics/${SERIES_STUB}_${SEED_COMIC_UNIQID}"
+chapter_dir="$comic_dir/seed-chapter-two_${SEED_CHAPTER_TWO_UNIQID}"
+mkdir -p "$chapter_dir"
+cp "$SEED_PAGE1_SOURCE" "$chapter_dir/001.png"
+cp "$SEED_PAGE2_SOURCE" "$chapter_dir/002.jpg"
+
+echo "[seed-local] Ensured local dev seed data: ${ADMIN_USER}/${ADMIN_PASSWORD}, ${SERIES_STUB}"
