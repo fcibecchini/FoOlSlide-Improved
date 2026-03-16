@@ -22,6 +22,7 @@ DB_PORT="${DB_PORT:-3306}"
 DB_NAME="${DB_NAME:-foolslide_db}"
 DB_USER="${DB_USER:-foolslide_user}"
 DB_PASSWORD="${DB_PASSWORD:-foobar}"
+SEED_PHP_BIN="${SEED_PHP_BIN:-}"
 
 require_cmd() {
 	local cmd="$1"
@@ -33,7 +34,15 @@ require_cmd() {
 
 require_cmd curl
 require_cmd mysql
-require_cmd php
+
+if [ -z "$SEED_PHP_BIN" ]; then
+	if command -v php8.3 >/dev/null 2>&1; then
+		SEED_PHP_BIN="php8.3"
+	else
+		SEED_PHP_BIN="php"
+	fi
+fi
+require_cmd "$SEED_PHP_BIN"
 
 if [ ! -f "$SEED_PAGE1_SOURCE" ] || [ ! -f "$SEED_PAGE2_SOURCE" ]; then
 	echo "[seed-local] Missing seeded chapter sample pages in scripts/." >&2
@@ -50,7 +59,7 @@ done
 curl -fsS "$BASE_URL/" >/dev/null
 
 admin_hash="$({
-	ADMIN_PASSWORD="$ADMIN_PASSWORD" php -r 'require "application/libraries/phpass-0.1/PasswordHash.php"; $hasher = new PasswordHash(8, FALSE); echo $hasher->HashPassword(getenv("ADMIN_PASSWORD")), PHP_EOL;' ;
+	ADMIN_PASSWORD="$ADMIN_PASSWORD" "$SEED_PHP_BIN" -r 'require "application/libraries/phpass-0.1/PasswordHash.php"; $hasher = new PasswordHash(8, FALSE); echo $hasher->HashPassword(getenv("ADMIN_PASSWORD")), PHP_EOL;' ;
 } | tr -d '\r\n')"
 
 mysql --protocol=TCP -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "-p$DB_PASSWORD" -D "$DB_NAME" <<SQL
