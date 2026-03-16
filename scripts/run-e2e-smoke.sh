@@ -624,6 +624,7 @@ else
 	fi
 	check_page "/latest/" 1000 "<!DOCTYPE html"
 	check_page "/tags/" 1000 "${SEEDED_PRIMARY_TAG_NAME}"
+	check_page "/teams/" 800 "Teams List"
 	check_post_page "/series/${SEEDED_SERIES_STUB}/" "adult=true" 1000 "${series_marker}"
 	check_page "/about/" 1000 'name="contact_name"'
 	check_post_page "/about/" "contact_name=&contact_email=&contact_subject=&contact_message=&contact_website=" 1000 'contact_name'

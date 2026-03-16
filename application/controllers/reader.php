@@ -256,6 +256,13 @@ class Reader extends Public_Controller
 				'lastmod' => '',
 				'changefreq' => 'weekly',
 				'priority' => '0.5'
+			),
+			array(
+				// teams page
+				'loc' => site_url('teams'),
+				'lastmod' => '',
+				'changefreq' => 'weekly',
+				'priority' => '0.5'
 			)
 		);
 
@@ -529,6 +536,24 @@ class Reader extends Public_Controller
 		$this->template->set('param_stub', 'parody_stub');
 		$this->template->set('show_sidebar', TRUE);
 		$this->template->set('comics', $comics);
+		$this->template->build('menu');
+	}
+
+	public function teams($page = 1)
+	{
+		$teams = $this->get_published_teams();
+		$teams->order_by('name', 'ASC')->get_paged($page, 100);
+
+		$this->template->title(_('Teams'), get_setting('fs_gen_site_title'));
+		$this->template->set('title', _('Teams List'));
+		$this->template->set('link', 'teams');
+		$this->template->set('search_action', 'search_team/');
+		$this->template->set('items_name', 'teams');
+		$this->template->set('item_name_field', 'name');
+		$this->template->set('item_stub_field', 'stub');
+		$this->template->set('item_link_prefix', 'teamworks');
+		$this->template->set('show_sidebar', TRUE);
+		$this->template->set('items', $teams);
 		$this->template->build('menu');
 	}
 	
@@ -992,6 +1017,67 @@ class Reader extends Public_Controller
 		$this->template->set('param', 'parody');
 		$this->template->set('param_stub', 'parody_stub');
 		$this->template->build('menu');
+	}
+
+	public function search_team()
+	{
+		$search = $this->sanitize_search_query($this->input->post('search'));
+		$this->template->title(_('Search Team'));
+
+		$teams = $this->get_published_teams();
+		$teams->ilike('name', $search)->order_by('name', 'ASC')->get();
+
+		$this->template->set('title', _('Teams List'));
+		$this->template->set('show_sidebar', TRUE);
+		$this->template->set('search', $search);
+		$this->template->set('link', 'teams');
+		$this->template->set('search_action', 'search_team/');
+		$this->template->set('items_name', 'teams');
+		$this->template->set('item_name_field', 'name');
+		$this->template->set('item_stub_field', 'stub');
+		$this->template->set('item_link_prefix', 'teamworks');
+		$this->template->set('items', $teams);
+		$this->template->build('menu');
+	}
+
+	private function get_published_teams()
+	{
+		$chapters = new Chapter();
+		$comics = new Comic();
+		$licenses = new License();
+		$db_table_prefix = $this->config_item('db_table_prefix');
+		if (!is_string($db_table_prefix))
+		{
+			$db_table_prefix = '';
+			if (file_exists(FCPATH . 'config.php'))
+			{
+				$db = array();
+				require(FCPATH . 'config.php');
+				if (isset($db['default']['dbprefix']) && is_string($db['default']['dbprefix']))
+				{
+					$db_table_prefix = $db['default']['dbprefix'];
+				}
+			}
+		}
+		$chapters_table = $db_table_prefix . $chapters->table;
+		$comics_table = $db_table_prefix . $comics->table;
+		$licenses_table = $db_table_prefix . $licenses->table;
+		$license_filter = '';
+		if ((!isset($this->tank_auth) || (!$this->tank_auth->is_allowed() && !$this->tank_auth->is_team()))
+			&& isset($this->session)
+			&& ($nation = $this->session->userdata('nation')))
+		{
+			$escaped_nation = isset($this->db) ? $this->db->escape($nation) : "'" . addslashes($nation) . "'";
+			$license_filter = ' AND NOT EXISTS (SELECT 1 FROM ' . $licenses_table . ' l WHERE l.comic_id = c.id AND l.nation = ' . $escaped_nation . ')';
+		}
+		$teams = new Team();
+		$teams->where(
+			'id IN (SELECT DISTINCT ch.team_id FROM ' . $chapters_table . ' ch JOIN ' . $comics_table . ' c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0' . $license_filter . ')',
+			NULL,
+			FALSE
+		);
+
+		return $teams;
 	}
 
 
