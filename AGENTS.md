@@ -29,7 +29,7 @@
 
 ## Agent Verification Rule
 - After any code change, run `./scripts/run-tests.sh` before finalizing the response unless the user explicitly asks to skip tests.
-- For code changes, also run `./scripts/run-e2e-smoke.sh`; treat `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke.sh` together as the required verification baseline.
+- For code changes, also run `./scripts/run-e2e-smoke-wrapper.sh`; treat `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke-wrapper.sh` together as the required verification baseline.
 - If tests cannot run, report the exact blocker and the attempted command in the final response.
 
 ## Commit & Pull Request Guidelines
@@ -45,7 +45,8 @@
 - If a bug is discovered and fixed through browser automation/manual browser testing, add permanent automated coverage for that path as part of the same change.
 - Commit new features and fixes on feature branches only; do not commit directly to `main`.
 - Use the `gh` CLI to open pull requests targeting the `main` branch.
-- Always run all repository verification scripts in `scripts/` that are part of the normal workflow, especially `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke.sh`, before finalizing.
+- Always run the default verification pair before finalizing: `./scripts/run-tests.sh` and `./scripts/run-e2e-smoke-wrapper.sh`.
+- The wrapper selects smoke mode: `./scripts/run-e2e-smoke-wrapper.sh` runs local smoke when `CODEX_VIRTUAL_ENV` is set, otherwise Docker smoke.
 - Run e2e smoke tests in addition to the automated test suite when the change affects browser flows or integration behavior.
 - Do not attempt remote deployments unless the user explicitly requests them.
 - If browser testing is performed locally or remotely, do not mention the specific URLs tested in summaries or PR text.
