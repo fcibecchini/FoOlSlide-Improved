@@ -333,7 +333,7 @@ class Members extends Admin_Controller
 			redirect('/admin/members/teams/');
 		}
 
-		redirect('/admin/members/teams/' . $team->stub);
+		return $this->teams($team->stub);
 	}
 
 

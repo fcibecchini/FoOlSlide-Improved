@@ -12,17 +12,22 @@ if (!defined('BASEPATH'))
 	echo '<div class="group">
 					<div class="title">' . _('Informations') . '</span></div>
 				';
+	if (trim((string) $team->url) !== '')
+		echo '<div class="element">
+					<div class="title">' . _("URL") . ': <a href="' . $team->url . '">' . $team->url . '</a></div></div>';
 	echo '<div class="element">
-					<div class="title">' . _("URL") . ': <a href="' . $team->url . '">' . $team->url . '</a></div></div>
-						<div class="element">
-					<div class="title">' . _("Translations") . ': <a href="' . site_url() . 'teamworks/' . $team->stub . '">' . site_url() . 'teamworks/' . $team->stub . '</a></div></div>
-						<div class="element">
-					<div class="title">' . _("IRC") . ': <a href="' . parse_irc($team->irc) . '">' . $team->irc . '</a></div></div>
-						<div class="element">
-					<div class="title">' . _("X") . ': <a href="https://x.com/' . $team->twitter . '">https://x.com/' . $team->twitter . '</a></div></div>
-						<div class="element">
+					<div class="title">' . _("Translations") . ': <a href="' . site_url() . 'teamworks/' . $team->stub . '">' . site_url() . 'teamworks/' . $team->stub . '</a></div></div>';
+	if (trim((string) $team->irc) !== '')
+		echo '<div class="element">
+					<div class="title">' . _("IRC") . ': <a href="' . parse_irc($team->irc) . '">' . $team->irc . '</a></div></div>';
+	if (trim((string) $team->twitter) !== '')
+		echo '<div class="element">
+					<div class="title">' . _("X") . ': <a href="https://x.com/' . $team->twitter . '">https://x.com/' . $team->twitter . '</a></div></div>';
+	if (trim((string) $team->facebook) !== '')
+		echo '<div class="element">
 					<div class="title">' . _("Facebook") . ': <a href="' . $team->facebook . '">' . $team->facebook . '</a></div>
-				</div></div>';
+				</div>';
+	echo '</div>';
 
 
 	echo '<div class="group">

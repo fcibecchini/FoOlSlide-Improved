@@ -475,7 +475,7 @@ create_team_via_admin() {
 	fi
 
 	check_authed_page "/admin/members/teams/${team_stub}" 1000 "${team_name}" >&2
-	check_page_fragment "/team/${team_stub}" 600 "${team_name}" >&2
+	check_page_fragment "/team/${team_stub}" 400 "${team_name}" >&2
 	check_page "/teamworks/${team_stub}" 800 "<!DOCTYPE html" >&2
 
 	echo "$team_stub"
@@ -510,7 +510,7 @@ add_team_leader_via_admin() {
 	fi
 
 	check_authed_page "/admin/members/teams/${team_stub}" 1000 "${username}" >&2
-	check_page_fragment "/team/${team_stub}" 600 "teamworks/${team_stub}" >&2
+	check_page_fragment "/team/${team_stub}" 400 "teamworks/${team_stub}" >&2
 }
 
 create_chapter_via_admin() {
@@ -652,9 +652,9 @@ else
 		check_authed_page "/admin/members/teams/" 1000 "<!DOCTYPE html"
 		seeded_team_stub="$(db_query "SELECT stub FROM fs_teams ORDER BY id LIMIT 1;")"
 		if [ -n "$seeded_team_stub" ]; then
-			check_authed_redirect "/admin/members/home_team/" "/admin/members/teams/${seeded_team_stub}"
+			check_authed_page "/admin/members/home_team/" 1000 "<!DOCTYPE html"
 			check_authed_page "/admin/members/teams/${seeded_team_stub}" 1000 "<!DOCTYPE html"
-			check_page_fragment "/team/${seeded_team_stub}" 600 "teamworks/${seeded_team_stub}"
+			check_page_fragment "/team/${seeded_team_stub}" 400 "teamworks/${seeded_team_stub}"
 		fi
 		team_stub="$(create_team_via_admin "Smoke Team ${smoke_suffix}")"
 		add_team_leader_via_admin "$team_stub" "$ADMIN_USER"
