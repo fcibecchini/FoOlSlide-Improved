@@ -341,6 +341,21 @@ class ReaderControllerTest extends TestCase
 		$this->assertSame(array('id IN (SELECT DISTINCT ch.team_id FROM chapters ch JOIN comics c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0)', null, false), Team::$whereArgs[0]);
 	}
 
+	public function testTeamsExcludeNationLicensedComicsForPublicReaders()
+	{
+		$controller = $this->newController();
+		$controller->template = new StubTemplate();
+		$controller->session = new StubSession();
+		$controller->session->set_userdata('nation', 'IT');
+		$controller->tank_auth = new StubTankAuth(false, false);
+		$controller->db = new StubDb();
+		Team::reset();
+
+		$controller->teams();
+
+		$this->assertSame(array("id IN (SELECT DISTINCT ch.team_id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0 AND NOT EXISTS (SELECT 1 FROM fs_licenses l WHERE l.comic_id = c.id AND l.nation = 'IT'))", null, false), Team::$whereArgs[0]);
+	}
+
 	public function testRemapCallsReaderMethodWhenAvailable()
 	{
 		$controller = new ReaderPingController();
@@ -600,6 +615,14 @@ class StubConfig
 	}
 }
 
+class StubDb
+{
+	public function escape($value)
+	{
+		return "'" . str_replace("'", "\\'", $value) . "'";
+	}
+}
+
 class StubAgent
 {
 	private $robot;
@@ -612,6 +635,28 @@ class StubAgent
 	public function is_robot()
 	{
 		return $this->robot;
+	}
+}
+
+class StubTankAuth
+{
+	private $allowed;
+	private $team;
+
+	public function __construct($allowed, $team)
+	{
+		$this->allowed = $allowed;
+		$this->team = $team;
+	}
+
+	public function is_allowed()
+	{
+		return $this->allowed;
+	}
+
+	public function is_team()
+	{
+		return $this->team;
 	}
 }
 
@@ -794,6 +839,14 @@ if (!class_exists('Comic'))
 	}
 }
 
+if (!class_exists('License'))
+{
+	class License
+	{
+		public $table = 'licenses';
+	}
+}
+
 if (!class_exists('Jointag'))
 {
 	class Jointag implements IteratorAggregate
@@ -918,6 +971,8 @@ class ReaderTestController extends Reader
 	public $form_validation;
 	public $email;
 	public $config;
+	public $tank_auth;
+	public $db;
 
 	public function __construct()
 	{

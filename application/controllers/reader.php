@@ -1044,6 +1044,7 @@ class Reader extends Public_Controller
 	{
 		$chapters = new Chapter();
 		$comics = new Comic();
+		$licenses = new License();
 		$db_table_prefix = $this->config_item('db_table_prefix');
 		if (!is_string($db_table_prefix))
 		{
@@ -1060,9 +1061,18 @@ class Reader extends Public_Controller
 		}
 		$chapters_table = $db_table_prefix . $chapters->table;
 		$comics_table = $db_table_prefix . $comics->table;
+		$licenses_table = $db_table_prefix . $licenses->table;
+		$license_filter = '';
+		if ((!isset($this->tank_auth) || (!$this->tank_auth->is_allowed() && !$this->tank_auth->is_team()))
+			&& isset($this->session)
+			&& ($nation = $this->session->userdata('nation')))
+		{
+			$escaped_nation = isset($this->db) ? $this->db->escape($nation) : "'" . addslashes($nation) . "'";
+			$license_filter = ' AND NOT EXISTS (SELECT 1 FROM ' . $licenses_table . ' l WHERE l.comic_id = c.id AND l.nation = ' . $escaped_nation . ')';
+		}
 		$teams = new Team();
 		$teams->where(
-			'id IN (SELECT DISTINCT ch.team_id FROM ' . $chapters_table . ' ch JOIN ' . $comics_table . ' c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0)',
+			'id IN (SELECT DISTINCT ch.team_id FROM ' . $chapters_table . ' ch JOIN ' . $comics_table . ' c ON c.id = ch.comic_id WHERE ch.hidden = 0 AND ch.team_id != 0 AND c.hidden = 0' . $license_filter . ')',
 			NULL,
 			FALSE
 		);
