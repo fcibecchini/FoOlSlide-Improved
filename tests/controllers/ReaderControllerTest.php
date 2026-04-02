@@ -888,13 +888,47 @@ if (!class_exists('Jointag'))
 
 if (!class_exists('Chapter'))
 {
-	class Chapter
+	class Chapter implements IteratorAggregate
 	{
+		public static $records = array();
 		public $table = 'chapters';
 		public $all = array();
+		private $filters = array();
+		private $loaded = array();
+		public $id = 1;
+		public $comic_id = 7;
+		public $uniqid = 'chapter';
+		public $language = 'en';
+		public $volume = 0;
+		public $chapter = 1;
+		public $subchapter = 0;
+		public $downloads = 0;
+		public $teams = array();
+		public $comic;
+		private $directoryName = 'chapter';
+
+		public static function resetRegistry()
+		{
+			self::$records = array();
+		}
+
+		public static function register(self $chapter)
+		{
+			self::$records[$chapter->id] = $chapter;
+		}
+
+		public function __construct($id = null)
+		{
+			if ($id !== null && isset(self::$records[$id]))
+			{
+				$this->copyFrom(self::$records[$id]);
+				$this->loaded = array(self::$records[$id]);
+			}
+		}
 
 		public function where($key, $value)
 		{
+			$this->filters[$key] = $value;
 			return $this;
 		}
 
@@ -914,19 +948,95 @@ if (!class_exists('Chapter'))
 			return $this;
 		}
 
+		public function get_hidden()
+		{
+			$this->loaded = array_values(array_filter(self::$records, function ($chapter) {
+				foreach ($this->filters as $field => $value)
+				{
+					if (!isset($chapter->$field) || $chapter->$field != $value)
+					{
+						return false;
+					}
+				}
+
+				return true;
+			}));
+
+			if (count($this->loaded) === 1)
+			{
+				$this->copyFrom($this->loaded[0]);
+			}
+
+			return $this;
+		}
+
 		public function result_count()
 		{
+			if (!empty($this->loaded))
+			{
+				return count($this->loaded);
+			}
+
 			return 0;
 		}
 
 		public function get_teams()
 		{
+			if (empty($this->teams))
+			{
+				$this->teams = array((object) array('name' => 'Demo Team'));
+			}
+
 			return $this;
+		}
+
+		public function get_comic()
+		{
+			if ($this->comic === null)
+			{
+				$this->comic = new Comic();
+			}
+
+			return $this;
+		}
+
+		public function save()
+		{
+			self::$records[$this->id] = clone $this;
+			return true;
+		}
+
+		public function directory()
+		{
+			return $this->directoryName;
+		}
+
+		public function setDirectory($directory)
+		{
+			$this->directoryName = $directory;
 		}
 
 		public function get_bulk()
 		{
 			return $this;
+		}
+
+		public function getIterator(): Traversable
+		{
+			return new ArrayIterator($this->loaded);
+		}
+
+		private function copyFrom(self $chapter)
+		{
+			foreach (get_object_vars($chapter) as $key => $value)
+			{
+				if ($key === 'filters' || $key === 'loaded')
+				{
+					continue;
+				}
+
+				$this->$key = $value;
+			}
 		}
 	}
 }

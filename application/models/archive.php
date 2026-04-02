@@ -150,6 +150,8 @@ class Archive extends DataMapper
 			$this->size = filesize($archive_path);
 			$this->lastdownload = date('Y-m-d H:i:s', time());
 			$this->save();
+			$archive_cleanup = new Archive();
+			$archive_cleanup->remove_old($this->id);
 		}
 		else
 		{
@@ -216,7 +218,7 @@ class Archive extends DataMapper
 	 * @author Woxxy
 	 * @returns bool
 	 */
-	function remove_old()
+	function remove_old($preserve_id = null)
 	{
 		$unlink_errors = 0;
 		while ($this->calculate_size() > (get_setting('fs_dl_archive_max') * 1024 * 1024))
@@ -225,6 +227,12 @@ class Archive extends DataMapper
 			$archive->order_by('lastdownload', 'ASC')->limit(1, $unlink_errors)->get();
 			if ($archive->result_count() == 1)
 			{
+				if ($preserve_id !== null && (int) $archive->id === (int) $preserve_id)
+				{
+					$unlink_errors++;
+					continue;
+				}
+
 				if (!$archive->remove())
 				{
 					$unlink_errors++;
