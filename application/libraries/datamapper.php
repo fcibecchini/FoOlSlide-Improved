@@ -1180,20 +1180,22 @@ class DataMapper implements IteratorAggregate {
 			$related_properties = $has_many ? $this->has_many[$name] : $this->has_one[$name];
 			// Instantiate it before accessing
 			$class = $related_properties['class'];
-			$this->{$name} = new $class();
+			$related = new $class();
 
 			// Store parent data
-			$this->{$name}->parent = array('model' => $related_properties['other_field'], 'id' => $this->id);
+			$related->parent = array('model' => $related_properties['other_field'], 'id' => $this->id);
+
+			$this->__set($name, $related);
 
 			// Check if Auto Populate for "has many" or "has one" is on
 			// (but only if this object exists in the DB, and we aren't instantiating)
 			if ($this->exists() &&
 					($has_many && ($this->auto_populate_has_many || $this->has_many[$name]['auto_populate'])) || ($has_one && ($this->auto_populate_has_one || $this->has_one[$name]['auto_populate'])))
 			{
-				$this->{$name}->get();
+				$related->get();
 			}
 
-			return $this->{$name};
+			return $related;
 		}
 
 		$name_single = singular($name);
@@ -5467,7 +5469,7 @@ class DataMapper implements IteratorAggregate {
 				$object = new $class();
 
 				// Store parent data
-				$object->parent = array('model' => $rel_properties['other_field'], 'id' => $this->id);
+					$object->parent = array('model' => $rel_properties['other_field'], 'id' => $this->id);
 
 				// pass in IDs to exclude from the count
 
