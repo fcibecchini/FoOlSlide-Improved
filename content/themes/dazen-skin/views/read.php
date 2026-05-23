@@ -140,7 +140,7 @@ if (!defined('BASEPATH'))
   pointer-events: auto;
   -webkit-tap-highlight-color: transparent;
 }
-#page .inner img.open{ position: relative; z-index: 1; }
+#page .inner img.open{ display: block; margin: 0 auto; position: relative; z-index: 1; }
 #page .inner .nav-left  { left: 0; }
 #page .inner .nav-right { right: 0; }
 #page .inner .nav-zone:focus{ outline: none; }
@@ -249,70 +249,63 @@ if (!defined('BASEPATH'))
     return false;
   }
 
+  function fitReaderPageDimensions(page_width, page_height, max_width, max_height, fit_height)
+  {
+    var width = Math.min(page_width, max_width);
+    var height = Math.floor((page_height * width) / page_width);
+
+    if (fit_height && max_height && height > max_height) {
+      height = max_height;
+      width = Math.floor((page_width * height) / page_height);
+    }
+
+    return {
+      width: Math.max(1, Math.floor(width)),
+      height: Math.max(1, Math.floor(height))
+    };
+  }
+
+  function readerBounds(viewport_width)
+  {
+    var max_width = viewport_width - 20;
+
+    if (viewport_width > 768) max_width = 980;
+    if (viewport_width > 1200) max_width = 1000;
+    if (viewport_width > 1600) max_width = 1300;
+    if (viewport_width > 1800) max_width = 1500;
+
+    var chrome_height = jQuery('.topbar').outerHeight(true) + jQuery('#bottombar').outerHeight(true) + 60;
+    var max_height = Math.max(620, jQuery(window).height() - chrome_height);
+
+    return {
+      max_width: Math.max(1, Math.min(max_width, viewport_width - 20)),
+      max_height: max_height
+    };
+  }
+
   function resizePage(id) {
     var viewport_width = Math.min(jQuery(window).width(), jQuery(document).width());
     var page_width  = parseInt(pages[id].width);
     var page_height = parseInt(pages[id].height);
 
-    // Mobile
-    if (viewport_width <= 768) {
-      var new_width  = viewport_width - 20; // padding
-      var new_height = Math.floor((new_width * page_height) / page_width);
+    var bounds = readerBounds(viewport_width);
+    var fit_height = (page_width / page_height) > 1.2;
+    var dimensions = fitReaderPageDimensions(page_width, page_height, bounds.max_width, bounds.max_height, fit_height);
 
-      jQuery('#page').css({'max-width': '100%', 'overflow': 'hidden'});
-      jQuery('#page .inner').css({'width': '100%', 'text-align': 'center'});
-      jQuery('#page .inner img.open').css({
-        'max-width': '100%', 'width': new_width, 'height': new_height, 'object-fit': 'contain'
+    jQuery('#page .inner').css({'width': '100%', 'text-align': 'center'});
+    jQuery('#page .inner img.open')
+      .attr({width: dimensions.width, height: dimensions.height})
+      .css({
+        'display': 'block',
+        'margin': '0 auto',
+        'max-width': '100%',
+        'width': dimensions.width,
+        'height': dimensions.height,
+        'object-fit': 'contain'
       });
-
-      isSpread = false;
-      delete_message('is_spread');
-      return;
-    }
-
-    // Desktop (logica originale)
-    var nice_width = 980;
-    var perfect_width = 980;
-
-    if (viewport_width > 1200) { nice_width = 1120; perfect_width = 1000; }
-    if (viewport_width > 1600) { nice_width = 1400; perfect_width = 1300; }
-    if (viewport_width > 1800) { nice_width = 1600; perfect_width = 1500; }
-
-    if (page_width > nice_width && (page_width/page_height) > 1.2) {
-      var width, height;
-      if (page_height < 1610) {
-        width  = page_width;
-        height = page_height;
-      } else {
-        height = 1600;
-        width  = (height*page_width)/(page_height);
-      }
-      jQuery("#page").css({'max-width': 'none', 'overflow':'auto'});
-      jQuery("#page .inner img.open").css({'max-width':'99999px'}).attr({width:width, height:height});
-
-      if (jQuery("#page").width() < jQuery("#page .inner img.open").width()) {
-        isSpread = true;
-        create_message('is_spread', 3000, 'Tap the arrows twice to change page');
-      } else {
-        jQuery("#page").css({'max-width': width+10, 'overflow':'hidden'});
-        isSpread = false;
-        delete_message('is_spread');
-      }
-    } else {
-      var width, height;
-      if ((page_width < nice_width) && (viewport_width > page_width + 10)) {
-        width  = page_width;
-        height = page_height;
-      } else {
-        width  = (viewport_width > perfect_width) ? perfect_width : viewport_width - 10;
-        height = (page_height*width)/page_width;
-      }
-      jQuery('#page .inner img.open').attr({width:width, height:height});
-      jQuery("#page").css({'max-width':(width + 10) + 'px','overflow':'hidden'});
-      jQuery("#page .inner img.open").css({'max-width':'100%'});
-      isSpread = false;
-      delete_message('is_spread');
-    }
+    jQuery("#page").css({'max-width':(dimensions.width + 10) + 'px','overflow':'hidden'});
+    isSpread = false;
+    delete_message('is_spread');
   }
 
   function nextPage(){ changePage(current_page+1); return false; }
