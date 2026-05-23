@@ -12,7 +12,8 @@
 <?php
 	if (isset($form_description)) echo '<span class="clearfix">' . $form_description . '</span>';
 	echo buttoner();
-	if (isset($multipart) && $multipart)
+	$has_upload = isset($table) && preg_match('/<input[^>]+type=["\']file["\']/i', $table);
+	if ((isset($multipart) && $multipart) || $has_upload)
 		echo form_open_multipart("", array('class' => 'form-stacked'));
 	else
 		echo form_open("", array('class' => 'form-stacked'));
