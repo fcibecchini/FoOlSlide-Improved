@@ -100,7 +100,9 @@ if (!defined('BASEPATH'))
 
 	function resetReaderScroll()
 	{
-		var readerTop = Math.max(jQuery('#page').offset().top - 6, 0);
+		var $readerBar = jQuery('.panel .topbar').first();
+		var scrollTarget = $readerBar.length ? $readerBar.offset().top : jQuery('#page').offset().top;
+		var readerTop = Math.max(scrollTarget - 6, 0);
 		jQuery(window).scrollTop(readerTop);
 		jQuery('html, body').scrollTop(readerTop);
 		jQuery('#page').scrollLeft(0);
