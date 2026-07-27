@@ -14,6 +14,12 @@ class MY_Controller extends CI_Controller
 	{
 		parent::__construct();
 
+		$canonical_url = canonical_request_url($this->config->item('base_url'), $_SERVER);
+		if ($canonical_url !== FALSE)
+		{
+			redirect($canonical_url, 'location', 301);
+		}
+
 		if (!file_exists(FCPATH . "config.php"))
 		{
 			if ($this->uri->segment(1) != "install")

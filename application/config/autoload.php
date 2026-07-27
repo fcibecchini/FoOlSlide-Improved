@@ -64,7 +64,7 @@ $autoload['libraries'] = array('user_agent');
 |	$autoload['helper'] = array('url', 'file');
 */
 
-$autoload['helper'] = array('html', 'url', 'file', 'form', 'notices', 'tabler', 'options');
+$autoload['helper'] = array('html', 'url', 'file', 'form', 'notices', 'tabler', 'options', 'canonical_url');
 
 
 /*

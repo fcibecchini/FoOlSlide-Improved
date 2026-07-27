@@ -548,6 +548,9 @@ create_chapter_via_admin() {
 upload_page_via_admin() {
 	local chapter_id="$1"
 	local response_file="$tmp_dir/upload_${chapter_id}.json"
+	local page_filename="page1.png"
+
+	db_query "UPDATE fs_pages SET created = '2000-01-01 00:00:00' WHERE chapter_id = ${chapter_id} AND filename = '${page_filename}';"
 
 	curl -sS -o "$response_file" \
 		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
@@ -560,6 +563,64 @@ upload_page_via_admin() {
 		cat "$response_file" >&2
 		exit 1
 	fi
+
+	local created
+	created="$(db_query "SELECT created FROM fs_pages WHERE chapter_id = ${chapter_id} AND filename = '${page_filename}' LIMIT 1;")"
+	if [ -z "$created" ] || [ "$created" = "2000-01-01 00:00:00" ]; then
+		echo "[e2e] FAIL upload for chapter ${chapter_id}: page created timestamp was not refreshed." >&2
+		exit 1
+	fi
+}
+
+check_hidden_series_pagination() {
+	local suffix="$1"
+	local type_name="P${suffix}"
+	local marker="Visible Pagination Marker ${suffix}"
+
+	db_query "INSERT INTO fs_typehs (name, description) VALUES ('${type_name}', 'Pagination smoke test');"
+	local type_id
+	type_id="$(db_query "SELECT id FROM fs_typehs WHERE name = '${type_name}' ORDER BY id DESC LIMIT 1;")"
+	if [ -z "$type_id" ]; then
+		echo "[e2e] FAIL hidden-series pagination: no type row found." >&2
+		exit 1
+	fi
+
+	db_query "
+		INSERT INTO fs_comics
+			(name, stub, uniqid, hidden, author, author_stub, artist, description,
+			 parody, parody_stub, urlforum, typeh_id, jointag_id, thumbnail,
+			 customchapter, format, adult, created, lastseen, updated, creator, editor)
+		SELECT
+			CONCAT('A Hidden Pagination Series ', n, ' ${suffix}'),
+			CONCAT('hidden-pagination-series-', n, '-${suffix}'),
+			CONCAT('hiddenpagination', n, '${suffix}'),
+			1, source.author, source.author_stub, source.artist, source.description,
+			source.parody, source.parody_stub, source.urlforum, ${type_id},
+			source.jointag_id, '', source.customchapter, source.format, 0,
+			NOW(), CURRENT_TIMESTAMP, NOW(), source.creator, source.editor
+		FROM fs_comics source
+		JOIN (
+			SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+			UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8
+			UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+			UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15
+		) numbers
+		WHERE source.id = (SELECT id FROM (SELECT id FROM fs_comics ORDER BY id LIMIT 1) seed);
+
+		INSERT INTO fs_comics
+			(name, stub, uniqid, hidden, author, author_stub, artist, description,
+			 parody, parody_stub, urlforum, typeh_id, jointag_id, thumbnail,
+			 customchapter, format, adult, created, lastseen, updated, creator, editor)
+		SELECT
+			'${marker}', 'visible-pagination-series-${suffix}',
+			'visiblepagination${suffix}', 0, author, author_stub, artist, description,
+			parody, parody_stub, urlforum, ${type_id}, jointag_id, '', customchapter,
+			format, 0, NOW(), CURRENT_TIMESTAMP, NOW(), creator, editor
+		FROM fs_comics
+		ORDER BY id
+		LIMIT 1;"
+
+	check_page "/directory/${type_name}/1" 1000 "${marker}"
 }
 
 check_search_tags_multi() {
@@ -661,6 +722,7 @@ else
 		no_tag_stub="$(create_series_via_admin "Smoke Series No Tag ${smoke_suffix}" 0)"
 		expected_tag_id="$(db_query "SELECT id FROM fs_tags ORDER BY name ASC LIMIT 1 OFFSET 1;")"
 		tagged_stub="$(create_series_via_admin "Smoke Series Tagged ${smoke_suffix}" 2 "$expected_tag_id")"
+		check_hidden_series_pagination "$smoke_suffix"
 		seeded_upload_chapter_id="$(db_query "SELECT ch.id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE c.stub = '${SEEDED_SERIES_STUB}' AND ch.uniqid = 'seedchapter002' LIMIT 1;")"
 		if [ -z "$seeded_upload_chapter_id" ]; then
 			echo "[e2e] FAIL upload smoke: no seeded chapter found." >&2
