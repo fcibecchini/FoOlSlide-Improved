@@ -356,11 +356,14 @@ class Page extends DataMapper
 			$this->$key = $value;
 		}
 
+		$timestamp = date('Y-m-d H:i:s');
 		$payload = array(
 			'chapter_id' => (int) $this->chapter_id,
 			'filename' => $this->filename,
 			'hidden' => isset($this->hidden) ? (int) $this->hidden : 0,
+			'created' => $timestamp,
 			'lastseen' => isset($this->lastseen) ? $this->lastseen : NULL,
+			'updated' => $timestamp,
 			'creator' => $this->creator,
 			'editor' => $this->editor,
 			'width' => (int) $this->width,

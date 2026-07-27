@@ -190,6 +190,25 @@ class Comic extends DataMapper
 
 
 	/**
+	 * Apply public visibility before DataMapper clones the query for its count.
+	 *
+	 * Comic::get() also enforces this filter, but get_paged() calculates totals
+	 * and offsets before calling get(). Hidden rows must not affect either.
+	 */
+	public function get_paged($page = 1, $page_size = 50, $page_num_by_rows = FALSE, $info_object = 'paged', $iterated = FALSE)
+	{
+		$CI = & get_instance();
+
+		if (!$CI->tank_auth->is_allowed())
+		{
+			$this->where('hidden', 0);
+		}
+
+		return parent::get_paged($page, $page_size, $page_num_by_rows, $info_object, $iterated);
+	}
+
+
+	/**
 	 * Overwrite of the get() function to add filters to the search.
 	 * Refer to DataMapper ORM for get() function details.
 	 *
