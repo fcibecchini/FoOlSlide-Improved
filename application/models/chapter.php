@@ -165,6 +165,43 @@ class Chapter extends DataMapper
 
 
 	/**
+	 * Apply public availability before DataMapper clones the paged query.
+	 *
+	 * Chapter::get() filters hidden chapters and removes chapters whose parent
+	 * comic is unavailable, but get_paged() calculates totals and offsets before
+	 * calling get(). All availability predicates must be present for the count.
+	 */
+	public function get_paged($page = 1, $page_size = 50, $page_num_by_rows = FALSE, $info_object = 'paged', $iterated = FALSE)
+	{
+		$CI = & get_instance();
+
+		if (!$CI->tank_auth->is_allowed())
+		{
+			$comics_table = $CI->db->dbprefix('comics');
+			$licenses_table = $CI->db->dbprefix('licenses');
+			$license_filter = '';
+			$nation = strtoupper(trim((string) $CI->session->userdata('nation')));
+
+			$this->where('hidden', 0);
+
+			if (!$CI->tank_auth->is_team() && $nation !== '')
+			{
+				$license_filter = ' AND NOT EXISTS (SELECT 1 FROM ' . $licenses_table
+					. ' l WHERE l.comic_id = c.id AND l.nation = ' . $CI->db->escape($nation) . ')';
+			}
+
+			$this->where(
+				'comic_id IN (SELECT c.id FROM ' . $comics_table . ' c WHERE c.hidden = 0' . $license_filter . ')',
+				NULL,
+				FALSE
+			);
+		}
+
+		return parent::get_paged($page, $page_size, $page_num_by_rows, $info_object, $iterated);
+	}
+
+
+	/**
 	 * Overwrite of the get() function to add filters to the search.
 	 * Refer to DataMapper ORM for get() function details.
 	 *
