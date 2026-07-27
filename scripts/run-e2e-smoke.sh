@@ -702,12 +702,12 @@ check_public_content_pagination() {
 	local latest_body
 	latest_body="$(curl -fsS "$BASE_URL/latest/1")"
 	local rendered_chapters
-	rendered_chapters="$(printf '%s' "$latest_body" | grep -o '<article class="element">' | wc -l | tr -d ' ')"
+	rendered_chapters="$(grep -Eo '<(article|div) class="element">' <<<"$latest_body" | wc -l | tr -d ' ' || true)"
 	if [ "$rendered_chapters" != "15" ]; then
 		echo "[e2e] FAIL latest pagination: expected 15 public chapters, got ${rendered_chapters}." >&2
 		exit 1
 	fi
-	if printf '%s' "$latest_body" | grep -q 'latest/3/'; then
+	if grep -q 'latest/3/' <<<"$latest_body"; then
 		echo "[e2e] FAIL latest pagination: unavailable chapters inflated the page total." >&2
 		exit 1
 	fi
