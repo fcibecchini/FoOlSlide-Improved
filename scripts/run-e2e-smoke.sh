@@ -572,10 +572,20 @@ upload_page_via_admin() {
 	fi
 }
 
-check_hidden_series_pagination() {
+check_public_content_pagination() {
 	local suffix="$1"
 	local type_name="P${suffix}"
 	local marker="Visible Pagination Marker ${suffix}"
+
+	db_query "
+		DELETE ch FROM fs_chapters ch
+		JOIN fs_comics c ON c.id = ch.comic_id
+		JOIN fs_typehs t ON t.id = c.typeh_id
+		WHERE t.description = 'Pagination smoke test';
+		DELETE c FROM fs_comics c
+		JOIN fs_typehs t ON t.id = c.typeh_id
+		WHERE t.description = 'Pagination smoke test';
+		DELETE FROM fs_typehs WHERE description = 'Pagination smoke test';"
 
 	db_query "INSERT INTO fs_typehs (name, description) VALUES ('${type_name}', 'Pagination smoke test');"
 	local type_id
@@ -621,6 +631,86 @@ check_hidden_series_pagination() {
 		LIMIT 1;"
 
 	check_page "/directory/${type_name}/1" 1000 "${marker}"
+
+	local visible_comic_id
+	visible_comic_id="$(db_query "SELECT id FROM fs_comics WHERE stub = 'visible-pagination-series-${suffix}' LIMIT 1;")"
+	if [ -z "$visible_comic_id" ]; then
+		echo "[e2e] FAIL latest pagination: no visible comic row found." >&2
+		exit 1
+	fi
+
+	db_query "
+		INSERT INTO fs_chapters
+			(comic_id, team_id, joint_id, chapter, subchapter, volume, language,
+			 name, stub, uniqid, hidden, description, thumbnail, created,
+			 lastseen, updated, creator, editor, downloads)
+		SELECT
+			c.id, source.team_id, source.joint_id, numbers.n, 0, 1, source.language,
+			CONCAT('Hidden Parent Chapter ', numbers.n),
+			CONCAT('hidden-parent-chapter-', numbers.n),
+			CONCAT('hiddenparentchapter', numbers.n, '${suffix}'), 0,
+			source.description, '', '2099-01-03 00:00:00',
+			CURRENT_TIMESTAMP, NOW(), source.creator, source.editor, 0
+		FROM fs_chapters source
+		JOIN (
+			SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+			UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8
+			UNION ALL SELECT 9 UNION ALL SELECT 10
+		) numbers
+		JOIN fs_comics c ON c.stub = CONCAT('hidden-pagination-series-', numbers.n, '-${suffix}')
+		WHERE source.id = (SELECT id FROM (SELECT id FROM fs_chapters ORDER BY id LIMIT 1) seed);
+
+		INSERT INTO fs_chapters
+			(comic_id, team_id, joint_id, chapter, subchapter, volume, language,
+			 name, stub, uniqid, hidden, description, thumbnail, created,
+			 lastseen, updated, creator, editor, downloads)
+		SELECT
+			${visible_comic_id}, source.team_id, source.joint_id, numbers.n, 0, 1,
+			source.language, CONCAT('Hidden Chapter ', numbers.n),
+			CONCAT('hidden-chapter-', numbers.n),
+			CONCAT('hiddenchapter', numbers.n, '${suffix}'), 1, source.description,
+			'', '2099-01-02 00:00:00', CURRENT_TIMESTAMP, NOW(), source.creator,
+			source.editor, 0
+		FROM fs_chapters source
+		JOIN (
+			SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+			UNION ALL SELECT 5
+		) numbers
+		WHERE source.id = (SELECT id FROM (SELECT id FROM fs_chapters ORDER BY id LIMIT 1) seed);
+
+		INSERT INTO fs_chapters
+			(comic_id, team_id, joint_id, chapter, subchapter, volume, language,
+			 name, stub, uniqid, hidden, description, thumbnail, created,
+			 lastseen, updated, creator, editor, downloads)
+		SELECT
+			${visible_comic_id}, source.team_id, source.joint_id, numbers.n + 100, 0,
+			1, source.language, CONCAT('Visible Pagination Chapter ', numbers.n),
+			CONCAT('visible-pagination-chapter-', numbers.n),
+			CONCAT('visiblepaginationchapter', numbers.n, '${suffix}'), 0,
+			source.description, '', '2099-01-01 00:00:00',
+			CURRENT_TIMESTAMP, NOW(), source.creator, source.editor, 0
+		FROM fs_chapters source
+		JOIN (
+			SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4
+			UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8
+			UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+			UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15
+		) numbers
+		WHERE source.id = (SELECT id FROM (SELECT id FROM fs_chapters ORDER BY id LIMIT 1) seed);"
+
+	check_page "/latest/1" 1000 "${marker}"
+	local latest_body
+	latest_body="$(curl -fsS "$BASE_URL/latest/1")"
+	local rendered_chapters
+	rendered_chapters="$(grep -Eo '<(article|div) class="element">' <<<"$latest_body" | wc -l | tr -d ' ' || true)"
+	if [ "$rendered_chapters" != "15" ]; then
+		echo "[e2e] FAIL latest pagination: expected 15 public chapters, got ${rendered_chapters}." >&2
+		exit 1
+	fi
+	if grep -q 'latest/3/' <<<"$latest_body"; then
+		echo "[e2e] FAIL latest pagination: unavailable chapters inflated the page total." >&2
+		exit 1
+	fi
 }
 
 check_search_tags_multi() {
@@ -722,7 +812,7 @@ else
 		no_tag_stub="$(create_series_via_admin "Smoke Series No Tag ${smoke_suffix}" 0)"
 		expected_tag_id="$(db_query "SELECT id FROM fs_tags ORDER BY name ASC LIMIT 1 OFFSET 1;")"
 		tagged_stub="$(create_series_via_admin "Smoke Series Tagged ${smoke_suffix}" 2 "$expected_tag_id")"
-		check_hidden_series_pagination "$smoke_suffix"
+		check_public_content_pagination "$smoke_suffix"
 		seeded_upload_chapter_id="$(db_query "SELECT ch.id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE c.stub = '${SEEDED_SERIES_STUB}' AND ch.uniqid = 'seedchapter002' LIMIT 1;")"
 		if [ -z "$seeded_upload_chapter_id" ]; then
 			echo "[e2e] FAIL upload smoke: no seeded chapter found." >&2
