@@ -2952,7 +2952,16 @@ msgstr ""
 
 #: application/controllers/reader.php:137
 #, php-format
-msgid "[%s] About Page Contact: %s"
+msgid "[%s] Contact: %s"
+msgstr ""
+
+#: application/controllers/reader.php:160 application/controllers/reader.php:177
+msgid "New contact request"
+msgstr ""
+
+#: application/controllers/reader.php:157
+#, php-format
+msgid "Submitted through the %s About page."
 msgstr ""
 
 #: application/controllers/reader.php:184 application/controllers/reader.php:188

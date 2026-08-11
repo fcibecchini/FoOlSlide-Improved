@@ -136,9 +136,9 @@ class Reader extends Public_Controller
 		$email->from($contact_email, $site_title);
 		$email->reply_to($form['email'], $form['name']);
 		$email->to($contact_email);
-		$email->subject(sprintf(_('[%s] About Page Contact: %s'), $site_title, $form['subject']));
-		$email->message($this->build_about_contact_html_message($form));
-		$email->set_alt_message($this->build_about_contact_text_message($form));
+		$email->subject(sprintf(_('[%s] Contact: %s'), $site_title, $form['subject']));
+		$email->message($this->build_about_contact_html_message($form, $site_title));
+		$email->set_alt_message($this->build_about_contact_text_message($form, $site_title));
 
 		$result = $email->send();
 		if (!$result)
@@ -149,20 +149,35 @@ class Reader extends Public_Controller
 		return (bool) $result;
 	}
 
-	protected function build_about_contact_html_message($form)
+	protected function build_about_contact_html_message($form, $site_title)
 	{
-		return '<p><strong>' . _('Name') . ':</strong> ' . htmlspecialchars($form['name']) . '</p>'
-			. '<p><strong>' . _('Email') . ':</strong> ' . htmlspecialchars($form['email']) . '</p>'
-			. '<p><strong>' . _('Subject') . ':</strong> ' . htmlspecialchars($form['subject']) . '</p>'
-			. '<p><strong>' . _('Message') . ':</strong><br>' . nl2br(htmlspecialchars($form['message'])) . '</p>';
+		$name = htmlspecialchars($form['name'], ENT_QUOTES, 'UTF-8');
+		$email = htmlspecialchars($form['email'], ENT_QUOTES, 'UTF-8');
+		$subject = htmlspecialchars($form['subject'], ENT_QUOTES, 'UTF-8');
+		$message = htmlspecialchars($form['message'], ENT_QUOTES, 'UTF-8');
+		$source = sprintf(_('Submitted through the %s About page.'), htmlspecialchars($site_title, ENT_QUOTES, 'UTF-8'));
+
+		return '<div style="max-width: 640px; color: #222; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5;">'
+			. '<h2>' . _('New contact request') . '</h2>'
+			. '<p style="color: #666;">' . $source . '</p>'
+			. '<table role="presentation" style="width: 100%; margin: 24px 0; border-collapse: collapse;">'
+			. '<tr><th style="width: 90px; padding: 6px 12px 6px 0; text-align: left; vertical-align: top;">' . _('Name') . '</th><td style="padding: 6px 0;">' . $name . '</td></tr>'
+			. '<tr><th style="padding: 6px 12px 6px 0; text-align: left; vertical-align: top;">' . _('Email') . '</th><td style="padding: 6px 0;"><a href="mailto:' . $email . '">' . $email . '</a></td></tr>'
+			. '<tr><th style="padding: 6px 12px 6px 0; text-align: left; vertical-align: top;">' . _('Subject') . '</th><td style="padding: 6px 0;">' . $subject . '</td></tr>'
+			. '</table>'
+			. '<h3 style="margin-bottom: 8px;">' . _('Message') . '</h3>'
+			. '<div style="padding: 16px; border-left: 4px solid #999; background: #f5f5f5; white-space: pre-wrap;">' . $message . '</div>'
+			. '</div>';
 	}
 
-	protected function build_about_contact_text_message($form)
+	protected function build_about_contact_text_message($form, $site_title)
 	{
-		return _('Name') . ': ' . $form['name'] . "\n"
+		return _('New contact request') . "\n"
+			. $site_title . "\n\n"
+			. _('Name') . ': ' . $form['name'] . "\n"
 			. _('Email') . ': ' . $form['email'] . "\n"
 			. _('Subject') . ': ' . $form['subject'] . "\n\n"
-			. _('Message') . ":\n" . $form['message'] . "\n";
+			. _('Message') . "\n-------\n" . $form['message'] . "\n";
 	}
 
 	protected function is_about_contact_rate_limited()
