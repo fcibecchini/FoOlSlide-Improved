@@ -202,7 +202,13 @@ class ReaderControllerTest extends TestCase
 			$this->assertSame('about@example.com', $controller->email->fromAddress);
 			$this->assertSame('alice@example.com', $controller->email->replyToAddress);
 			$this->assertSame('about@example.com', $controller->email->toAddress);
-			$this->assertStringContainsString('Help', $controller->email->subjectLine);
+			$this->assertSame('[Demo Site] Contact: Help', $controller->email->subjectLine);
+			$this->assertStringContainsString('<h2>New contact request</h2>', $controller->email->messageBody);
+			$this->assertStringContainsString('Submitted through the Demo Site About page.', $controller->email->messageBody);
+			$this->assertStringContainsString('<a href="mailto:alice@example.com">alice@example.com</a>', $controller->email->messageBody);
+			$this->assertStringContainsString('white-space: pre-wrap', $controller->email->messageBody);
+			$this->assertStringContainsString('Need assistance', $controller->email->messageBody);
+			$this->assertSame("New contact request\nDemo Site\n\nName: Alice\nEmail: alice@example.com\nSubject: Help\n\nMessage\n-------\nNeed assistance\n", $controller->email->altMessageBody);
 			$this->assertSame(1, count($GLOBALS['__test_flash_notices']));
 			$this->assertArrayHasKey('about_contact_last_sent', $controller->session->data);
 		}

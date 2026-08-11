@@ -3575,8 +3575,17 @@ msgstr "Non siamo riusciti a inviare il tuo messaggio in questo momento. Riprova
 
 #: application/controllers/reader.php:137
 #, php-format
-msgid "[%s] About Page Contact: %s"
-msgstr "[%s] Contatto dalla pagina Chi Siamo: %s"
+msgid "[%s] Contact: %s"
+msgstr "[%s] Contatto: %s"
+
+#: application/controllers/reader.php:160 application/controllers/reader.php:177
+msgid "New contact request"
+msgstr "Nuovo messaggio di contatto"
+
+#: application/controllers/reader.php:157
+#, php-format
+msgid "Submitted through the %s About page."
+msgstr "Inviato tramite la pagina Chi Siamo di %s."
 
 #: application/controllers/reader.php:184 application/controllers/reader.php:188
 msgid "Your message has been sent."
