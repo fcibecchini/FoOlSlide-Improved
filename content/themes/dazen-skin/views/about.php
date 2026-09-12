@@ -46,7 +46,7 @@
 			<p style="color: #d7dce5;">
 				<?php echo _('If you have any questions or feedback, please contact us using the information provided above.'); ?>
 			</p>
-			<?php echo form_open('about#contact-form'); ?>
+			<?php echo form_open(site_url('about') . '#contact-form'); ?>
 				<p>
 					<label for="contact_name" style="color: #d7dce5; display: block;"><?php echo _('Name'); ?></label>
 					<input type="text" name="contact_name" id="contact_name" value="<?php echo htmlspecialchars($about_contact_form['name']); ?>" required="required" aria-required="true" aria-invalid="<?php echo $contact_name_error ? 'true' : 'false'; ?>" style="width: 100%; max-width: 42rem; background: #1f2733; border: 1px solid <?php echo $contact_name_error ? '#c96b7a' : '#3a4250'; ?>; border-radius: 8px; color: #f0f0f0; font: inherit; padding: 9px 10px; text-align: left;" />

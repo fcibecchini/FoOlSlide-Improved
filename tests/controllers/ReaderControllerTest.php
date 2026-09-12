@@ -165,6 +165,13 @@ class ReaderControllerTest extends TestCase
 		$this->assertFalse($template->values['about_contact_email']);
 	}
 
+	public function testAboutContactUrlKeepsFragmentAfterUrlSuffix()
+	{
+		$controller = $this->newController();
+
+		$this->assertSame('http://localhost/about#contact-form', $controller->aboutContactUrl());
+	}
+
 	public function testAboutContactSubmissionSendsEmailAndRedirects()
 	{
 		$GLOBALS['__test_settings'] = array(
@@ -191,7 +198,7 @@ class ReaderControllerTest extends TestCase
 		$controller->email = new StubEmail(true);
 
 		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage('redirect:about');
+		$this->expectExceptionMessage('redirect:http://localhost/about#contact-form');
 
 		try
 		{
@@ -241,7 +248,7 @@ class ReaderControllerTest extends TestCase
 		$controller->email = new StubEmail(true);
 
 		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage('redirect:about');
+		$this->expectExceptionMessage('redirect:http://localhost/about#contact-form');
 
 		try
 		{
@@ -1136,6 +1143,11 @@ class ReaderTestController extends Reader
 
 	public function __construct()
 	{
+	}
+
+	public function aboutContactUrl()
+	{
+		return $this->about_contact_url();
 	}
 }
 
