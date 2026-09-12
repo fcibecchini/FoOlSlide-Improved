@@ -214,6 +214,50 @@ class ReaderControllerTest extends TestCase
 		}
 	}
 
+	public function testAboutContactSubmissionKeepsLongSubjectHeaderSafe()
+	{
+		$GLOBALS['__test_settings'] = array(
+			'fs_about_admin_email' => 'about@example.com',
+			'fs_gen_site_title' => 'Hentai Fantasy Reader',
+		);
+		$long_subject = 'traduttore c1 inglese e c2 russo/ucraino';
+
+		$controller = $this->newController();
+		$controller->template = new StubTemplate();
+		$controller->input = new StubInput(array(
+			'contact_name' => 'Luca',
+			'contact_email' => 'nemo-nemo@gmx.com',
+			'contact_subject' => $long_subject,
+			'contact_message' => 'I would be happy to help.',
+			'contact_website' => '',
+		));
+		$controller->session = new StubSession();
+		$controller->form_validation = new StubFormValidation(array(
+			'contact_name' => 'Luca',
+			'contact_email' => 'nemo-nemo@gmx.com',
+			'contact_subject' => $long_subject,
+			'contact_message' => 'I would be happy to help.',
+		), true);
+		$controller->email = new StubEmail(true);
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('redirect:about');
+
+		try
+		{
+			$controller->about();
+		}
+		finally
+		{
+			$this->assertStringStartsWith('[Hentai Fantasy Reader] Contact: ', $controller->email->subjectLine);
+			$this->assertStringNotContainsString("\r", $controller->email->subjectLine);
+			$this->assertStringNotContainsString("\n", $controller->email->subjectLine);
+			$this->assertStringEndsWith('...', $controller->email->subjectLine);
+			$this->assertStringContainsString($long_subject, $controller->email->messageBody);
+			$this->assertStringContainsString('Subject: ' . $long_subject, $controller->email->altMessageBody);
+		}
+	}
+
 	public function testAboutContactSubmissionHonorsRateLimit()
 	{
 		$GLOBALS['__test_settings'] = array(

@@ -136,7 +136,7 @@ class Reader extends Public_Controller
 		$email->from($contact_email, $site_title);
 		$email->reply_to($form['email'], $form['name']);
 		$email->to($contact_email);
-		$email->subject(sprintf(_('[%s] Contact: %s'), $site_title, $form['subject']));
+		$email->subject($this->build_about_contact_subject($site_title, $form['subject']));
 		$email->message($this->build_about_contact_html_message($form, $site_title));
 		$email->set_alt_message($this->build_about_contact_text_message($form, $site_title));
 
@@ -147,6 +147,62 @@ class Reader extends Public_Controller
 		}
 
 		return (bool) $result;
+	}
+
+	/**
+	 * Keep the subject on one physical line for the legacy mail transport.
+	 * The full visitor subject is retained in both message bodies.
+	 */
+	protected function build_about_contact_subject($site_title, $form_subject)
+	{
+		$site_title = trim(preg_replace('/[\r\n]+/', ' ', (string) $site_title));
+		$form_subject = trim(preg_replace('/[\r\n]+/', ' ', (string) $form_subject));
+		$subject = '[' . $site_title . '] ' . _('Contact') . ': ' . $form_subject;
+		$max_q_encoded_length = 50;
+
+		if ($this->about_contact_q_encoded_length($subject) <= $max_q_encoded_length)
+		{
+			return $subject;
+		}
+
+		$subject_chars = preg_split('//u', $subject, -1, PREG_SPLIT_NO_EMPTY);
+		if ($subject_chars === FALSE)
+		{
+			$subject_chars = str_split($subject);
+		}
+
+		while (count($subject_chars) > 0)
+		{
+			$subject_preview = rtrim(implode('', $subject_chars)) . '...';
+			if ($this->about_contact_q_encoded_length($subject_preview) <= $max_q_encoded_length)
+			{
+				return $subject_preview;
+			}
+
+			array_pop($subject_chars);
+		}
+
+		return '...';
+	}
+
+	protected function about_contact_q_encoded_length($subject)
+	{
+		$length = 0;
+
+		for ($i = 0, $subject_length = strlen($subject); $i < $subject_length; $i++)
+		{
+			$ascii = ord($subject[$i]);
+			if ($ascii < 32 || $ascii > 126 || $subject[$i] === '_' || $subject[$i] === '=' || $subject[$i] === '?')
+			{
+				$length += 3;
+			}
+			else
+			{
+				$length++;
+			}
+		}
+
+		return $length;
 	}
 
 	protected function build_about_contact_html_message($form, $site_title)
