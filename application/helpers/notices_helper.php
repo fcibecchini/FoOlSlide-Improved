@@ -92,7 +92,10 @@ if (!function_exists('get_notice_toasts'))
 			$stack_style = 'position: fixed; top: 18px; right: 18px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; width: min(28rem, calc(100vw - 36px));';
 		}
 
-		$echo = '<div class="fs-toast-stack" data-fs-toast-stack="1" style="' . $stack_style . '">';
+		$echo = '<div class="fs-toast-stack" data-fs-toast-stack="1" role="status" aria-live="polite" style="' . $stack_style . '">';
+		$toast_visibility = ($position === 'inline')
+			? 'opacity: 1; transform: translateY(0);'
+			: 'opacity: 0; transform: translateY(-8px); transition: opacity .25s ease, transform .25s ease;';
 
 		foreach ($items as $index => $item)
 		{
@@ -111,7 +114,7 @@ if (!function_exists('get_notice_toasts'))
 				$border = $palette['warning_border'];
 			}
 
-			$echo .= '<div data-fs-toast="1" style="background: ' . $background . '; border: 1px solid ' . $border . '; border-left-width: 6px; border-radius: 12px; box-shadow: ' . $palette['shadow'] . '; color: ' . $palette['text'] . '; padding: 14px 16px; font: inherit; line-height: 1.5; opacity: 0; transform: translateY(-8px); transition: opacity .25s ease, transform .25s ease;">';
+			$echo .= '<div data-fs-toast="1" style="background: ' . $background . '; border: 1px solid ' . $border . '; border-left-width: 6px; border-radius: 12px; box-shadow: ' . $palette['shadow'] . '; color: ' . $palette['text'] . '; padding: 14px 16px; font: inherit; line-height: 1.5; ' . $toast_visibility . '">';
 			$heading = _('Success');
 			if ($type === 'error')
 			{
@@ -128,7 +131,10 @@ if (!function_exists('get_notice_toasts'))
 		}
 
 		$echo .= '</div>';
-		$echo .= '<script>(function(){var stack=document.querySelector("[data-fs-toast-stack=\'1\']");if(!stack){return;}var toasts=stack.querySelectorAll("[data-fs-toast=\'1\']");for(var i=0;i<toasts.length;i++){(function(toast,index){setTimeout(function(){toast.style.opacity="1";toast.style.transform="translateY(0)";},20+(index*80));setTimeout(function(){toast.style.opacity="0";toast.style.transform="translateY(-8px)";setTimeout(function(){if(toast.parentNode){toast.parentNode.removeChild(toast);}if(stack && !stack.querySelector("[data-fs-toast=\'1\']")){stack.parentNode.removeChild(stack);}},260);},4200+(index*180));})(toasts[i],i);}})();</script>';
+		if ($position !== 'inline')
+		{
+			$echo .= '<script>(function(){var stack=document.querySelector("[data-fs-toast-stack=\'1\']");if(!stack){return;}var toasts=stack.querySelectorAll("[data-fs-toast=\'1\']");for(var i=0;i<toasts.length;i++){(function(toast,index){setTimeout(function(){toast.style.opacity="1";toast.style.transform="translateY(0)";},20+(index*80));setTimeout(function(){toast.style.opacity="0";toast.style.transform="translateY(-8px)";setTimeout(function(){if(toast.parentNode){toast.parentNode.removeChild(toast);}if(stack && !stack.querySelector("[data-fs-toast=\'1\']")){stack.parentNode.removeChild(stack);}},260);},4200+(index*180));})(toasts[i],i);}})();</script>';
+		}
 
 		return $echo;
 	}

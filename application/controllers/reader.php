@@ -88,7 +88,7 @@ class Reader extends Public_Controller
 		if ($form['website'] !== '')
 		{
 			$this->set_about_contact_success_notice();
-			redirect('about#contact-form');
+			redirect($this->about_contact_url());
 		}
 
 		if ($this->is_about_contact_rate_limited())
@@ -121,7 +121,13 @@ class Reader extends Public_Controller
 
 		$this->session->set_userdata('about_contact_last_sent', time());
 		$this->set_about_contact_success_notice();
-		redirect('about#contact-form');
+		redirect($this->about_contact_url());
+	}
+
+	protected function about_contact_url()
+	{
+		// Append the fragment after site_url() adds its configured URL suffix.
+		return site_url('about') . '#contact-form';
 	}
 
 	protected function send_about_contact_email($contact_email, $form)
