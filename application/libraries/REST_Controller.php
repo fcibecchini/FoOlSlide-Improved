@@ -33,6 +33,10 @@ class REST_Controller extends MY_Controller
 	{
 		parent::__construct();
 
+		$this->request = new stdClass();
+		$this->response = new stdClass();
+		$this->rest = new stdClass();
+
 		// if this is a load balancer FoOlSlide, disable the public interface
 		if (get_setting('fs_balancer_master_url'))
 		{
