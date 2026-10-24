@@ -555,7 +555,7 @@ upload_page_via_admin() {
 	curl -sS -o "$response_file" \
 		-c "$COOKIE_JAR" -b "$COOKIE_JAR" \
 		-F "chapter_id=${chapter_id}" \
-		-F "Filedata[]=@${ROOT_DIR}/scripts/page1.png;type=image/png" \
+		-F "Filedata[]=@${ROOT_DIR}/tests/fixtures/pages/page1.png;type=image/png" \
 		"$BASE_URL/admin/series/upload"
 
 	if ! grep -q '"name"' "$response_file"; then

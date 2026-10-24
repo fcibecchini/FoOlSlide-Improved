@@ -15,8 +15,8 @@ PRIMARY_TYPE_NAME="${PRIMARY_TYPE_NAME:-Manga}"
 SECONDARY_TYPE_NAME="${SECONDARY_TYPE_NAME:-Doujinshi}"
 PRIMARY_TAG_NAME="${PRIMARY_TAG_NAME:-School Life}"
 SECONDARY_TAG_NAME="${SECONDARY_TAG_NAME:-Romance}"
-SEED_PAGE1_SOURCE="${SEED_PAGE1_SOURCE:-$ROOT_DIR/scripts/page1.png}"
-SEED_PAGE2_SOURCE="${SEED_PAGE2_SOURCE:-$ROOT_DIR/scripts/page2.jpg}"
+SEED_PAGE1_SOURCE="${SEED_PAGE1_SOURCE:-$ROOT_DIR/tests/fixtures/pages/page1.png}"
+SEED_PAGE2_SOURCE="${SEED_PAGE2_SOURCE:-$ROOT_DIR/tests/fixtures/pages/page2.jpg}"
 
 require_cmd() {
 	local cmd="$1"
@@ -30,7 +30,7 @@ require_cmd docker
 require_cmd curl
 
 if [ ! -f "$SEED_PAGE1_SOURCE" ] || [ ! -f "$SEED_PAGE2_SOURCE" ]; then
-	echo "[seed] Missing seeded chapter sample pages in scripts/." >&2
+	echo "[seed] Missing seeded chapter sample pages in tests/fixtures/pages/." >&2
 	exit 1
 fi
 
