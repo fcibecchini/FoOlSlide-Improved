@@ -8,6 +8,7 @@ services:
       APACHE_RUN_USER: www-data
       APACHE_RUN_GROUP: www-data
     volumes:
+      - ./assets/config.docker.php:/var/www/html/config.php:ro
       - ./index.php:/var/www/html/index.php
       - ./content/themes:/var/www/html/content/themes
       - ./application:/var/www/html/application

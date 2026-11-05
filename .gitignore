@@ -16,6 +16,7 @@ application/controllers/admin/chat.php
 application/views/admin/chat
 vendor/
 .phpunit.result.cache
+/config.php
 
 # Beads / Dolt files (added by bd init)
 .dolt/
