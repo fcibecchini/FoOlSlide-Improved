@@ -30,6 +30,8 @@ Note that this project improved the frontend as well, providing a mobile-friendl
 5. Complete the installer with DB credentials and admin user details.
 6. Sign in to the admin area and configure site options.
 
+The installer-generated root `config.php` is environment-specific and intentionally ignored by Git. Keep that file on the server when deploying updates. `assets/config.sample.php` is the installation template; Docker Compose uses the development-only `assets/config.docker.php` instead.
+
 ## Run Locally with Docker Compose
 To run the full stack locally:
 

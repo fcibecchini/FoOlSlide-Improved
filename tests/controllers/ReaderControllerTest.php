@@ -6,7 +6,10 @@ class ReaderControllerTest extends TestCase
 {
 	private function newController()
 	{
-		return new ReaderTestController();
+		$controller = new ReaderTestController();
+		$controller->config = new StubConfig(array('db_table_prefix' => 'fs_'));
+
+		return $controller;
 	}
 
 	protected function setUp(): void
