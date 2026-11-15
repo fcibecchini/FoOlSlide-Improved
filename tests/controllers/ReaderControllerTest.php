@@ -475,6 +475,50 @@ class ReaderControllerTest extends TestCase
 
 		$this->assertSame('comic', $template->builtView);
 	}
+
+	public function testUploaderBuildsPagedChapterListForUploader()
+	{
+		$controller = $this->newController();
+		$template = new StubTemplate();
+		$controller->template = $template;
+		Chapter::$whereArgs = array();
+		Chapter::$orderArgs = array();
+		Chapter::$pagedArgs = array();
+		Users::$lastLookup = null;
+		Users::$notFoundId = null;
+
+		$controller->uploader('23', 2);
+
+		$this->assertSame('latest', $template->builtView);
+		$this->assertSame(23, Users::$lastLookup);
+		$this->assertSame(array(array('creator', 23)), Chapter::$whereArgs);
+		$this->assertSame(array(array('created', 'DESC')), Chapter::$orderArgs);
+		$this->assertSame(array(2, 15), Chapter::$pagedArgs);
+		$this->assertSame('admin', $template->values['uploader']);
+		$this->assertSame('uploader/23', $template->values['link']);
+		$this->assertTrue($template->values['is_uploader']);
+	}
+
+	public function testUploaderThrows404ForInvalidId()
+	{
+		$controller = $this->newController();
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('404');
+
+		$controller->uploader('not-an-id');
+	}
+
+	public function testUploaderThrows404ForUnknownUser()
+	{
+		$controller = $this->newController();
+		Users::$notFoundId = 404;
+
+		$this->expectException(RuntimeException::class);
+		$this->expectExceptionMessage('404');
+
+		$controller->uploader('404');
+	}
 }
 
 class StubTemplate
@@ -951,6 +995,9 @@ if (!class_exists('Chapter'))
 	class Chapter implements IteratorAggregate
 	{
 		public static $records = array();
+		public static $whereArgs = array();
+		public static $orderArgs = array();
+		public static $pagedArgs = array();
 		public $table = 'chapters';
 		public $all = array();
 		private $filters = array();
@@ -989,11 +1036,20 @@ if (!class_exists('Chapter'))
 		public function where($key, $value)
 		{
 			$this->filters[$key] = $value;
+			self::$whereArgs[] = array($key, $value);
 			return $this;
 		}
 
 		public function order_by($field, $dir)
 		{
+			self::$orderArgs[] = array($field, $dir);
+			return $this;
+		}
+
+		public function get_paged($page = 1, $page_size = 50)
+		{
+			self::$pagedArgs = array($page, $page_size);
+			$this->loaded = array();
 			return $this;
 		}
 
@@ -1124,8 +1180,15 @@ if (!class_exists('Users'))
 {
 	class Users
 	{
+		public static $lastLookup;
+		public static $notFoundId;
+
 		public function get_user_by_id($id, $public = true)
 		{
+			self::$lastLookup = (int) $id;
+			if ((int) $id === self::$notFoundId)
+				return NULL;
+
 			return (object) array('username' => 'admin');
 		}
 	}

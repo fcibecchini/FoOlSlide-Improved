@@ -572,6 +572,36 @@ upload_page_via_admin() {
 	fi
 }
 
+check_uploader_chapters() {
+	local chapter_id="$1"
+	local series_stub="$2"
+	local chapter_marker="$3"
+	local uploader_id
+	local uploader_name
+	local uploader_body
+	local series_body
+
+	uploader_id="$(db_query "SELECT creator FROM fs_chapters WHERE id = ${chapter_id} LIMIT 1;")"
+	uploader_name="$(db_query "SELECT username FROM fs_users WHERE id = ${uploader_id} LIMIT 1;")"
+	if [ -z "$uploader_id" ] || [ -z "$uploader_name" ]; then
+		echo "[e2e] FAIL uploader listing: seeded chapter has no valid uploader." >&2
+		exit 1
+	fi
+
+	check_page "/uploader/${uploader_id}" 1000 "Chapters uploaded by ${uploader_name}"
+	uploader_body="$(curl -fsS "$BASE_URL/uploader/${uploader_id}")"
+	if ! grep -Fq "$chapter_marker" <<<"$uploader_body"; then
+		echo "[e2e] FAIL uploader listing: expected chapter marker was not shown." >&2
+		exit 1
+	fi
+
+	series_body="$(curl -fsS "$BASE_URL/series/${series_stub}/")"
+	if ! grep -Fq "/uploader/${uploader_id}" <<<"$series_body"; then
+		echo "[e2e] FAIL uploader link: series page does not link to /uploader/${uploader_id}." >&2
+		exit 1
+	fi
+}
+
 check_public_content_pagination() {
 	local suffix="$1"
 	local type_name="P${suffix}"
@@ -711,6 +741,14 @@ check_public_content_pagination() {
 		echo "[e2e] FAIL latest pagination: unavailable chapters inflated the page total." >&2
 		exit 1
 	fi
+
+	local uploader_test_chapter_id
+	uploader_test_chapter_id="$(db_query "SELECT ch.id FROM fs_chapters ch JOIN fs_comics c ON c.id = ch.comic_id WHERE c.stub = 'visible-pagination-series-${suffix}' ORDER BY ch.created DESC, ch.id DESC LIMIT 1;")"
+	if [ -z "$uploader_test_chapter_id" ]; then
+		echo "[e2e] FAIL uploader listing: pagination fixture has no chapter." >&2
+		exit 1
+	fi
+	check_uploader_chapters "$uploader_test_chapter_id" "visible-pagination-series-${suffix}" "$marker"
 }
 
 check_search_tags_multi() {

@@ -5,7 +5,7 @@
 $cover = method_exists($comic, 'get_thumb') ? $comic->get_thumb() : '';
 $author_html = $comic->author ? '<a href="'.site_url('author/'.$comic->author_stub).'">'.htmlspecialchars($comic->author, ENT_QUOTES, 'UTF-8').'</a>' : '';
 $artist_html = $comic->artist ? htmlspecialchars($comic->artist, ENT_QUOTES, 'UTF-8') : '';
-$uploader_html = !empty($user) ? htmlspecialchars($user, ENT_QUOTES, 'UTF-8') : '';
+$uploader_html = !empty($user) ? '<a href="'.site_url('uploader/'.(int) $comic->creator).'">'.htmlspecialchars($user, ENT_QUOTES, 'UTF-8').'</a>' : '';
 $type_html = ($comic->typeh_id != 0 && !empty($type)) ? '<a href="'.site_url('directory/'.$type->stub).'" class="label label-primary">'.$type->name.'</a>' : '';
 $parody_html = $comic->parody ? '<a href="'.site_url('parody/'.$comic->parody_stub).'" class="label label-success">'.htmlspecialchars($comic->parody, ENT_QUOTES, 'UTF-8').'</a>' : '';
 $tags_arr = is_array($comic->tags) ? $comic->tags : [];

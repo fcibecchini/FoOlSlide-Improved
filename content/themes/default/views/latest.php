@@ -12,6 +12,7 @@ $is_team = !empty($is_team);
 		if ($is_latest) echo _('Latest released chapters').':'; 
 		elseif ($is_download) echo _('Most Popular Releases').':';
 		elseif ($is_team) echo $team->name.' - '._('Latest released chapters').':';
+		elseif (!empty($is_uploader)) echo sprintf(_('Chapters uploaded by %s'), htmlspecialchars($uploader, ENT_QUOTES, 'UTF-8')).':';
 		?>
 		</a>
 	</div>

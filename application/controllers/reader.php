@@ -492,6 +492,41 @@ class Reader extends Public_Controller
 		$this->template->build('latest');
 	}
 
+	public function uploader($user_id = NULL, $page = 1)
+	{
+		if (is_null($user_id) || !ctype_digit((string) $user_id) || (int) $user_id < 1)
+			show_404();
+
+		$user_id = (int) $user_id;
+		$users = new Users();
+		$uploader = $users->get_user_by_id($user_id, TRUE);
+		if (!$uploader)
+			show_404();
+
+		$chapters = new Chapter();
+		$chapters->where('creator', $user_id)->order_by('created', 'DESC')->get_paged($page, 15);
+		foreach ($chapters as $chapter)
+		{
+			if (!isset($chapter->comic) || !is_object($chapter->comic))
+				continue;
+
+			$chapter->comic->get_tags();
+			if (!is_array($chapter->comic->tags) && !is_object($chapter->comic->tags))
+				continue;
+
+			foreach ($chapter->comic->tags as $tag)
+				$tag->stub = URIpurifier($tag->name);
+		}
+
+		$this->template->set('show_sidebar', TRUE);
+		$this->template->set('chapters', $chapters);
+		$this->template->set('uploader', $uploader->username);
+		$this->template->set('is_uploader', TRUE);
+		$this->template->set('link', 'uploader/' . $user_id);
+		$this->template->title(sprintf(_('Chapters uploaded by %s'), $uploader->username), get_setting('fs_gen_site_title'));
+		$this->template->build('latest');
+	}
+
 
 	public function directory($name, $page = 1)
 	{
